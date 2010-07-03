@@ -6,7 +6,8 @@
 	 rshift128/2,
 	 lshift128/2,
 	 do_recursion/4,
-	 gen_rand_all/1
+	 gen_rand_all/1,
+	 test_gen_rand_all/0
 	 ]).
 
 -include("sfmt.hrl").
@@ -110,5 +111,7 @@ gen_rand_all(Int) ->
     lists:reverse(
       gen_rand_all_rec2(Acc, IntB, NewIntP, U1, U2)).
 
+test_gen_rand_all() ->    
+    io:format("~p~n", [gen_rand_all(lists:seq(1, ?N32))]).
     
 
