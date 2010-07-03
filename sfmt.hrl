@@ -1,5 +1,8 @@
 %% Common SFMT parameters for sfmt-erlang
 
+%% SFMT period parameters
+%% details on SFMT-1.3.3 source code
+
 %% Mersenne Exponent. The period of the sequence 
 %%  is a multiple of 2^MEXP-1.
 -define(MEXP, 19937).
@@ -35,3 +38,7 @@
 %% identification string for the algorithm
 -define(IDSTR, "SFMT-19937:122-18-1-11-1:dfffffef-ddfecb7f-bffaffff-bffffff6").
 
+%% SFMT calculation masks
+
+-define(BITMASK32, 16#ffffffff).
+-define(BITMASK64, 16#ffffffffffffffff).
