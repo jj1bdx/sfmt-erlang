@@ -7,7 +7,13 @@
 	 lshift128/2,
 	 do_recursion/4,
 	 gen_rand_all/1,
-	 gen_rand_list32/2
+	 gen_rand_list32/2,
+	 period_certification/1,
+	 get_idstring/0,
+	 get_min_array_size/0,
+	 func1/1,
+	 func2/1,
+	 init_gen_rand/2
 	 ]).
 
 -include("sfmt.hrl").
@@ -136,3 +142,40 @@ gen_rand_list32(Size, Int) when Size >= ?N32, Size rem 4 =:= 0 ->
 	   [S0, S1, S2, S3], [T0, T1, T2, T3]),
     Int2 = lists:nthtail(Size - ?N32, A2),
     {A2, Int2}.
+
+%%%% incomplete
+
+%% period_certification(Int) ->
+%%     [I0, I1, I2, I3 | Ileft] = Int,
+%%     In0 = (I0 band ?PARITY1) bxor (I1 band ?PARITY2) bxor
+%% 	(I2 band ?PARITY3) bxor	(I3 band ?PARITY4),
+%%     In1 = (In0 bsr 16) bxor (In0 bsr 8) bxor
+%% 	(In0 bsr 4) bxor (In0 bsr 2) bxor (In0 bsr 1),
+%%     Inner = In1 band 1,
+%%     case Inner of
+%% 	1 ->
+%% 	    Int;
+%% 	0 ->
+%% 	    1 band ?PARITY1
+
+get_idstring() ->
+    ?IDSTR.
+
+get_min_array_size32() ->
+    ?N32.
+
+func1(X) ->
+    ((X bxor (X bsr 27)) * 1664525) band ?BITMASK32.
+
+func2(X) ->
+    ((X bxor (X bsr 27)) * 1566083941) band ?BITMASK32.
+
+init_gen_rand_rec1(?N32, Acc) ->
+    list:reverse(Acc);
+init_gen_rand_rec1(I, Acc) ->
+    [H | _] = Acc,
+    init_gen_rand_rec1(I + 1, 
+		       [(1812433253 * (H bxor (H bsr 30))) + I | Acc]).
+
+init_gen_rand(Seed) ->
+    period_certification(init_gen_rand_rec1(1, [Seed])).
