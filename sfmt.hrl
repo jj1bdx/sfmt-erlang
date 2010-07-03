@@ -8,10 +8,10 @@
 -define(MEXP, 19937).
 %% SFMT generator has an internal state array of 128-bit integers,
 %% and N is its size.
--define(N, ((MEXP / 128) + 1)).
+-define(N, ((?MEXP div 128) + 1)).
 %% N32 is the size of internal state array when regarded as an array
 %% of 32-bit integers.
--define(N32, (N * 4)).
+-define(N32, (?N * 4)).
 %% the pick up position of the array.
 -define(POS1, 122).
 %% the parameter of shift left as four 32-bit registers.
