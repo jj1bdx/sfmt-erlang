@@ -5,7 +5,8 @@
 -export([
 	 rshift128/2,
 	 lshift128/2,
-	 do_recursion/4
+	 do_recursion/4,
+	 gen_rand_all/1
 	 ]).
 
 -include("sfmt.hrl").
@@ -61,4 +62,43 @@ do_recursion(A, B, C, D) ->
      A3 bxor X3 bxor ((B3 bsr ?SR1) band ?MSK4) bxor Y3
         bxor ((D3 bsl ?SL1) band ?BITMASK32)
      ].
+
+%% still buggy - need to fix!
+
+gen_rand_all_rec1(Acc, Int, [], R1, R2) ->
+    {Acc, Int, R1, R2};
+gen_rand_all_rec1(Acc, Int, IntP, R1, R2) ->
+    [A0, A1, A2, A3 | IntN ] = Int,
+    [B0, B1, B2, B3 | IntPN ] = IntP,
+    NI = do_recursion([A0, A1, A2, A3],
+		      [B0, B1, B2, B3],
+		      R1,
+		      R2),
+    gen_rand_all_rec1([lists:reverse(NI)|Acc], IntN, IntPN, R2, NI).
+
+gen_rand_all_rec2(Acc, [], _, _, _) ->
+    Acc;
+gen_rand_all_rec2(Acc, Int, NewIntP, R1, R2) ->
+    [A0, A1, A2, A3 | IntN ] = Int,
+    [B0, B1, B2, B3 | NewIntPN ] = NewIntP,
+    NI = do_recursion([A0, A1, A2, A3],
+		      [B0, B1, B2, B3],
+		      R1,
+		      R2),
+    RevNI = lists:reverse(NI),
+    gen_rand_all_rec1([RevNI|Acc], IntN, [RevNI|NewIntPN], R2, NI).
+
+gen_rand_all(Int) ->
+    [R23, R22, R21, R20, R13, R12, R11, R10 | _] = lists:reverse(Int),
+    {Acc, IntB, R1B, R2B} = 
+	gen_rand_all_rec1([], Int, lists:nthtail(?POS1 * 4, Int),
+			  [R10, R11, R12, R13], [R20, R21, R22, R23]),
+    [R1B0, R1B1, R1B2, R1B3] = R1B,
+    [R2B0, R2B1, R2B2, R2B3] = R2B,
+    NewIntP = lists:reverse(Acc),
+    lists:reverse(
+      gen_rand_all_rec2(Acc, IntB, NewIntP,
+			[R1B0, R1B1, R1B2, R1B3], [R2B0, R2B1, R2B2, R2B3])).
+
+    
 
