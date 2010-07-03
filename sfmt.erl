@@ -10,10 +10,10 @@
 	 gen_rand_list32/2,
 	 period_certification/1,
 	 get_idstring/0,
-	 get_min_array_size/0,
+	 get_min_array_size32/0,
 	 func1/1,
 	 func2/1,
-	 init_gen_rand/2
+	 init_gen_rand/1
 	 ]).
 
 -include("sfmt.hrl").
@@ -143,20 +143,59 @@ gen_rand_list32(Size, Int) when Size >= ?N32, Size rem 4 =:= 0 ->
     Int2 = lists:nthtail(Size - ?N32, A2),
     {A2, Int2}.
 
-%%%% incomplete
+period_modification_rec1(Parity, I) ->
+    period_modification_rec1(0, Parity, I).
 
-%% period_certification(Int) ->
-%%     [I0, I1, I2, I3 | Ileft] = Int,
-%%     In0 = (I0 band ?PARITY1) bxor (I1 band ?PARITY2) bxor
-%% 	(I2 band ?PARITY3) bxor	(I3 band ?PARITY4),
-%%     In1 = (In0 bsr 16) bxor (In0 bsr 8) bxor
-%% 	(In0 bsr 4) bxor (In0 bsr 2) bxor (In0 bsr 1),
-%%     Inner = In1 band 1,
-%%     case Inner of
-%% 	1 ->
-%% 	    Int;
-%% 	0 ->
-%% 	    1 band ?PARITY1
+period_modification_rec1(true, _, I) ->
+    {I, true};
+period_modification_rec1(32, _, I) ->
+    {I, false};
+period_modification_rec1(X, Parity, I) ->
+    Work = 1 bsl X,
+    case (Work band Parity =/= 0) of
+	true -> 
+	    period_modification_rec1(true, Parity, I bxor Work);
+	false ->
+	    period_modification_rec1(X + 1, Parity, I)
+    end.
+
+period_modification(Int) ->
+    [I0, I1, I2, I3 | IR ] = Int,
+    {NI0, F0} = period_modification_rec1(?PARITY1, I0),
+    {NI1, F1} = period_modification_rec1(?PARITY2, I1),
+    {NI2, F2} = period_modification_rec1(?PARITY3, I2),
+    {NI3, F3} = period_modification_rec1(?PARITY4, I3),
+    if
+	F0 =:= true ->
+	    [NI0, I1, I2, I3 | IR];
+	F1 =:= true ->
+	    [I0, NI1, I2, I3 | IR];
+	F2 =:= true ->
+	    [I0, I1, NI2, I3 | IR];
+	F3 =:= true ->
+	    [I0, I1, I2, NI3 | IR];
+	true ->
+	    Int
+    end.
+
+period_certification(Int) ->
+    [I0, I1, I2, I3 | _ ] = Int,
+    In0 = (I0 band ?PARITY1) bxor 
+	(I1 band ?PARITY2) bxor
+	(I2 band ?PARITY3) bxor	
+	(I3 band ?PARITY4),
+    In1 = (In0 bsr 16) bxor 
+	(In0 bsr 8) bxor
+	(In0 bsr 4) bxor 
+	(In0 bsr 2) bxor 
+	(In0 bsr 1),
+    Inner = In1 band 1,
+    case Inner of
+	1 ->
+	    Int;
+	0 ->
+	    period_modification(Int)
+    end.
 
 get_idstring() ->
     ?IDSTR.
@@ -171,11 +210,14 @@ func2(X) ->
     ((X bxor (X bsr 27)) * 1566083941) band ?BITMASK32.
 
 init_gen_rand_rec1(?N32, Acc) ->
-    list:reverse(Acc);
+    lists:reverse(Acc);
 init_gen_rand_rec1(I, Acc) ->
     [H | _] = Acc,
-    init_gen_rand_rec1(I + 1, 
-		       [(1812433253 * (H bxor (H bsr 30))) + I | Acc]).
+    init_gen_rand_rec1(
+      I + 1, 
+      [((1812433253 * (H bxor (H bsr 30))) + I) band ?BITMASK32 | Acc]).
 
 init_gen_rand(Seed) ->
     period_certification(init_gen_rand_rec1(1, [Seed])).
+
+    
