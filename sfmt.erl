@@ -136,11 +136,3 @@ gen_rand_list32(Size, Int) when Size >= ?N32, Size rem 4 =:= 0 ->
 	   [S0, S1, S2, S3], [T0, T1, T2, T3]),
     Int2 = lists:nthtail(Size - ?N32, A2),
     {A2, Int2}.
-    
-	    
-	    
-    
-    
-    
-    
-
