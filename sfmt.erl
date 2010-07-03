@@ -54,11 +54,11 @@ do_recursion(A, B, C, D) ->
     [
      A0 bxor X0 bxor ((B0 bsr ?SR1) band ?MSK1) bxor Y0
         bxor ((D0 bsl ?SL1) band ?BITMASK32),
-     A1 bxor X1 bxor ((B1 bsr ?SR1) band ?MSK1) bxor Y1
+     A1 bxor X1 bxor ((B1 bsr ?SR1) band ?MSK2) bxor Y1
         bxor ((D1 bsl ?SL1) band ?BITMASK32),
-     A2 bxor X2 bxor ((B2 bsr ?SR1) band ?MSK1) bxor Y2
+     A2 bxor X2 bxor ((B2 bsr ?SR1) band ?MSK3) bxor Y2
         bxor ((D2 bsl ?SL1) band ?BITMASK32),
-     A3 bxor X3 bxor ((B3 bsr ?SR1) band ?MSK1) bxor Y3
+     A3 bxor X3 bxor ((B3 bsr ?SR1) band ?MSK4) bxor Y3
         bxor ((D3 bsl ?SL1) band ?BITMASK32)
      ].
 
