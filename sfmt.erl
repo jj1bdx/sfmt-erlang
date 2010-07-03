@@ -7,7 +7,7 @@
 	 lshift128/2,
 	 do_recursion/4,
 	 gen_rand_all/1,
-	 test_gen_rand_all/0
+	 gen_rand_list32/2
 	 ]).
 
 -include("sfmt.hrl").
@@ -71,7 +71,6 @@ gen_rand_all_rec1(Acc, Int, [], R, Q) ->
 gen_rand_all_rec1(Acc, Int, IntP,
 		  [R0, R1, R2, R3],
 		  [Q0, Q1, Q2, Q3]) ->
-    % io:format("~p~n",[[length(Int), length(IntP)]]),
     [A0, A1, A2, A3 | IntN ] = Int,
     [B0, B1, B2, B3 | IntPN ] = IntP,
     [X0, X1, X2, X3] = do_recursion([A0, A1, A2, A3],
@@ -84,11 +83,10 @@ gen_rand_all_rec1(Acc, Int, IntP,
 		      [X0, X1, X2, X3]).
 
 gen_rand_all_rec2(Acc, [], _, _, _) ->
-    Acc;
+    lists:reverse(Acc);
 gen_rand_all_rec2(Acc, Int, IntP,
 		  [R0, R1, R2, R3],
 		  [Q0, Q1, Q2, Q3]) ->
-    % io:format("~p~n",[[length(Int), length(IntP)]]),
     [A0, A1, A2, A3 | IntN ] = Int,
     [B0, B1, B2, B3 | IntPN ] = IntP,
     [X0, X1, X2, X3] = do_recursion([A0, A1, A2, A3],
@@ -101,17 +99,48 @@ gen_rand_all_rec2(Acc, Int, IntP,
 		      [Q0, Q1, Q2, Q3],
 		      [X0, X1, X2, X3]).
 
+%% returns internal state table
 gen_rand_all(Int) ->
     [T3, T2, T1, T0, S3, S2, S1, S0 | _] = lists:reverse(Int),
     {Acc, IntB, U1, U2} = 
 	gen_rand_all_rec1([], Int, lists:nthtail(?POS1 * 4, Int),
 			  [S0, S1, S2, S3], [T0, T1, T2, T3]),
-    % io:format("~p~n",[[Acc, IntB, U1, U2]]),
     NewIntP = lists:reverse(Acc),
-    lists:reverse(
-      gen_rand_all_rec2(Acc, IntB, NewIntP, U1, U2)).
+    gen_rand_all_rec2(Acc, IntB, NewIntP, U1, U2).
 
-test_gen_rand_all() ->    
-    io:format("~p~n", [gen_rand_all(lists:seq(1, ?N32))]).
+gen_rand_list32_rec1(0, Acc, _, _, _, _) ->
+    lists:reverse(Acc);
+gen_rand_list32_rec1(K, Acc, Int, IntP,
+		     [R0, R1, R2, R3],
+		     [Q0, Q1, Q2, Q3]) ->
+    [A0, A1, A2, A3 | IntN ] = Int,
+    [B0, B1, B2, B3 | IntPN ] = IntP,
+    [X0, X1, X2, X3] = do_recursion([A0, A1, A2, A3],
+				   [B0, B1, B2, B3],
+				   [R0, R1, R2, R3],
+				   [Q0, Q1, Q2, Q3]),
+    gen_rand_list32_rec1(K - 4, 
+			 [X3 | [X2 | [X1 | [X0 | Acc]]]],
+			 IntN ++ [X0, X1, X2, X3],
+			 IntPN ++ [X0, X1, X2, X3],
+			 [Q0, Q1, Q2, Q3],
+			 [X0, X1, X2, X3]).
+
+gen_rand_list32(Size, Int) when Size >= ?N32, Size rem 4 =:= 0 ->
+    A = gen_rand_all(Int),
+    RevA = lists:reverse(A),
+    [T3, T2, T1, T0, S3, S2, S1, S0 | _] = RevA,
+    A2 = gen_rand_list32_rec1(
+	   Size - ?N32,
+	   RevA, A, lists:nthtail(?POS1 * 4, A),
+	   [S0, S1, S2, S3], [T0, T1, T2, T3]),
+    Int2 = lists:nthtail(Size - ?N32, A2),
+    {A2, Int2}.
+    
+	    
+	    
+    
+    
+    
     
 
