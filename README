@@ -3,7 +3,7 @@ sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 Edited and written by Kenji Rikitake
 Email contact: kenji.rikitake AT acm.org
 (change AT to @ for the email address)
-Version 0.1.0 4-JUL-2010
+Version 0.1.1 4-JUL-2010
 
 Copyright (c) 2010 Kenji Rikitake. All rights reserved.
 
@@ -28,6 +28,8 @@ Makoto Matsumoto (Hiroshima University)
   * Documentation
   * API functions compatible as the random module
   * C NIFs based on SFMT 1.3.3
+    * reference: sfmt-extstate at
+      http://github.com/jj1bdx/sfmt-extstate
   * Refactoring of the pure-Erlang code for the sfmt module
     * Note: ++ (lists:append) operators in gen_rand_all_rec2/5
       	    and gen_rand_list32_rec1/6 are still faster than
