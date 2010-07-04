@@ -35,6 +35,7 @@
 -module(sfmt_test).
 
 -export([
+	 test_speed_rand/2,
 	 test/0
 	 ]).
 
@@ -44,7 +45,7 @@ test_rec1(I, Acc, Randlist, Int) ->
     {Val, Randlist2, Int2} = sfmt:gen_rand32(Randlist, Int),
     test_rec1(I - 1, [Val | Acc], Randlist2, Int2).
 
-test() ->
+test_sfmt_check() ->
     {Refrand, Refarray} = test_refval(),
     Int1 = sfmt:init_gen_rand(1234),
     {Outarray1, Int2} = sfmt:gen_rand_list32(10000, Int1),
@@ -98,7 +99,28 @@ test() ->
 	false ->
 	    io:format("Outarray8 to Outarray6 test passed~n", [])
     end.
-    
+
+test_speed_rand_rec1(0, _, _) ->
+    ok;
+test_speed_rand_rec1(X, Q, I) ->
+    {_, I2} = sfmt:gen_rand_list32(Q, I),
+    test_speed_rand_rec1(X - 1, Q, I2).
+
+test_speed_rand(P, Q) ->
+    I = sfmt:init_gen_rand(1234),
+    ok = test_speed_rand_rec1(P, Q, I).
+
+test_speed_timer() -> 
+    timer:tc(?MODULE, test_speed_rand, [100, 100000]).
+
+test_speed() ->
+    io:format("100 * sfmt:gen_rand_list32(100000, i)~n~p~n",
+	      [test_speed_timer()]).
+
+test() ->
+    test_sfmt_check(),
+    test_speed().
+
 test_refval() ->
     %% values taken from SFMT.19937.out.txt of SFMT-1.3.3
     Refrand = [
