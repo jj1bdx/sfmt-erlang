@@ -29,6 +29,9 @@ Makoto Matsumoto (Hiroshima University)
   * API functions compatible as the random module
   * C NIFs based on SFMT 1.3.3
   * Refactoring of the pure-Erlang code for the sfmt module
+    * Note: ++ (lists:append) operators in gen_rand_all_rec2/5
+      	    and gen_rand_list32_rec1/6 are still faster than
+	    changing them to double lists:reverse/1
 
 [End of README]
 
