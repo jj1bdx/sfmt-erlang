@@ -117,6 +117,13 @@
 %% /* end */
 %% and 128-bit list is a flat concatenation
 %% of 128-bit number
+%%
+%% @type w128() = [integer(), integer(), integer(), integer()].
+%% @type intstate() = [w128()].
+
+%% @spec rshift128(w128(), integer()) -> w128().
+%% @doc SIMD 128-bit right shift simulation for little endian SIMD
+%%      of Shift*8 bits
 
 rshift128(In, Shift) ->
     [I0, I1, I2, I3] = In,
@@ -128,6 +135,10 @@ rshift128(In, Shift) ->
     [OL band ?BITMASK32, OL bsr 32, 
      OH band ?BITMASK32, OH bsr 32].
 
+%% @spec lshift128(w128(), integer()) -> w128().
+%% @doc SIMD 128-bit left shift simulation for little endian SIMD
+%%      of Shift*8 bits
+
 lshift128(In, Shift) ->
     [I0, I1, I2, I3] = In,
     TH = (I3 bsl 32) bor (I2), 
@@ -137,6 +148,9 @@ lshift128(In, Shift) ->
 	band ?BITMASK64,
     [OL band ?BITMASK32, OL bsr 32, 
      OH band ?BITMASK32, OH bsr 32].
+
+%% @spec do_recursion(w128(), w128(), w128(), w128()) -> w128().
+%% @doc the recursion formula operation of SFMT
 
 do_recursion(A, B, C, D) ->
     [A0, A1, A2, A3] = A,
@@ -155,8 +169,6 @@ do_recursion(A, B, C, D) ->
      A3 bxor X3 bxor ((B3 bsr ?SR1) band ?MSK4) bxor Y3
         bxor ((D3 bsl ?SL1) band ?BITMASK32)
      ].
-
-%% still buggy - need to fix!
 
 gen_rand_all_rec1(Acc, Int, [], R, Q) ->
     {Acc, Int, R, Q};
@@ -191,7 +203,9 @@ gen_rand_all_rec2(Acc, Int, IntP,
 		      [Q0, Q1, Q2, Q3],
 		      [X0, X1, X2, X3]).
 
-%% returns internal state table
+%% @spec gen_rand_all(intstate()) - > intstate().
+%% @doc filling the internal state array with SFMT PRNG
+
 gen_rand_all(Int) ->
     [T3, T2, T1, T0, S3, S2, S1, S0 | _] = lists:reverse(Int),
     {Acc, IntB, U1, U2} = 
@@ -217,6 +231,11 @@ gen_rand_list32_rec1(K, Acc, Int, IntP,
 			 IntPN ++ [X0, X1, X2, X3],
 			 [Q0, Q1, Q2, Q3],
 			 [X0, X1, X2, X3]).
+
+%% @spec gen_rand_all(integer(), intstate()) - > {[integer()], intstate()}.
+%% @doc generating the 32-bit integer list of PRNG,
+%%      where length of the list is Size
+%%      with the updated internal state
 
 gen_rand_list32(Size, Int) when Size >= ?N32, Size rem 4 =:= 0 ->
     A = gen_rand_all(Int),
@@ -283,8 +302,14 @@ period_certification(Int) ->
 	    period_modification(Int)
     end.
 
+%% @spec get_idstring() -> string().
+%% @doc returns SFMT identification string
+
 get_idstring() ->
     ?IDSTR.
+
+%% @spec get_idstring() -> integer().
+%% @doc returns array size of internal state
 
 get_min_array_size32() ->
     ?N32.
@@ -302,6 +327,9 @@ init_gen_rand_rec1(I, Acc) ->
     init_gen_rand_rec1(
       I + 1, 
       [((1812433253 * (H bxor (H bsr 30))) + I) band ?BITMASK32 | Acc]).
+
+%% @spec init_gen_rand(integer()) -> intstate().
+%% @doc generates an internal state from an integer seed
 
 init_gen_rand(Seed) ->
     period_certification(init_gen_rand_rec1(1, [Seed])).
@@ -355,6 +383,9 @@ init_by_list32_rec2(K, I, A) ->
     I2 = (I + 1) rem ?N32,
     init_by_list32_rec2(K - 1, I2, A4).
 
+%% @spec init_by_list32([integer()]) -> intstate().
+%% @doc generates an internal state from a list of 32-bit integers
+
 init_by_list32(Key) ->
     Keylength = length(Key),
     
@@ -385,6 +416,9 @@ init_by_list32(Key) ->
     period_certification(
       array:to_list(
 	init_by_list32_rec2(?N32, I1, A5))).
+
+%% @spec gen_rand32([integer()], intstate()) -> {integer(), [integer()], intstate()).
+%% @doc generates a 32-bit random number from the given list and internal state
 
 gen_rand32([], Int) ->
     Int2 = gen_rand_all(Int),
