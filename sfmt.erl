@@ -232,7 +232,7 @@ gen_rand_list32_rec1(K, Acc, Int, IntP,
 			 [Q0, Q1, Q2, Q3],
 			 [X0, X1, X2, X3]).
 
-%% @spec gen_rand_all(integer(), intstate()) - > {[integer()], intstate()}.
+%% @spec gen_rand_list32(integer(), intstate()) - > {[integer()], intstate()}.
 %% @doc generating the 32-bit integer list of PRNG,
 %%      where length of the list is Size
 %%      with the updated internal state
@@ -308,7 +308,7 @@ period_certification(Int) ->
 get_idstring() ->
     ?IDSTR.
 
-%% @spec get_idstring() -> integer().
+%% @spec get_min_array_size32() -> integer().
 %% @doc returns array size of internal state
 
 get_min_array_size32() ->
@@ -422,6 +422,7 @@ init_by_list32(Key) ->
 
 gen_rand32([], Int) ->
     Int2 = gen_rand_all(Int),
+    % this operation is intstate() type dependent
     [H|T] = Int2,
     {H, T, Int2};
 gen_rand32(Randlist, Int) ->
