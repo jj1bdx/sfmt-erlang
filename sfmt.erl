@@ -1,4 +1,37 @@
-%% Module sfmt (for SFMT-based RNG)
+%% Module sfmt
+%% SIMD-oriented Fast Mersenne Twister (SFMT)
+
+%% Copyright (c) 2010 Kenji Rikitake. All rights reserved.
+%%
+%% Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
+%% University. All rights reserved.
+%%
+%% Redistribution and use in source and binary forms, with or without
+%% modification, are permitted provided that the following conditions are
+%% met:
+%%
+%%     * Redistributions of source code must retain the above copyright
+%%       notice, this list of conditions and the following disclaimer.
+%%     * Redistributions in binary form must reproduce the above
+%%       copyright notice, this list of conditions and the following
+%%       disclaimer in the documentation and/or other materials provided
+%%       with the distribution.
+%%     * Neither the name of the Hiroshima University nor the names of
+%%       its contributors may be used to endorse or promote products
+%%       derived from this software without specific prior written
+%%       permission.
+%%
+%% THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+%% "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+%% LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+%% A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+%% OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+%% SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+%% LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+%% DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+%% THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+%% (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+%% OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 -module(sfmt).
 
@@ -12,20 +45,35 @@
 	 gen_rand32/2
 	 ]).
 
-%% Common SFMT parameters for sfmt-erlang
-
 %% SFMT period parameters
 %% details on SFMT-1.3.3 source code
-
+%%
 %% Mersenne Exponent. The period of the sequence 
 %%  is a multiple of 2^MEXP-1.
 -define(MEXP, 19937).
 %% SFMT generator has an internal state array of 128-bit integers,
 %% and N is its size.
--define(N, ((?MEXP div 128) + 1)).
+%% -define(N, ((?MEXP div 128) + 1)).
+-define(N, 156).
 %% N32 is the size of internal state array when regarded as an array
 %% of 32-bit integers.
--define(N32, (?N * 4)).
+%% -define(N32, (?N * 4)).
+-define(N32, 624).
+%% for init_by_list32/1:
+%% LAG =
+%% 	if
+%% 	    ?N32 >= 623 ->
+%% 		11;
+%% 	    ?N32 >= 68 ->
+%% 		7;
+%% 	    ?N32 >= 39 ->
+%% 		5;
+%% 	    ?N32 ->
+%% 		3
+%% 	end,
+%% MID = (?N32 - LAG) div 2
+-define(LAG, 11).
+-define(MID, 306).
 %% the pick up position of the array.
 -define(POS1, 122).
 %% the parameter of shift left as four 32-bit registers.
@@ -53,26 +101,8 @@
 -define(IDSTR, "SFMT-19937:122-18-1-11-1:dfffffef-ddfecb7f-bffaffff-bffffff6").
 
 %% SFMT calculation masks
-
 -define(BITMASK32, 16#ffffffff).
 -define(BITMASK64, 16#ffffffffffffffff).
-
-%% for init_by_list32/1:
-%% Lag =
-%% 	if
-%% 	    ?N32 >= 623 ->
-%% 		11;
-%% 	    ?N32 >= 68 ->
-%% 		7;
-%% 	    ?N32 >= 39 ->
-%% 		5;
-%% 	    ?N32 ->
-%% 		3
-%% 	end,
-%% Mid = (?N32 - Lag) div 2
-
--define(Lag, 11).
--define(Mid, 306).
 
 %% internal state format: 
 %% list of 32-bit unsigned ints,
@@ -280,29 +310,29 @@ init_by_list32_rec1(0, I, _, A) ->
     {I, A};
 init_by_list32_rec1(K, I, [], A) ->
     R = func1(array:get(I, A) bxor
-		  array:get((I + ?Mid) rem ?N32, A) bxor
+		  array:get((I + ?MID) rem ?N32, A) bxor
 		  array:get((I + ?N32 - 1) rem ?N32, A)),
-    A2 = array:set((I + ?Mid) rem ?N32,
-		   (array:get((I + ?Mid) rem ?N32, A) + R) band ?BITMASK32,
+    A2 = array:set((I + ?MID) rem ?N32,
+		   (array:get((I + ?MID) rem ?N32, A) + R) band ?BITMASK32,
 		   A),
     R2 = (R + I) band ?BITMASK32,
-    A3 = array:set((I + ?Mid + ?Lag) rem ?N32,
-		 (array:get((I + ?Mid + ?Lag) rem ?N32, A2) + R2) band ?BITMASK32,
+    A3 = array:set((I + ?MID + ?LAG) rem ?N32,
+		 (array:get((I + ?MID + ?LAG) rem ?N32, A2) + R2) band ?BITMASK32,
 		 A2),
     A4 = array:set(I, R2, A3),
     I2 = (I + 1) rem ?N32,
     init_by_list32_rec1(K - 1, I2, [], A4);
 init_by_list32_rec1(K, I, Key, A) ->
     R = func1(array:get(I, A) bxor
-		  array:get((I + ?Mid) rem ?N32, A) bxor
+		  array:get((I + ?MID) rem ?N32, A) bxor
 		  array:get((I + ?N32 - 1) rem ?N32, A)),
-    A2 = array:set((I + ?Mid) rem ?N32,
-		   (array:get((I + ?Mid) rem ?N32, A) + R) band ?BITMASK32,
+    A2 = array:set((I + ?MID) rem ?N32,
+		   (array:get((I + ?MID) rem ?N32, A) + R) band ?BITMASK32,
 		   A),
     [H|T] = Key,
     R2 = (R + H + I) band ?BITMASK32,
-    A3 = array:set((I + ?Mid + ?Lag) rem ?N32,
-		   (array:get((I + ?Mid + ?Lag) rem ?N32, A2) + R2) band ?BITMASK32,
+    A3 = array:set((I + ?MID + ?LAG) rem ?N32,
+		   (array:get((I + ?MID + ?LAG) rem ?N32, A2) + R2) band ?BITMASK32,
 		   A2),
     A4 = array:set(I, R2, A3),
     I2 = (I + 1) rem ?N32,
@@ -312,14 +342,14 @@ init_by_list32_rec2(0, _, A) ->
     A;
 init_by_list32_rec2(K, I, A) ->
     R = func2((array:get(I, A) +
-		  array:get((I + ?Mid) rem ?N32, A) +
+		  array:get((I + ?MID) rem ?N32, A) +
 		  array:get((I + ?N32 - 1) rem ?N32, A)) band ?BITMASK32),
-    A2 = array:set((I + ?Mid) rem ?N32,
-		   (array:get((I + ?Mid) rem ?N32, A) bxor R),
+    A2 = array:set((I + ?MID) rem ?N32,
+		   (array:get((I + ?MID) rem ?N32, A) bxor R),
 		   A),
     R2 = (R - I) band ?BITMASK32,
-    A3 = array:set((I + ?Mid + ?Lag) rem ?N32,
-		   (array:get((I + ?Mid + ?Lag) rem ?N32, A2) bxor R2),
+    A3 = array:set((I + ?MID + ?LAG) rem ?N32,
+		   (array:get((I + ?MID + ?LAG) rem ?N32, A2) bxor R2),
 		   A2),
     A4 = array:set(I, R2, A3),
     I2 = (I + 1) rem ?N32,
@@ -338,14 +368,14 @@ init_by_list32(Key) ->
 		?N32
 	end,
     R = func1(array:get(0, A) bxor
-		  array:get(?Mid, A) bxor
+		  array:get(?MID, A) bxor
 		  array:get(?N32 - 1, A)),
-    A2 = array:set(?Mid,
-		   (array:get(?Mid, A) + R) band ?BITMASK32,
+    A2 = array:set(?MID,
+		   (array:get(?MID, A) + R) band ?BITMASK32,
 		   A),
     R2 = (R + Keylength) band ?BITMASK32,
-    A3 = array:set(?Mid + ?Lag,
-		   (array:get(?Mid + ?Lag, A2) + R2) band ?BITMASK32,
+    A3 = array:set(?MID + ?LAG,
+		   (array:get(?MID + ?LAG, A2) + R2) band ?BITMASK32,
 		   A2),
     A4 = array:set(0, R2, A3),
 
