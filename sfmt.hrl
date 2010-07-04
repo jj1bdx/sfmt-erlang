@@ -42,3 +42,20 @@
 
 -define(BITMASK32, 16#ffffffff).
 -define(BITMASK64, 16#ffffffffffffffff).
+
+%% for init_by_list32/1:
+%% Lag =
+%% 	if
+%% 	    ?N32 >= 623 ->
+%% 		11;
+%% 	    ?N32 >= 68 ->
+%% 		7;
+%% 	    ?N32 >= 39 ->
+%% 		5;
+%% 	    ?N32 ->
+%% 		3
+%% 	end,
+%% Mid = (?N32 - Lag) div 2
+
+-define(Lag, 11).
+-define(Mid, 306).
