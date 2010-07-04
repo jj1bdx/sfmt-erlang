@@ -170,6 +170,36 @@ do_recursion(A, B, C, D) ->
         bxor ((D3 bsl ?SL1) band ?BITMASK32)
      ].
 
+%% Recursion algorithm for gen_rand_all and gen_rand_list32:
+%%
+%% a[]: output array (of S w128() elements)
+%% i[]: internal state (of N w128() elements)
+%% (For gen_rand_all, S =:= N)
+%% (For gen_rand_list32, S >= N)
+%% r(a, b, c, d): do_recursion/4 function (of 4 w128() arguments)
+%% (The indexes are in C notation ([0 ... J-1] for J elements))
+%%
+%% a[0] = r(i[0], i[POS1],   i[N-2], i[N-1]);
+%% a[1] = r(i[1], i[POS1+1], i[N-1], a[0]);
+%% a[2] = r(i[2], i[POS1+2], a[0],   a[1]);
+%% ...
+%% a[(N-POS1)-1] = r(i[(N-POS1)-1], i[N-1], a[(N-POS1)-3], a[(N-POS1)-2]);
+%% a[(N-POS1)]   = r(i[(N-POS1)],   a[0],   a[(N-POS1)-2], a[(N-POS1)-1]);
+%% a[(N-POS1)+1] = r(i[(N-POS1)+1], a[1],   a[(N-POS1)-1], a[(N-POS1)]);
+%% ...
+%% a[N-1] = r(i[N-1], a[POS1-1], a[N-3], a[N-2]);
+%% % assignments from here only applicable to gen_rand_list32
+%% a[N]   = r(a[0],   a[POS1],   a[N-2], a[N-1]);
+%% a[N+1] = r(a[1],   a[POS1+1], a[N-1], a[N]);
+%% ...
+%% a[X]   = r(a[X-N], a[X-(N-POS1)], a[X-1], a[X-2]);
+%% ...
+%% a[S-1] = r(a[(S-N)-1], a[S-(N-POS1)-1], a[S-2], a[S-3]);
+%%
+%% Use the last N w128() elements of a[] for the new internal state ni[]
+%% i.e., 
+%% ni[0] = a[S-N], ni[1] = a[S-N+1], ... ni[N-1] = a[S-1].
+
 gen_rand_all_rec1(Acc, Int, [], R, Q) ->
     {Acc, Int, R, Q};
 gen_rand_all_rec1(Acc, Int, IntP,
