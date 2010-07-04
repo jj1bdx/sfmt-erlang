@@ -1,4 +1,4 @@
-%% Module sfmt (for SFMT-based RNG)
+%% Module sfmt_test (testing sfmt module)
 
 -module(sfmt_test).
 
@@ -16,7 +16,7 @@ test() ->
     {Refrand, Refarray} = test_refval(),
     Int1 = sfmt:init_gen_rand(1234),
     {Outarray1, Int2} = sfmt:gen_rand_list32(10000, Int1),
-    {Outarray2, Int3} = sfmt:gen_rand_list32(10000, Int2),
+    {Outarray2, _Int3} = sfmt:gen_rand_list32(10000, Int2),
     case Refrand =/= lists:reverse(
 		       lists:nthtail(10000 - length(Refrand),
 				     lists:reverse(Outarray1))) of
@@ -33,15 +33,42 @@ test() ->
 	false ->
 	    io:format("Outarray3 to Outarray1 test passed~n", [])
     end,
-    {Outarray4, Randlist6, Int6} = test_rec1(10000, [], Randlist5, Int5),
+    {Outarray4, _Randlist6, _Int6} = test_rec1(10000, [], Randlist5, Int5),
     case Outarray4 =/= Outarray2 of
 	true ->
 	    erlang:error({error_Outarray4_Outarray2_testfailed});
 	false ->
 	    io:format("Outarray4 to Outarray2 test passed~n", [])
+    end,
+    Int7 = sfmt:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0]),
+    {Outarray5, Int8} = sfmt:gen_rand_list32(10000, Int7),
+    {Outarray6, _Int9} = sfmt:gen_rand_list32(10000, Int8),
+    case Refarray =/= lists:reverse(
+		       lists:nthtail(10000 - length(Refarray),
+				     lists:reverse(Outarray5))) of
+	true ->
+	    erlang:error({error_Refarray_Outarray5_testfailed});
+	false ->
+	    io:format("Refarray to Outarray5 test passed~n", [])
+    end,
+    Int10 = sfmt:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0]),
+    {Outarray7, Randlist11, Int11} = test_rec1(10000, [], [], Int10),
+    case Outarray7 =/= Outarray5 of
+	true ->
+	    erlang:error({error_Outarray7_Outarray5_testfailed});
+	false ->
+	    io:format("Outarray7 to Outarray5 test passed~n", [])
+    end,
+    {Outarray8, _Randlist12, _Int12} = test_rec1(10000, [], Randlist11, Int11),
+    case Outarray8 =/= Outarray6 of
+	true ->
+	    erlang:error({error_Outarray8_Outarray6_testfailed});
+	false ->
+	    io:format("Outarray8 to Outarray6 test passed~n", [])
     end.
     
 test_refval() ->
+    %% values taken from SFMT.19937.out.txt of SFMT-1.3.3
     Refrand = [
 	      3440181298,1564997079,1510669302,2930277156,1452439940,
 	      3796268453,423124208,2143818589,3827219408,2987036003,
