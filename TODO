@@ -1,0 +1,14 @@
+* TODO
+
+* 5-JUL-2010: to reduce ++ (append) op:
+
+  * generate (N-POS1) elements in each loop,
+    until the first N elements are generated
+
+  * after that, generate N elements in each loop
+    (or even smaller number of elements)
+
+  * NIFnization
+
+[end of TODO]
+	    
