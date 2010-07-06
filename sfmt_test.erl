@@ -107,8 +107,10 @@ test_speed_rand_rec1(X, Q, I) ->
     test_speed_rand_rec1(X - 1, Q, I2).
 
 test_speed_rand(P, Q) ->
+    statistics(runtime),
     I = sfmt:init_gen_rand(1234),
-    ok = test_speed_rand_rec1(P, Q, I).
+    ok = test_speed_rand_rec1(P, Q, I),
+    statistics(runtime).
 
 test_speed_timer() -> 
     timer:tc(?MODULE, test_speed_rand, [100, 100000]).
