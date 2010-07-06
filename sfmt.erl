@@ -200,67 +200,51 @@ do_recursion(A, B, C, D) ->
 %% i.e., 
 %% ni[0] = a[S-N], ni[1] = a[S-N+1], ... ni[N-1] = a[S-1].
 
-gen_rand_all_rec1(Acc, Int, [], R, Q) ->
-    {Acc, Int, R, Q};
-gen_rand_all_rec1(Acc, Int, IntP,
-		  [R0, R1, R2, R3],
-		  [Q0, Q1, Q2, Q3]) ->
-    [A0, A1, A2, A3 | IntN ] = Int,
-    [B0, B1, B2, B3 | IntPN ] = IntP,
-    [X0, X1, X2, X3] = do_recursion([A0, A1, A2, A3],
-				   [B0, B1, B2, B3],
-				   [R0, R1, R2, R3],
-				   [Q0, Q1, Q2, Q3]),
-    gen_rand_all_rec1([X3 | [X2 | [X1 | [X0 | Acc]]]],
-		      IntN, IntPN,
-		      [Q0, Q1, Q2, Q3],
-		      [X0, X1, X2, X3]).
+%% To avoid appending two lists, 
+%% a and b of r(a, b, c, d) form ring buffers
+%% (e.g., Int and AccInt, IntP and AccIntP,
+%%  of gen_rand_recursion/8)
+%% This makes the algorithm simpler and faster
 
-gen_rand_all_rec2(Acc, [], _, _, _) ->
+gen_rand_recursion(0, Acc, _, _, _, _, _, _) ->
     lists:reverse(Acc);
-gen_rand_all_rec2(Acc, Int, IntP,
-		  [R0, R1, R2, R3],
-		  [Q0, Q1, Q2, Q3]) ->
+gen_rand_recursion(K, Acc, Int, AccInt, [], AccIntP, R, Q) ->
+    gen_rand_recursion(K, Acc, Int, AccInt,
+		       lists:reverse(AccIntP),
+		       [],
+		       R, Q);
+gen_rand_recursion(K, Acc, [], AccInt, IntP, AccIntP, R, Q) ->
+    gen_rand_recursion(K, Acc, 
+		       lists:reverse(AccInt),
+		       [],
+		       IntP, AccIntP, R, Q);
+gen_rand_recursion(K, Acc, Int, 
+		   AccInt, IntP, AccIntP,
+		   [R0, R1, R2, R3],
+		   [Q0, Q1, Q2, Q3]) ->
     [A0, A1, A2, A3 | IntN ] = Int,
     [B0, B1, B2, B3 | IntPN ] = IntP,
     [X0, X1, X2, X3] = do_recursion([A0, A1, A2, A3],
-				   [B0, B1, B2, B3],
-				   [R0, R1, R2, R3],
-				   [Q0, Q1, Q2, Q3]),
-    gen_rand_all_rec2([X3 | [X2 | [X1 | [X0 | Acc]]]],
-		      IntN, 
-		      IntPN ++ [X0, X1, X2, X3],
-		      [Q0, Q1, Q2, Q3],
-		      [X0, X1, X2, X3]).
+				    [B0, B1, B2, B3],
+				    [R0, R1, R2, R3],
+				    [Q0, Q1, Q2, Q3]),
+    gen_rand_recursion(K - 4,
+		       [X3 | [X2 | [X1 | [X0 | Acc]]]],
+		       IntN, 
+		       [X3 | [X2 | [X1 | [X0 | AccInt]]]],
+		       IntPN,
+		       [X3 | [X2 | [X1 | [X0 | AccIntP]]]],
+		       [Q0, Q1, Q2, Q3],
+		       [X0, X1, X2, X3]).
 
 %% @spec gen_rand_all(intstate()) - > intstate().
 %% @doc filling the internal state array with SFMT PRNG
 
 gen_rand_all(Int) ->
     [T3, T2, T1, T0, S3, S2, S1, S0 | _] = lists:reverse(Int),
-    {Acc, IntB, U1, U2} = 
-	gen_rand_all_rec1([], Int, lists:nthtail(?POS1 * 4, Int),
-			  [S0, S1, S2, S3], [T0, T1, T2, T3]),
-    NewIntP = lists:reverse(Acc),
-    gen_rand_all_rec2(Acc, IntB, NewIntP, U1, U2).
-
-gen_rand_list32_rec1(0, Acc, _, _, _, _) ->
-    lists:reverse(Acc);
-gen_rand_list32_rec1(K, Acc, Int, IntP,
-		     [R0, R1, R2, R3],
-		     [Q0, Q1, Q2, Q3]) ->
-    [A0, A1, A2, A3 | IntN ] = Int,
-    [B0, B1, B2, B3 | IntPN ] = IntP,
-    [X0, X1, X2, X3] = do_recursion([A0, A1, A2, A3],
-				   [B0, B1, B2, B3],
-				   [R0, R1, R2, R3],
-				   [Q0, Q1, Q2, Q3]),
-    gen_rand_list32_rec1(K - 4, 
-			 [X3 | [X2 | [X1 | [X0 | Acc]]]],
-			 IntN ++ [X0, X1, X2, X3],
-			 IntPN ++ [X0, X1, X2, X3],
-			 [Q0, Q1, Q2, Q3],
-			 [X0, X1, X2, X3]).
+    gen_rand_recursion(?N32, [], Int, [],
+		       lists:nthtail(?POS1 * 4, Int), [],
+		       [S0, S1, S2, S3], [T0, T1, T2, T3]).
 
 %% @spec gen_rand_list32(integer(), intstate()) - > {[integer()], intstate()}.
 %% @doc generating the 32-bit integer list of PRNG,
@@ -268,13 +252,10 @@ gen_rand_list32_rec1(K, Acc, Int, IntP,
 %%      with the updated internal state
 
 gen_rand_list32(Size, Int) when Size >= ?N32, Size rem 4 =:= 0 ->
-    A = gen_rand_all(Int),
-    RevA = lists:reverse(A),
-    [T3, T2, T1, T0, S3, S2, S1, S0 | _] = RevA,
-    A2 = gen_rand_list32_rec1(
-	   Size - ?N32,
-	   RevA, A, lists:nthtail(?POS1 * 4, A),
-	   [S0, S1, S2, S3], [T0, T1, T2, T3]),
+    [T3, T2, T1, T0, S3, S2, S1, S0 | _] = lists:reverse(Int),
+    A2 = gen_rand_recursion(Size, [], Int, [],
+			    lists:nthtail(?POS1 * 4, Int), [],
+			    [S0, S1, S2, S3], [T0, T1, T2, T3]),
     Int2 = lists:nthtail(Size - ?N32, A2),
     {A2, Int2}.
 
