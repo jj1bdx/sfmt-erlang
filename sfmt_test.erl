@@ -119,9 +119,30 @@ test_speed() ->
     io:format("100 * sfmt:gen_rand_list32(100000, i)~n~p~n",
 	      [test_speed_timer()]).
 
+test_speed_orig_random_rec1(Acc, 0, _, _, _) ->
+    lists:reverse(Acc),
+    ok;
+test_speed_orig_random_rec1(Acc, X, 0, R, I) ->
+    lists:reverse(Acc),
+    test_speed_orig_random_rec1([], X - 1, R, R, I);
+test_speed_orig_random_rec1(Acc, X, Q, R, I) ->
+    {F, I2} = random:uniform_s(I),
+    test_speed_orig_random_rec1([F|Acc], X, Q - 1, R, I2).
+
+test_speed_orig_random_timer(P, Q) ->
+    statistics(runtime),
+    I = random:seed(),
+    ok = test_speed_orig_random_rec1([], P, Q, Q, I),
+    statistics(runtime).
+
+test_speed_orig_random() ->
+    io:format("100 * random:uniform_s(100000)~n~p~n",
+	      [test_speed_orig_random_timer(100, 100000)]).
+
 test() ->
     test_sfmt_check(),
-    test_speed().
+    test_speed(),
+    test_speed_orig_random().
 
 test_refval() ->
     %% values taken from SFMT.19937.out.txt of SFMT-1.3.3
