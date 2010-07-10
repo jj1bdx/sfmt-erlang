@@ -520,7 +520,7 @@ uniform_s(RS) ->
     {X, NR, NI} = gen_rand32(R, I),
     {X * (1.0/4294967295.0), {NR, NI}}.
 
-%% @spec uniform(integer() ran_sfmt()) -> float()
+%% @spec uniform(integer(), ran_sfmt()) -> (integer(), ran_sfmt()} 
 %%      Returns a uniformly-distributed integer random number X
 %%      where (X >= 1) and (X =< N)
 %%      and a new state
