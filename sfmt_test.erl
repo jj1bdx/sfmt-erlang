@@ -36,6 +36,7 @@
 
 -export([
 	 test_speed_rand/2,
+	 test_speed_orig_random/2,
 	 test/0
 	 ]).
 
@@ -129,15 +130,18 @@ test_speed_orig_random_rec1(Acc, X, Q, R, I) ->
     {F, I2} = random:uniform_s(I),
     test_speed_orig_random_rec1([F|Acc], X, Q - 1, R, I2).
 
-test_speed_orig_random_timer(P, Q) ->
+test_speed_orig_random(P, Q) ->
     statistics(runtime),
     I = random:seed(),
     ok = test_speed_orig_random_rec1([], P, Q, Q, I),
     statistics(runtime).
 
+test_speed_orig_random_timer() -> 
+    timer:tc(?MODULE, test_speed_orig_random, [100, 100000]).
+
 test_speed_orig_random() ->
     io:format("100 * random:uniform_s(100000)~n~p~n",
-	      [test_speed_orig_random_timer(100, 100000)]).
+	      [test_speed_orig_random_timer()]).
 
 test() ->
     test_sfmt_check(),
