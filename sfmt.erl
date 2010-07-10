@@ -548,8 +548,6 @@ uniform(N) when N >= 1 ->
     trunc(uniform() * N) + 1.
 
 %% @spec uniform(ran_sfmt()) -> float()
-
-%% @spec uniform(ran_sfmt()) -> float()
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
 %%      where (X >= 0.0) and (X =< 1.0)
