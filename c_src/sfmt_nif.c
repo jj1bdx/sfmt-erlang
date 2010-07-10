@@ -41,7 +41,43 @@
 #include "erl_nif.h"
 #include "sfmt_nif.h"
 
-/* sfmt-extstate code */
+/* prototypes */
+static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
+
+/* prototypes of sfmt-extstate functions */
+#if defined(HAVE_SSE2)
+static PRE_ALWAYS __m128i mm_recursion(__m128i *a, __m128i *b,
+                                   __m128i c, __m128i d, __m128i mask);
+#endif /* defined(HAVE_SSE2) */
+static inline void gen_rand_all(w128_t *intstate);
+static inline void gen_rand_array(w128_t *array, int size, w128_t *intstate);
+static inline void rshift128(w128_t *out, w128_t const *in, int shift);
+static inline void lshift128(w128_t *out, w128_t const *in, int shift);
+static inline void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c, w128_t *d);
+static inline void gen_rand_all(w128_t *intstate);
+static inline void gen_rand_array(w128_t *array, int size, w128_t *intstate);
+static void period_certification(w128_t *intstate);
+static const char *get_idstring(void);
+static int get_min_array_size32(void);
+static void init_gen_rand(uint32_t seed, w128_t *intstate);
+static void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate);
+
+static ErlNifFunc nif_funcs[] = {
+    /* {"do_recursion", 4, sfmt_nif_do_recursion} */
+};
+
+ERL_NIF_INIT(sfmt, nif_funcs, load, NULL, NULL, NULL)
+
+/* atom variables */
+static ERL_NIF_TERM atom_error;
+
+static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
+{
+    /* initializing atoms */
+    atom_error = enif_make_atom(env,"error");
+}
+
+/* sfmt-extstate static C function code follows */
 
 #if defined(HAVE_SSE2)
 
@@ -465,11 +501,3 @@ static void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate) 
 
 }
 
-#if 0
-static ErlNifFunc nif_funcs[] = {
-    {"do_recursion", 4, erl_do_recursion}
-};
-
-ERL_NIF_INIT(iconverl, nif_funcs, load, NULL, NULL, NULL)
-
-#endif
