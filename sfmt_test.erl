@@ -40,11 +40,11 @@
 	 test/0
 	 ]).
 
-test_rec1(0, Acc, Randlist, Int) ->
-    {lists:reverse(Acc), Randlist, Int};
-test_rec1(I, Acc, Randlist, Int) ->
-    {Val, Randlist2, Int2} = sfmt:gen_rand32(Randlist, Int),
-    test_rec1(I - 1, [Val | Acc], Randlist2, Int2).
+test_rec1(0, Acc, RS) ->
+    {lists:reverse(Acc), RS};
+test_rec1(I, Acc, RS) ->
+    {Val, RS2} = sfmt:gen_rand32(RS),
+    test_rec1(I - 1, [Val | Acc], RS2).
 
 test_sfmt_check() ->
     {Refrand, Refarray} = test_refval(),
@@ -60,14 +60,14 @@ test_sfmt_check() ->
 	    io:format("Refrand to Outarray1 test passed~n", [])
     end,
     Int4 = sfmt:init_gen_rand(1234),
-    {Outarray3, Randlist5, Int5} = test_rec1(10000, [], [], Int4),
+    {Outarray3, RS5} = test_rec1(10000, [], {[], Int4}),
     case Outarray3 =/= Outarray1 of
 	true ->
 	    erlang:error({error_Outarray3_Outarray1_testfailed});
 	false ->
 	    io:format("Outarray3 to Outarray1 test passed~n", [])
     end,
-    {Outarray4, _Randlist6, _Int6} = test_rec1(10000, [], Randlist5, Int5),
+    {Outarray4, _RS6} = test_rec1(10000, [], RS5),
     case Outarray4 =/= Outarray2 of
 	true ->
 	    erlang:error({error_Outarray4_Outarray2_testfailed});
@@ -86,14 +86,14 @@ test_sfmt_check() ->
 	    io:format("Refarray to Outarray5 test passed~n", [])
     end,
     Int10 = sfmt:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0]),
-    {Outarray7, Randlist11, Int11} = test_rec1(10000, [], [], Int10),
+    {Outarray7, RS11} = test_rec1(10000, [], {[], Int10}),
     case Outarray7 =/= Outarray5 of
 	true ->
 	    erlang:error({error_Outarray7_Outarray5_testfailed});
 	false ->
 	    io:format("Outarray7 to Outarray5 test passed~n", [])
     end,
-    {Outarray8, _Randlist12, _Int12} = test_rec1(10000, [], Randlist11, Int11),
+    {Outarray8, _RS12} = test_rec1(10000, [], RS11),
     case Outarray8 =/= Outarray6 of
 	true ->
 	    erlang:error({error_Outarray8_Outarray6_testfailed});
