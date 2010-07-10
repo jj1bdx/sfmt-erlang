@@ -436,7 +436,12 @@ init_by_list32(Key) ->
       array:to_list(
 	init_by_list32_rec2(?N32, I1, A5))).
 
+%%%%
+%% functions from here will not be NIFnized
+%%%%
+
 %% Note: ran_sfmt() -> {[integer()], intstate()}
+%% intstate() content may be changed by NIFnization
 
 %% @spec gen_rand32(ran_sfmt()) -> {integer(), ran_sfmt()).
 %% @doc generates a 32-bit random number from the given ran_sfmt()
@@ -452,7 +457,9 @@ gen_rand32({R, I}) ->
 
 %% compatible funtions to the random module in stdlib
 
+%% entry in the process dictionary
 -define(PDIC_SEED, sfmt_seed).
+%% (1 / ((2 ^ 32) - 1)) (for [0, 1]-interval conversion)
 -define(FLOAT_CONST, (1.0/4294967295.0)).
 
 %% @spec seed0() -> ran_sfmt()
@@ -465,14 +472,10 @@ seed0() ->
     {R, I}.
 
 %% @spec seed() -> ran_sfmt()
-%% @doc if the process dictionary does not have a valid internal state,
-%%      initialize with seed0/0; otherwise keep the value as is
+%% @doc Initialize the process dictionary with seed0/0
 
 seed() ->
     put(?PDIC_SEED, seed0()).
-
-
-
 
 %% @spec seed(integer()) -> ran_sfmt()
 %% @doc Puts the seed computed from the given integer list by init_gen_rand/1
@@ -565,4 +568,4 @@ uniform_s(N, RS) ->
     {X, NRS} = gen_rand32(RS),
     {trunc(X * ?FLOAT_CONST * N) + 1, NRS}.
     
-    
+%% end of the module    
