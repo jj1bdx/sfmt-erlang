@@ -42,7 +42,15 @@
 	 get_min_array_size32/0,
 	 init_gen_rand/1,
 	 init_by_list32/1,
-	 gen_rand32/2
+	 gen_rand32/1,
+	 seed0/0,
+	 seed/0,
+	 seed/1,
+	 seed/3,
+	 uniform/0,
+	 uniform/1,
+	 uniform_s/1,
+	 uniform_s/2
 	 ]).
 
 %% SFMT period parameters
@@ -428,56 +436,87 @@ init_by_list32(Key) ->
       array:to_list(
 	init_by_list32_rec2(?N32, I1, A5))).
 
-%% @spec gen_rand32([integer()], intstate()) -> {integer(), [integer()], intstate()).
-%% @doc generates a 32-bit random number from the given list and internal state
+%% Note: ran_sfmt() -> {[integer()], intstate()}
 
-gen_rand32([], Int) ->
-    Int2 = gen_rand_all(Int),
+%% @spec gen_rand32(ran_sfmt()) -> {integer(), ran_sfmt()).
+%% @doc generates a 32-bit random number from the given ran_sfmt()
+
+gen_rand32({[], I}) ->
+    I2 = gen_rand_all(I),
     % this operation is intstate() type dependent
-    [H|T] = Int2,
-    {H, T, Int2};
-gen_rand32(Randlist, Int) ->
-    [H|T] = Randlist,
-    {H, T, Int}.
+    [H|T] = I2,
+    {H, {T, I2}};
+gen_rand32({R, I}) ->
+    [H|T] = R,
+    {H, {T, I}}.
 
 %% compatible funtions to the random module in stdlib
 
--define(INITLIST, [3172, 9814, 20125]).
--define(PDIC_RAN_SFMT, sfmt_seed).
-
-%% Note: ran_sfmt() -> {[integer()], intstate()}
+-define(PDIC_SEED, sfmt_seed).
+-define(FLOAT_CONST, (1.0/4294967295.0)).
 
 %% @spec seed0() -> ran_sfmt()
 %% @doc Returns the default internal state
 
 seed0() ->
-    Int = init_by_list32(?INITLIST),
+    I = init_gen_rand(1234),
     % this operation is intstate() type dependent
-    Randlist = Int,
-    {Randlist, Int}.
-    
+    R = I,
+    {R, I}.
 
 %% @spec seed() -> ran_sfmt()
-%% @doc Puts the default internal state into the process dictionary
+%% @doc if the process dictionary does not have a valid internal state,
+%%      initialize with seed0/0; otherwise keep the value as is
+
+seed() ->
+    put(?PDIC_SEED, seed0()).
+
+
+
+
+%% @spec seed(integer()) -> ran_sfmt()
+%% @doc Puts the seed computed from the given integer list by init_gen_rand/1
+%%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
 %%      and returns the old internal state
 
-seed() ->
-    RS = seed0(),
-    put(?PDIC_RAN_SFMT, RS).
+seed(N) when is_integer(N) ->
+    I = init_gen_rand(N),
+    % this operation is intstate() type dependent
+    R = I,
+    RS = {R, I},
+    put(?PDIC_SEED, RS);
+
+%% @spec seed([integer()]) -> ran_sfmt()
+%% @doc Puts the seed computed from the given integer list by init_by_list32/1
+%%      and puts the internal state into the process dictionary
+%%      and initializes the random number list with the internal state
+%%      and returns the old internal state
+
+seed(L) when is_list(L), is_integer(hd(L)) ->
+    I = init_by_list32(L),
+    % this operation is intstate() type dependent
+    R = I,
+    RS = {R, I},
+    put(?PDIC_SEED, RS);
+
+%% @spec seed({integer(), integer(), integer()}) -> ran_sfmt()
+%% @doc Puts the seed computed from given three integers as a tuple
+%%      and puts the internal state into the process dictionary
+%%      and initializes the random number list with the internal state
+%%      and returns the old internal state
+
+seed({A1, A2, A3}) ->
+    seed([A1, A2, A3]).
 
 %% @spec seed(integer(), integer(), integer()) -> ran_sfmt()
 %% @doc Puts the seed computed from given three integers
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
-%%      and returns the old internal statep
+%%      and returns the old internal state
 
 seed(A1, A2, A3) ->
-    I = init_by_list32([A1, A2, A3]),
-    % this operation is intstate() type dependent
-    R = I,
-    RS = {R, I},
-    put(?PDIC_RAN_SFMT, RS).
+    seed([A1, A2, A3]).
 
 %% @spec uniform() -> float()
 %% @doc Returns a uniformly-distributed float random number X
@@ -487,17 +526,15 @@ seed(A1, A2, A3) ->
 uniform() -> 
     % if random number list doesn't exist
     % the corresponding internal state must be initialized
-    RS = case get(?PDIC_RAN_SFMT) of
+    RS = case get(?PDIC_SEED) of
 		   undefined ->
 		       seed0();
 		   Val -> Val
 	       end,
-    {R, I} = RS, 
-    {X, NR, NI} = gen_rand32(R, I),
-    NRS = {NR, NI},
+    {X, NRS} = gen_rand32(RS),
     % divided by 2^32 - 1
-    put(?PDIC_RAN_SFMT, NRS),
-    X * (1.0/4294967295.0).
+    put(?PDIC_SEED, NRS),
+    X * ?FLOAT_CONST.
 
 %% @spec uniform(N) -> integer()
 %% @doc Returns a uniformly-distributed integer random number X
@@ -516,9 +553,8 @@ uniform(N) when N >= 1 ->
 %%      and a new state
 
 uniform_s(RS) ->
-    {R, I} = RS, 
-    {X, NR, NI} = gen_rand32(R, I),
-    {X * (1.0/4294967295.0), {NR, NI}}.
+    {X, NRS} = gen_rand32(RS),
+    {X * ?FLOAT_CONST, NRS}.
 
 %% @spec uniform(integer(), ran_sfmt()) -> (integer(), ran_sfmt()} 
 %%      Returns a uniformly-distributed integer random number X
@@ -526,13 +562,7 @@ uniform_s(RS) ->
 %%      and a new state
 
 uniform_s(N, RS) ->
-    {R, I} = RS, 
-    {X, NR, NI} = gen_rand32(R, I),
-    {trunc(X * (1.0/4294967295.0) * N) + 1, {NR, NI}}.
-
-    
-
-    
-
+    {X, NRS} = gen_rand32(RS),
+    {trunc(X * ?FLOAT_CONST * N) + 1, NRS}.
     
     
