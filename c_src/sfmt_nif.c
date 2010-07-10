@@ -48,12 +48,11 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
 #if defined(HAVE_SSE2)
 static PRE_ALWAYS __m128i mm_recursion(__m128i *a, __m128i *b,
                                    __m128i c, __m128i d, __m128i mask);
-#endif /* defined(HAVE_SSE2) */
-static inline void gen_rand_all(w128_t *intstate);
-static inline void gen_rand_array(w128_t *array, int size, w128_t *intstate);
+#else /* !defined(HAVE_SSE2) */
 static inline void rshift128(w128_t *out, w128_t const *in, int shift);
 static inline void lshift128(w128_t *out, w128_t const *in, int shift);
 static inline void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c, w128_t *d);
+#endif /* defined(HAVE_SSE2) */
 static inline void gen_rand_all(w128_t *intstate);
 static inline void gen_rand_array(w128_t *array, int size, w128_t *intstate);
 static void period_certification(w128_t *intstate);
