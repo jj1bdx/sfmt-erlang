@@ -44,6 +44,13 @@
 /* prototypes */
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
 
+static ERL_NIF_TERM
+sfmt_nif_get_idstring(ErlNifEnv *env, int argc, 
+		       const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM 
+sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, 
+			      const ERL_NIF_TERM argv[]);
+
 /* prototypes of sfmt-extstate functions */
 #if defined(HAVE_SSE2)
 static PRE_ALWAYS __m128i mm_recursion(__m128i *a, __m128i *b,
@@ -62,7 +69,8 @@ static void init_gen_rand(uint32_t seed, w128_t *intstate);
 static void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate);
 
 static ErlNifFunc nif_funcs[] = {
-    /* {"do_recursion", 4, sfmt_nif_do_recursion} */
+    {"get_idstring", 0, sfmt_nif_get_idstring},
+    {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
 
 ERL_NIF_INIT(sfmt, nif_funcs, load, NULL, NULL, NULL)
@@ -74,6 +82,22 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 {
     /* initializing atoms */
     atom_error = enif_make_atom(env,"error");
+
+    return 0;
+}
+
+static ERL_NIF_TERM
+sfmt_nif_get_idstring(ErlNifEnv *env, int argc, 
+			      const ERL_NIF_TERM argv[])
+{
+    return enif_make_string(env, get_idstring(), ERL_NIF_LATIN1);
+}
+
+static ERL_NIF_TERM
+sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, 
+			      const ERL_NIF_TERM argv[])
+{
+    return enif_make_uint(env, (unsigned int) get_min_array_size32());
 }
 
 /* sfmt-extstate static C function code follows */

@@ -35,6 +35,8 @@
 
 -module(sfmt).
 
+-on_load(load_nif/0).
+
 -export([
 	 gen_rand_all/1,
 	 gen_rand_list32/2,
@@ -324,14 +326,12 @@ period_certification(Int) ->
 %% @spec get_idstring() -> string().
 %% @doc returns SFMT identification string
 
-get_idstring() ->
-    ?IDSTR.
+get_idstring() -> undefined.
 
 %% @spec get_min_array_size32() -> integer().
 %% @doc returns array size of internal state
 
-get_min_array_size32() ->
-    ?N32.
+get_min_array_size32() -> undefined.
 
 func1(X) ->
     ((X bxor (X bsr 27)) * 1664525) band ?BITMASK32.
@@ -566,4 +566,9 @@ uniform_s(N, RS) ->
     {X, NRS} = gen_rand32(RS),
     {trunc(X * ?FLOAT_CONST * N) + 1, NRS}.
     
+%% On-load callback
+
+load_nif() ->
+    erlang:load_nif("/home/kenji/src/sfmt-erlang/c_src/sfmt_nif",0).
+
 %% end of the module    
