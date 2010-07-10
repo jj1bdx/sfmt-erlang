@@ -440,3 +440,99 @@ gen_rand32(Randlist, Int) ->
     [H|T] = Randlist,
     {H, T, Int}.
 
+%% compatible funtions to the random module in stdlib
+
+-define(INITLIST, [3172, 9814, 20125]).
+-define(PDIC_RAN_SFMT, sfmt_seed).
+
+%% Note: ran_sfmt() -> {[integer()], intstate()}
+
+%% @spec seed0() -> ran_sfmt()
+%% @doc Returns the default internal state
+
+seed0() ->
+    Int = init_by_list32(?INITLIST),
+    % this operation is intstate() type dependent
+    Randlist = Int,
+    {Randlist, Int}.
+    
+
+%% @spec seed() -> ran_sfmt()
+%% @doc Puts the default internal state into the process dictionary
+%%      and initializes the random number list with the internal state
+%%      and returns the old internal state
+
+seed() ->
+    RS = seed0(),
+    put(?PDIC_RAN_SFMT, RS).
+
+%% @spec seed(integer(), integer(), integer()) -> ran_sfmt()
+%% @doc Puts the seed computed from given three integers
+%%      and puts the internal state into the process dictionary
+%%      and initializes the random number list with the internal state
+%%      and returns the old internal statep
+
+seed(A1, A2, A3) ->
+    I = init_by_list32([A1, A2, A3]),
+    % this operation is intstate() type dependent
+    R = I,
+    RS = {R, I},
+    put(?PDIC_RAN_SFMT, RS).
+
+%% @spec uniform() -> float()
+%% @doc Returns a uniformly-distributed float random number X
+%%      where (X >= 0.0) and (X =< 1.0)
+%%      and updates the internal state in the process dictionary
+
+uniform() -> 
+    % if random number list doesn't exist
+    % the corresponding internal state must be initialized
+    RS = case get(?PDIC_RAN_SFMT) of
+		   undefined ->
+		       seed0();
+		   Val -> Val
+	       end,
+    {R, I} = RS, 
+    {X, NR, NI} = gen_rand32(R, I),
+    NRS = {NR, NI},
+    % divided by 2^32 - 1
+    put(?PDIC_RAN_SFMT, NRS),
+    X * (1.0/4294967295.0).
+
+%% @spec uniform(N) -> integer()
+%% @doc Returns a uniformly-distributed integer random number X
+%%      where (X >= 1) and (X =< N)
+%%      and updates the internal state in the process dictionary
+
+uniform(N) when N >= 1 ->
+    trunc(uniform() * N) + 1.
+
+%% @spec uniform(ran_sfmt()) -> float()
+
+%% @spec uniform(ran_sfmt()) -> float()
+%% @doc With a given state,
+%%      Returns a uniformly-distributed float random number X
+%%      where (X >= 0.0) and (X =< 1.0)
+%%      and a new state
+
+uniform_s(RS) ->
+    {R, I} = RS, 
+    {X, NR, NI} = gen_rand32(R, I),
+    {X * (1.0/4294967295.0), {NR, NI}}.
+
+%% @spec uniform(integer() ran_sfmt()) -> float()
+%%      Returns a uniformly-distributed integer random number X
+%%      where (X >= 1) and (X =< N)
+%%      and a new state
+
+uniform_s(N, RS) ->
+    {R, I} = RS, 
+    {X, NR, NI} = gen_rand32(R, I),
+    {trunc(X * (1.0/4294967295.0) * N) + 1, {NR, NI}}.
+
+    
+
+    
+
+    
+    
