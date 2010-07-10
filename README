@@ -3,7 +3,7 @@ sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 Edited and written by Kenji Rikitake
 Email contact: kenji.rikitake AT acm.org
 (change AT to @ for the email address)
-Version 0.1.2 6-JUL-2010
+Version 0.2.0 10-JUL-2010
 
 Copyright (c) 2010 Kenji Rikitake. All rights reserved.
 
@@ -23,18 +23,21 @@ Makoto Matsumoto (Hiroshima University)
 
 * Tested on FreeBSD/i386 7.3-RELEASE with Erlang/OTP R14A.
 
+* API functions compatible as the random module added
+
+* Refactoring Note of the pure-Erlang code:
+  ++ (append) operators rewritten by ring buffer loops
+  (lists consuming the head elements, and
+   the corresponding accumulators)
+  This modification made the code ~50% faster
+
 * TODO
 
   * Documentation
-  * API functions compatible as the random module
+
   * C NIFs based on SFMT 1.3.3
     * reference: sfmt-extstate at
       http://github.com/jj1bdx/sfmt-extstate
-  * Refactoring of the pure-Erlang code for the sfmt module
-    * ++ (append) operators rewritten by ring buffer loops
-      (lists consuming the head elements, and
-       the corresponding accumulators)
-      This modification made the code ~50% faster
 
 [End of README]
 
