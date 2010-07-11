@@ -43,6 +43,9 @@
 
 /* prototypes */
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
+static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info);
+static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info);
+static void unload(ErlNifEnv* env, void* priv_data);
 
 static ERL_NIF_TERM sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
@@ -81,7 +84,7 @@ static ErlNifFunc nif_funcs[] = {
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
 
-ERL_NIF_INIT(sfmt, nif_funcs, load, NULL, NULL, NULL)
+ERL_NIF_INIT(sfmt, nif_funcs, load, reload, upgrade, unload)
 
 /* atom variables */
 static ERL_NIF_TERM atom_error;
@@ -104,76 +107,21 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     return 0;
 }
 
-#if 0 /* to be removed */
-static ERL_NIF_TERM
-sfmt_nif_do_recursion(ErlNifEnv *env, int argc, 
-			      const ERL_NIF_TERM argv[])
-{ /* ([A0, A1, A2, A3], [B0, B1, B2, B3], [C0, C1, C2, C3], [D0, D1, D2, D3]) */
-    w128_t a, b, c, d, r;
-    ERL_NIF_TERM head, tail, r0, r1, r2, r3;
+static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
+{
 
-    /* convert a */
-    if (!enif_get_list_cell(env, argv[0], &head, &tail)
-	|| !enif_get_uint(env, head, &a.u[0])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &a.u[1])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &a.u[2])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &a.u[3])
-	|| !enif_is_empty_list(env, tail)) {
-	return enif_make_badarg(env);
-    }
-
-    /* convert b */
-    if (!enif_get_list_cell(env, argv[1], &head, &tail)
-	|| !enif_get_uint(env, head, &b.u[0])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &b.u[1])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &b.u[2])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &b.u[3])
-	|| !enif_is_empty_list(env, tail)) {
-	return enif_make_badarg(env);
-    }
-
-    /* convert c */
-    if (!enif_get_list_cell(env, argv[2], &head, &tail)
-	|| !enif_get_uint(env, head, &c.u[0])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &c.u[1])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &c.u[2])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &c.u[3])
-	|| !enif_is_empty_list(env, tail)) {
-	return enif_make_badarg(env);
-    }
-
-    /* convert d */
-    if (!enif_get_list_cell(env, argv[3], &head, &tail)
-	|| !enif_get_uint(env, head, &d.u[0])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &d.u[1])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &d.u[2])
-	|| !enif_get_list_cell(env, tail, &head, &tail)
-	|| !enif_get_uint(env, head, &d.u[3])
-	|| !enif_is_empty_list(env, tail)) {
-	return enif_make_badarg(env);
-    }
-
-    do_recursion(&r, &a, &b, &c, &d);
-
-    r0 = enif_make_uint(env, (unsigned int) r.u[0]);
-    r1 = enif_make_uint(env, (unsigned int) r.u[1]);
-    r2 = enif_make_uint(env, (unsigned int) r.u[2]);
-    r3 = enif_make_uint(env, (unsigned int) r.u[3]);
-
-    return enif_make_list4(env, r0, r1, r2, r3);
+    return 0;
 }
-#endif 
+
+static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info)
+{
+
+    return 0;
+}
+
+static void unload(ErlNifEnv* env, void* priv_data)
+{
+}
 
 static ERL_NIF_TERM
 sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, 
