@@ -348,6 +348,6 @@ uniform_s(N, RS) ->
 %% On-load callback
 
 load_nif() ->
-    erlang:load_nif("/home/kenji/src/sfmt-erlang/c_src/sfmt_nif",0).
+    erlang:load_nif("../priv/sfmt_nif",0).
 
 %% end of the module    
