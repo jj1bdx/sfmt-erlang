@@ -46,7 +46,7 @@
 	 init_gen_rand/1,
 	 init_by_list32/1,
 	 randlist_to_intstate/1,
-	 % intstate_to_randlist/1,
+	 intstate_to_randlist/1,
 	 gen_rand32/1,
 	 seed0/0,
 	 seed/0,
@@ -412,7 +412,7 @@ init_by_list32(Key) ->
 
 randlist_to_intstate(_) -> undefined.
 
-%% intstate_to_randlist(_) -> undefined.
+intstate_to_randlist(_) -> undefined.
 
 %%%%
 %% functions from here will not be NIFnized
