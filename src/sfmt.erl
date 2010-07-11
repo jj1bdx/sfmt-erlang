@@ -189,60 +189,6 @@ gen_rand_all(_) -> undefined.
 
 gen_rand_list32(_, _) -> undefined.
 
-period_modification_rec1(Parity, I) ->
-    period_modification_rec1(0, Parity, I).
-
-period_modification_rec1(true, _, I) ->
-    {I, true};
-period_modification_rec1(32, _, I) ->
-    {I, false};
-period_modification_rec1(X, Parity, I) ->
-    Work = 1 bsl X,
-    case (Work band Parity =/= 0) of
-	true -> 
-	    period_modification_rec1(true, Parity, I bxor Work);
-	false ->
-	    period_modification_rec1(X + 1, Parity, I)
-    end.
-
-period_modification(Int) ->
-    [I0, I1, I2, I3 | IR ] = Int,
-    {NI0, F0} = period_modification_rec1(?PARITY1, I0),
-    {NI1, F1} = period_modification_rec1(?PARITY2, I1),
-    {NI2, F2} = period_modification_rec1(?PARITY3, I2),
-    {NI3, F3} = period_modification_rec1(?PARITY4, I3),
-    if
-	F0 =:= true ->
-	    [NI0, I1, I2, I3 | IR];
-	F1 =:= true ->
-	    [I0, NI1, I2, I3 | IR];
-	F2 =:= true ->
-	    [I0, I1, NI2, I3 | IR];
-	F3 =:= true ->
-	    [I0, I1, I2, NI3 | IR];
-	true ->
-	    Int
-    end.
-
-period_certification(Int) ->
-    [I0, I1, I2, I3 | _ ] = Int,
-    In0 = (I0 band ?PARITY1) bxor 
-	(I1 band ?PARITY2) bxor
-	(I2 band ?PARITY3) bxor	
-	(I3 band ?PARITY4),
-    In1 = In0 bxor (In0 bsr 16),
-    In2 = In1 bxor (In1 bsr 8),
-    In3 = In2 bxor (In2 bsr 4),
-    In4 = In3 bxor (In3 bsr 2),
-    In5 = In4 bxor (In4 bsr 1),
-    Inner = In5 band 1,
-    case Inner of
-	1 ->
-	    Int;
-	0 ->
-	    period_modification(Int)
-    end.
-
 %% @spec get_idstring() -> string().
 %% @doc returns SFMT identification string
 %% @note NIFnized
@@ -261,94 +207,11 @@ get_min_array_size32() -> undefined.
 
 init_gen_rand(_) -> undefined.
 
-func1(X) ->
-    ((X bxor (X bsr 27)) * 1664525) band ?BITMASK32.
-
-func2(X) ->
-    ((X bxor (X bsr 27)) * 1566083941) band ?BITMASK32.
-
-init_by_list32_rec1(0, I, _, A) ->
-    {I, A};
-init_by_list32_rec1(K, I, [], A) ->
-    R = func1(array:get(I, A) bxor
-		  array:get((I + ?MID) rem ?N32, A) bxor
-		  array:get((I + ?N32 - 1) rem ?N32, A)),
-    A2 = array:set((I + ?MID) rem ?N32,
-		   (array:get((I + ?MID) rem ?N32, A) + R) band ?BITMASK32,
-		   A),
-    R2 = (R + I) band ?BITMASK32,
-    A3 = array:set((I + ?MID + ?LAG) rem ?N32,
-		 (array:get((I + ?MID + ?LAG) rem ?N32, A2) + R2) band ?BITMASK32,
-		 A2),
-    A4 = array:set(I, R2, A3),
-    I2 = (I + 1) rem ?N32,
-    init_by_list32_rec1(K - 1, I2, [], A4);
-init_by_list32_rec1(K, I, Key, A) ->
-    R = func1(array:get(I, A) bxor
-		  array:get((I + ?MID) rem ?N32, A) bxor
-		  array:get((I + ?N32 - 1) rem ?N32, A)),
-    A2 = array:set((I + ?MID) rem ?N32,
-		   (array:get((I + ?MID) rem ?N32, A) + R) band ?BITMASK32,
-		   A),
-    [H|T] = Key,
-    R2 = (R + H + I) band ?BITMASK32,
-    A3 = array:set((I + ?MID + ?LAG) rem ?N32,
-		   (array:get((I + ?MID + ?LAG) rem ?N32, A2) + R2) band ?BITMASK32,
-		   A2),
-    A4 = array:set(I, R2, A3),
-    I2 = (I + 1) rem ?N32,
-    init_by_list32_rec1(K - 1, I2, T, A4).
-
-init_by_list32_rec2(0, _, A) ->
-    A;
-init_by_list32_rec2(K, I, A) ->
-    R = func2((array:get(I, A) +
-		  array:get((I + ?MID) rem ?N32, A) +
-		  array:get((I + ?N32 - 1) rem ?N32, A)) band ?BITMASK32),
-    A2 = array:set((I + ?MID) rem ?N32,
-		   (array:get((I + ?MID) rem ?N32, A) bxor R),
-		   A),
-    R2 = (R - I) band ?BITMASK32,
-    A3 = array:set((I + ?MID + ?LAG) rem ?N32,
-		   (array:get((I + ?MID + ?LAG) rem ?N32, A2) bxor R2),
-		   A2),
-    A4 = array:set(I, R2, A3),
-    I2 = (I + 1) rem ?N32,
-    init_by_list32_rec2(K - 1, I2, A4).
-
 %% @spec init_by_list32([integer()]) -> intstate().
 %% @doc generates an internal state from a list of 32-bit integers
+%% @note NIFnized
 
-init_by_list32(Key) ->
-    Keylength = length(Key),
-    
-    A = array:new(?N32, {default, 16#8b8b8b8b}),
-
-    Count =
-	if
-	    Keylength + 1 > ?N32 ->
-		Keylength + 1;
-	    true ->
-		?N32
-	end,
-    R = func1(array:get(0, A) bxor
-		  array:get(?MID, A) bxor
-		  array:get(?N32 - 1, A)),
-    A2 = array:set(?MID,
-		   (array:get(?MID, A) + R) band ?BITMASK32,
-		   A),
-    R2 = (R + Keylength) band ?BITMASK32,
-    A3 = array:set(?MID + ?LAG,
-		   (array:get(?MID + ?LAG, A2) + R2) band ?BITMASK32,
-		   A2),
-    A4 = array:set(0, R2, A3),
-
-    Count1 = Count - 1,
-    {I1, A5} = init_by_list32_rec1(Count1, 1, Key, A4),
-
-    period_certification(
-      array:to_list(
-	init_by_list32_rec2(?N32, I1, A5))).
+init_by_list32(_) -> undefined.
 
 %%
 
@@ -368,8 +231,7 @@ intstate_to_randlist(_) -> undefined.
 
 gen_rand32({[], I}) ->
     I2 = gen_rand_all(I),
-    % this operation is intstate() type dependent
-    [H|T] = I2,
+    [H|T] = intstate_to_randlist(I2),
     {H, {T, I2}};
 gen_rand32({R, I}) ->
     [H|T] = R,
@@ -387,8 +249,7 @@ gen_rand32({R, I}) ->
 
 seed0() ->
     I = init_gen_rand(1234),
-    % this operation is intstate() type dependent
-    R = I,
+    R = intstate_to_randlist(I),
     {R, I}.
 
 %% @spec seed() -> ran_sfmt()
@@ -405,8 +266,7 @@ seed() ->
 
 seed(N) when is_integer(N) ->
     I = init_gen_rand(N),
-    % this operation is intstate() type dependent
-    R = I,
+    R = intstate_to_randlist(I),
     RS = {R, I},
     put(?PDIC_SEED, RS);
 
@@ -418,8 +278,7 @@ seed(N) when is_integer(N) ->
 
 seed(L) when is_list(L), is_integer(hd(L)) ->
     I = init_by_list32(L),
-    % this operation is intstate() type dependent
-    R = I,
+    R = intstate_to_randlist(I),
     RS = {R, I},
     put(?PDIC_SEED, RS);
 
