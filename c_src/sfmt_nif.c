@@ -48,6 +48,7 @@ static ERL_NIF_TERM sfmt_nif_do_recursion(ErlNifEnv *env, int argc, const ERL_NI
 static ERL_NIF_TERM sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_gen_rand_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
@@ -72,6 +73,7 @@ static ErlNifFunc nif_funcs[] = {
     {"randlist_to_intstate", 1, sfmt_nif_randlist_to_intstate},
     {"intstate_to_randlist", 1, sfmt_nif_intstate_to_randlist},
     {"gen_rand_all", 1, sfmt_nif_gen_rand_all},
+    {"gen_rand_list32", 2, sfmt_nif_gen_rand_list32},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
@@ -83,6 +85,7 @@ static ERL_NIF_TERM atom_error;
 static ERL_NIF_TERM atom_error1;
 static ERL_NIF_TERM atom_error2;
 static ERL_NIF_TERM atom_error3;
+static ERL_NIF_TERM atom_error_sfmt_nomem;
 static ERL_NIF_TERM atom_ok;
 
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
@@ -92,6 +95,7 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     atom_error1 = enif_make_atom(env,"error1");
     atom_error2 = enif_make_atom(env,"error2");
     atom_error3 = enif_make_atom(env,"error3");
+    atom_error_sfmt_nomem = enif_make_atom(env,"error_sfmt_nomem");
     atom_ok = enif_make_atom(env,"ok");
 
     return 0;
@@ -174,12 +178,10 @@ sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc,
     unsigned int j;
     ERL_NIF_TERM head, tail, r;
 
-    if (!enif_get_list_length(env, argv[0], &j)) {
+    if (!enif_get_list_length(env, argv[0], &j)
+        || j != N32) {
 	return enif_make_badarg(env);
     }
-    if (j != N32) {
-	return atom_error;
-    } 
 
     i = (w128_t *)enif_make_new_binary(env, (N32 * 4), &r);
 
@@ -245,18 +247,79 @@ sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc,
 { /* (<<binary of (N32 * 4) bytes) */
     ErlNifBinary p;
     ERL_NIF_TERM r;
+    w128_t *q;
 
     if (!enif_inspect_binary(env, argv[0], &p)
         || p.size != (N32 * 4)) {
 	return enif_make_badarg(env);
     }
 
-    gen_rand_all((w128_t *)p.data);
-
-    memcpy(enif_make_new_binary(env, (N32 * 4), &r),
-	   p.data, N32 * 4);
+    /* make a new binary object first */
+    q = (w128_t *) enif_make_new_binary(env, (N32 * 4), &r);
+    /* copy the original data first before manipulating */
+    memcpy(q, p.data, N32 * 4);
+    /* the new (mutable) q has the new random data */
+    gen_rand_all(q);
     
     return r;
+}
+
+static ERL_NIF_TERM
+sfmt_nif_gen_rand_list32(ErlNifEnv *env,
+			 int argc, const ERL_NIF_TERM argv[])
+{ /* (size, intstate()) */
+    unsigned int size;
+    ErlNifBinary p;
+    ERL_NIF_TERM *terms;
+    ERL_NIF_TERM r, list;
+    w128_t *array, *q;
+    int j, k;
+    
+    if (!enif_get_uint(env, argv[0], &size)
+	|| 0 != size % 4
+	|| size < N32) {
+	return enif_make_badarg(env);
+    }
+    
+    if (!enif_inspect_binary(env, argv[1], &p)
+        || p.size != (N32 * 4)) {
+	return enif_make_badarg(env);
+    }
+    
+    /* list terms */
+    terms = (ERL_NIF_TERM *) enif_alloc(size * sizeof(ERL_NIF_TERM *));
+    if (NULL == terms) {
+	return atom_error_sfmt_nomem;
+    }
+    /* working area for PRNG computation */
+    array = (w128_t *) enif_alloc(size * 4);
+    if (NULL == array) {
+	return atom_error_sfmt_nomem;
+    }
+
+    /* make a new binary object first */
+    q = (w128_t *) enif_make_new_binary(env, (N32 * 4), &r);
+    /* copy the original data first before manipulating */
+    memcpy(q, p.data, N32 * 4);
+    /* the new (mutable) q has the new random data */
+    /* size is for w128_t */
+    gen_rand_array(array, size / 4, q);
+
+    /* generate the list terms from the result array */
+    for (j = 0, k = 0; j < (size / 4); j++, k += 4) {
+	terms[k] = enif_make_uint(env, array[j].u[0]); 
+	terms[k + 1] = enif_make_uint(env, array[j].u[1]); 
+	terms[k + 2] = enif_make_uint(env, array[j].u[2]); 
+	terms[k + 3] = enif_make_uint(env, array[j].u[3]); 
+    }
+    
+    list = enif_make_list_from_array(env, terms, size);
+
+    /* freeing objects already converted into another ERL_NIF_TERM */
+    enif_free(array);
+    enif_free(terms);
+
+    return enif_make_tuple2(env, list, r);
 }
 
 static ERL_NIF_TERM
