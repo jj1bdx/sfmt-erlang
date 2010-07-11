@@ -44,12 +44,9 @@
 /* prototypes */
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
 
-static ERL_NIF_TERM
-sfmt_nif_get_idstring(ErlNifEnv *env, int argc, 
-		       const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM 
-sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, 
-			      const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_do_recursion(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
 /* prototypes of sfmt-extstate functions */
 #if defined(HAVE_SSE2)
@@ -69,6 +66,7 @@ static void init_gen_rand(uint32_t seed, w128_t *intstate);
 static void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate);
 
 static ErlNifFunc nif_funcs[] = {
+    {"do_recursion", 4, sfmt_nif_do_recursion},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
@@ -87,16 +85,85 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 }
 
 static ERL_NIF_TERM
+sfmt_nif_do_recursion(ErlNifEnv *env, int argc, 
+			      const ERL_NIF_TERM argv[])
+{ /* ([A0, A1, A2, A3], [B0, B1, B2, B3], [C0, C1, C2, C3], [D0, D1, D2, D3]) */
+    w128_t a, b, c, d, r;
+    ERL_NIF_TERM head, tail, r0, r1, r2, r3;
+
+    /* convert a */
+    if (!enif_get_list_cell(env, argv[0], &head, &tail)
+	|| !enif_get_uint(env, head, &a.u[0])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &a.u[1])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &a.u[2])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &a.u[3])
+	|| !enif_is_empty_list(env, tail)) {
+	return enif_make_badarg(env);
+    }
+
+    /* convert b */
+    if (!enif_get_list_cell(env, argv[1], &head, &tail)
+	|| !enif_get_uint(env, head, &b.u[0])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &b.u[1])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &b.u[2])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &b.u[3])
+	|| !enif_is_empty_list(env, tail)) {
+	return enif_make_badarg(env);
+    }
+
+    /* convert c */
+    if (!enif_get_list_cell(env, argv[2], &head, &tail)
+	|| !enif_get_uint(env, head, &c.u[0])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &c.u[1])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &c.u[2])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &c.u[3])
+	|| !enif_is_empty_list(env, tail)) {
+	return enif_make_badarg(env);
+    }
+
+    /* convert d */
+    if (!enif_get_list_cell(env, argv[3], &head, &tail)
+	|| !enif_get_uint(env, head, &d.u[0])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &d.u[1])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &d.u[2])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &d.u[3])
+	|| !enif_is_empty_list(env, tail)) {
+	return enif_make_badarg(env);
+    }
+
+    do_recursion(&r, &a, &b, &c, &d);
+
+    r0 = enif_make_uint(env, (unsigned int) r.u[0]);
+    r1 = enif_make_uint(env, (unsigned int) r.u[1]);
+    r2 = enif_make_uint(env, (unsigned int) r.u[2]);
+    r3 = enif_make_uint(env, (unsigned int) r.u[3]);
+
+    return enif_make_list4(env, r0, r1, r2, r3);
+}
+
+static ERL_NIF_TERM
 sfmt_nif_get_idstring(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
-{
+{ /* () */
     return enif_make_string(env, get_idstring(), ERL_NIF_LATIN1);
 }
 
 static ERL_NIF_TERM
 sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
-{
+{ /* () */
     return enif_make_uint(env, (unsigned int) get_min_array_size32());
 }
 
