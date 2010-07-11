@@ -220,11 +220,7 @@ gen_rand_recursion(K, Acc, Int,
 %% @spec gen_rand_all(intstate()) - > intstate().
 %% @doc filling the internal state array with SFMT PRNG
 
-gen_rand_all(Int) ->
-    [T3, T2, T1, T0, S3, S2, S1, S0 | _] = lists:reverse(Int),
-    gen_rand_recursion(?N32, [], Int, [],
-		       lists:nthtail(?POS1 * 4, Int), [],
-		       [S0, S1, S2, S3], [T0, T1, T2, T3]).
+gen_rand_all(_) -> undefined.
 
 %% @spec gen_rand_list32(integer(), intstate()) - > {[integer()], intstate()}.
 %% @doc generating the 32-bit integer list of PRNG,

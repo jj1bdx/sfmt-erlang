@@ -47,6 +47,7 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
 static ERL_NIF_TERM sfmt_nif_do_recursion(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
@@ -68,9 +69,9 @@ static void init_gen_rand(uint32_t seed, w128_t *intstate);
 static void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate);
 
 static ErlNifFunc nif_funcs[] = {
-    {"do_recursion", 4, sfmt_nif_do_recursion},
     {"randlist_to_intstate", 1, sfmt_nif_randlist_to_intstate},
     {"intstate_to_randlist", 1, sfmt_nif_intstate_to_randlist},
+    {"gen_rand_all", 1, sfmt_nif_gen_rand_all},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
@@ -180,7 +181,7 @@ sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc,
 	return atom_error;
     } 
 
-    i = (w128_t *)enif_make_new_binary(env, (N * 16), &r);
+    i = (w128_t *)enif_make_new_binary(env, (N32 * 4), &r);
 
     if (!enif_get_list_cell(env, argv[0], &head, &tail)
 	|| !enif_get_uint(env, head, &i[0].u[0])
@@ -211,13 +212,12 @@ sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc,
     }
 
     return r;
-
 }
 
 static ERL_NIF_TERM
 sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
-{ /* (<<binary of (N32 * 4) bytes */
+{ /* (<<binary of (N32 * 4) bytes) */
     ErlNifBinary r;
     w128_t *p;
     ERL_NIF_TERM l[N32];
@@ -237,6 +237,26 @@ sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc,
     }
 
     return enif_make_list_from_array(env, l, N32);
+}
+
+static ERL_NIF_TERM
+sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, 
+		      const ERL_NIF_TERM argv[])
+{ /* (<<binary of (N32 * 4) bytes) */
+    ErlNifBinary p;
+    ERL_NIF_TERM r;
+
+    if (!enif_inspect_binary(env, argv[0], &p)
+        || p.size != (N32 * 4)) {
+	return enif_make_badarg(env);
+    }
+
+    gen_rand_all((w128_t *)p.data);
+
+    memcpy(enif_make_new_binary(env, (N32 * 4), &r),
+	   p.data, N32 * 4);
+    
+    return r;
 }
 
 static ERL_NIF_TERM
