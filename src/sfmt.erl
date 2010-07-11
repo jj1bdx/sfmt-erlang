@@ -38,7 +38,6 @@
 -on_load(load_nif/0).
 
 -export([
-	 do_recursion/4,
 	 gen_rand_all/1,
 	 gen_rand_list32/2,
 	 get_idstring/0,
@@ -146,9 +145,7 @@
 
 %% @spec do_recursion(w128(), w128(), w128(), w128()) -> w128().
 %% @doc the recursion formula operation of SFMT
-%% @note NIFnized
-
-do_recursion(_, _, _, _) -> undefined.
+%% @note no longer required
 
 %% Recursion algorithm for gen_rand_all and gen_rand_list32:
 %%
@@ -180,43 +177,6 @@ do_recursion(_, _, _, _) -> undefined.
 %% i.e., 
 %% ni[0] = a[S-N], ni[1] = a[S-N+1], ... ni[N-1] = a[S-1].
 
-%% To avoid appending two lists, 
-%% a and b of r(a, b, c, d) form ring buffers
-%% (e.g., Int and AccInt, IntP and AccIntP,
-%%  of gen_rand_recursion/8)
-%% This makes the algorithm simpler and faster
-
-gen_rand_recursion(0, Acc, _, _, _, _, _, _) ->
-    lists:reverse(Acc);
-gen_rand_recursion(K, Acc, Int, AccInt, [], AccIntP, R, Q) ->
-    gen_rand_recursion(K, Acc, Int, AccInt,
-		       lists:reverse(AccIntP),
-		       [],
-		       R, Q);
-gen_rand_recursion(K, Acc, [], AccInt, IntP, AccIntP, R, Q) ->
-    gen_rand_recursion(K, Acc, 
-		       lists:reverse(AccInt),
-		       [],
-		       IntP, AccIntP, R, Q);
-gen_rand_recursion(K, Acc, Int, 
-		   AccInt, IntP, AccIntP,
-		   [R0, R1, R2, R3],
-		   [Q0, Q1, Q2, Q3]) ->
-    [A0, A1, A2, A3 | IntN ] = Int,
-    [B0, B1, B2, B3 | IntPN ] = IntP,
-    [X0, X1, X2, X3] = do_recursion([A0, A1, A2, A3],
-				    [B0, B1, B2, B3],
-				    [R0, R1, R2, R3],
-				    [Q0, Q1, Q2, Q3]),
-    gen_rand_recursion(K - 4,
-		       [X3 | [X2 | [X1 | [X0 | Acc]]]],
-		       IntN, 
-		       [X3 | [X2 | [X1 | [X0 | AccInt]]]],
-		       IntPN,
-		       [X3 | [X2 | [X1 | [X0 | AccIntP]]]],
-		       [Q0, Q1, Q2, Q3],
-		       [X0, X1, X2, X3]).
-
 %% @spec gen_rand_all(intstate()) - > intstate().
 %% @doc filling the internal state array with SFMT PRNG
 
@@ -227,13 +187,7 @@ gen_rand_all(_) -> undefined.
 %%      where length of the list is Size
 %%      with the updated internal state
 
-gen_rand_list32(Size, Int) when Size >= ?N32, Size rem 4 =:= 0 ->
-    [T3, T2, T1, T0, S3, S2, S1, S0 | _] = lists:reverse(Int),
-    A2 = gen_rand_recursion(Size, [], Int, [],
-			    lists:nthtail(?POS1 * 4, Int), [],
-			    [S0, S1, S2, S3], [T0, T1, T2, T3]),
-    Int2 = lists:nthtail(Size - ?N32, A2),
-    {A2, Int2}.
+gen_rand_list32(_, _) -> undefined.
 
 period_modification_rec1(Parity, I) ->
     period_modification_rec1(0, Parity, I).
