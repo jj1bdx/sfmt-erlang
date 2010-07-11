@@ -45,6 +45,8 @@
 	 get_min_array_size32/0,
 	 init_gen_rand/1,
 	 init_by_list32/1,
+	 randlist_to_intstate/1,
+	 % intstate_to_randlist/1,
 	 gen_rand32/1,
 	 seed0/0,
 	 seed/0,
@@ -405,6 +407,12 @@ init_by_list32(Key) ->
     period_certification(
       array:to_list(
 	init_by_list32_rec2(?N32, I1, A5))).
+
+%%
+
+randlist_to_intstate(_) -> undefined.
+
+%% intstate_to_randlist(_) -> undefined.
 
 %%%%
 %% functions from here will not be NIFnized

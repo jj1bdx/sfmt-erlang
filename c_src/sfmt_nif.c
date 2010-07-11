@@ -45,6 +45,7 @@
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
 
 static ERL_NIF_TERM sfmt_nif_do_recursion(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
@@ -67,6 +68,7 @@ static void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate);
 
 static ErlNifFunc nif_funcs[] = {
     {"do_recursion", 4, sfmt_nif_do_recursion},
+    {"randlist_to_intstate", 1, sfmt_nif_randlist_to_intstate},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
@@ -75,11 +77,19 @@ ERL_NIF_INIT(sfmt, nif_funcs, load, NULL, NULL, NULL)
 
 /* atom variables */
 static ERL_NIF_TERM atom_error;
+static ERL_NIF_TERM atom_error1;
+static ERL_NIF_TERM atom_error2;
+static ERL_NIF_TERM atom_error3;
+static ERL_NIF_TERM atom_ok;
 
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 {
     /* initializing atoms */
     atom_error = enif_make_atom(env,"error");
+    atom_error1 = enif_make_atom(env,"error1");
+    atom_error2 = enif_make_atom(env,"error2");
+    atom_error3 = enif_make_atom(env,"error3");
+    atom_ok = enif_make_atom(env,"ok");
 
     return 0;
 }
@@ -151,6 +161,59 @@ sfmt_nif_do_recursion(ErlNifEnv *env, int argc,
     r3 = enif_make_uint(env, (unsigned int) r.u[3]);
 
     return enif_make_list4(env, r0, r1, r2, r3);
+}
+
+static ERL_NIF_TERM
+sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, 
+			      const ERL_NIF_TERM argv[])
+{ /* ([list of N32 elements]) */
+    w128_t *i;
+    w128_t s[N];
+    unsigned int j;
+    ERL_NIF_TERM head, tail, r;
+
+    if (!enif_get_list_length(env, argv[0], &j)) {
+	return enif_make_badarg(env);
+    }
+    if (j != (N * 4)) {
+	return atom_error;
+    } 
+
+    /* i = (w128_t *)enif_make_new_binary(env, (N * 16), &r); */
+
+    i = &s[0];
+
+    if (!enif_get_list_cell(env, argv[0], &head, &tail)
+	|| !enif_get_uint(env, head, &i[0].u[0])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &i[0].u[1])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &i[0].u[2])
+	|| !enif_get_list_cell(env, tail, &head, &tail)
+	|| !enif_get_uint(env, head, &i[0].u[3])) {
+	return atom_error1;
+    }
+
+    for (j = 1; j < N; j++) {
+	if (!enif_get_list_cell(env, tail, &head, &tail)
+	    || !enif_get_uint(env, head, &i[j].u[0])
+	    || !enif_get_list_cell(env, tail, &head, &tail)
+	    || !enif_get_uint(env, head, &i[j].u[1])
+	    || !enif_get_list_cell(env, tail, &head, &tail)
+	    || !enif_get_uint(env, head, &i[j].u[2])
+	    || !enif_get_list_cell(env, tail, &head, &tail)
+	    || !enif_get_uint(env, head, &i[j].u[3])) {
+	    return atom_error2;
+	}
+    }
+
+    if (!enif_is_empty_list(env, tail)) {
+	return atom_error3;
+
+    }
+
+    return atom_ok;
+
 }
 
 static ERL_NIF_TERM
