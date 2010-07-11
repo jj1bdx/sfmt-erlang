@@ -38,6 +38,7 @@
 -on_load(load_nif/0).
 
 -export([
+	 do_recursion/4,
 	 gen_rand_all/1,
 	 gen_rand_list32/2,
 	 get_idstring/0,
@@ -134,51 +135,18 @@
 %% @spec rshift128(w128(), integer()) -> w128().
 %% @doc SIMD 128-bit right shift simulation for little endian SIMD
 %%      of Shift*8 bits
-
-rshift128(In, Shift) ->
-    [I0, I1, I2, I3] = In,
-    TH = (I3 bsl 32) bor (I2), 
-    TL = (I1 bsl 32) bor (I0),
-    OH = (TH bsr (Shift * 8)) band ?BITMASK64,
-    OL = (TL bsr (Shift * 8) bor (TH bsl (64 - (Shift * 8))))
-	band ?BITMASK64,
-    [OL band ?BITMASK32, OL bsr 32, 
-     OH band ?BITMASK32, OH bsr 32].
+%% @note no longer required
 
 %% @spec lshift128(w128(), integer()) -> w128().
 %% @doc SIMD 128-bit left shift simulation for little endian SIMD
 %%      of Shift*8 bits
-
-lshift128(In, Shift) ->
-    [I0, I1, I2, I3] = In,
-    TH = (I3 bsl 32) bor (I2), 
-    TL = (I1 bsl 32) bor (I0),
-    OL = (TL bsl (Shift * 8)) band ?BITMASK64,
-    OH = (TH bsl (Shift * 8) bor (TL bsr (64 - (Shift * 8))))
-	band ?BITMASK64,
-    [OL band ?BITMASK32, OL bsr 32, 
-     OH band ?BITMASK32, OH bsr 32].
+%% @note no longer required
 
 %% @spec do_recursion(w128(), w128(), w128(), w128()) -> w128().
 %% @doc the recursion formula operation of SFMT
+%% @note NIFnized
 
-do_recursion(A, B, C, D) ->
-    [A0, A1, A2, A3] = A,
-    [B0, B1, B2, B3] = B,
-    % [C0, C1, C2, C3] = C,
-    [D0, D1, D2, D3] = D,
-    [X0, X1, X2, X3] = lshift128(A, ?SL2),
-    [Y0, Y1, Y2, Y3] = rshift128(C, ?SR2),
-    [
-     A0 bxor X0 bxor ((B0 bsr ?SR1) band ?MSK1) bxor Y0
-        bxor ((D0 bsl ?SL1) band ?BITMASK32),
-     A1 bxor X1 bxor ((B1 bsr ?SR1) band ?MSK2) bxor Y1
-        bxor ((D1 bsl ?SL1) band ?BITMASK32),
-     A2 bxor X2 bxor ((B2 bsr ?SR1) band ?MSK3) bxor Y2
-        bxor ((D2 bsl ?SL1) band ?BITMASK32),
-     A3 bxor X3 bxor ((B3 bsr ?SR1) band ?MSK4) bxor Y3
-        bxor ((D3 bsl ?SL1) band ?BITMASK32)
-     ].
+do_recursion(_, _, _, _) -> undefined.
 
 %% Recursion algorithm for gen_rand_all and gen_rand_list32:
 %%
@@ -325,11 +293,13 @@ period_certification(Int) ->
 
 %% @spec get_idstring() -> string().
 %% @doc returns SFMT identification string
+%% @note NIFnized
 
 get_idstring() -> undefined.
 
 %% @spec get_min_array_size32() -> integer().
 %% @doc returns array size of internal state
+%% @note NIFnized
 
 get_min_array_size32() -> undefined.
 
