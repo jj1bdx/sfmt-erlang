@@ -292,7 +292,7 @@ static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_N
 
 static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 { /* ([arbitrary_length_of_integer_list]) */
-    w128_t *i, *q;
+    w128_t *q;
     uint32_t *il;
     unsigned int j, size;
     ERL_NIF_TERM head, tail, r;
