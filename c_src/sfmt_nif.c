@@ -49,6 +49,7 @@ static ERL_NIF_TERM sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, cons
 static ERL_NIF_TERM sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_gen_rand_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
@@ -75,6 +76,7 @@ static ErlNifFunc nif_funcs[] = {
     {"gen_rand_all", 1, sfmt_nif_gen_rand_all},
     {"gen_rand_list32", 2, sfmt_nif_gen_rand_list32},
     {"init_gen_rand", 1, sfmt_nif_init_gen_rand},
+    {"init_by_list32", 1, sfmt_nif_init_by_list32},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
@@ -336,6 +338,47 @@ static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_N
     }
     q = (w128_t *) enif_make_new_binary(env, (N32 * 4), &r);
     init_gen_rand(seed, q);
+
+    return r;
+}
+
+static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{ /* ([arbitrary_length_of_integer_list]) */
+    w128_t *i, *q;
+    uint32_t *il;
+    unsigned int j, size;
+    ERL_NIF_TERM head, tail, r;
+
+    if (!enif_get_list_length(env, argv[0], &size)
+        || size == 0) {
+	return enif_make_badarg(env);
+    }
+
+    /* init list */
+    il = (uint32_t *) enif_alloc(size * 4);
+    if (NULL == il) {
+	return atom_error_sfmt_nomem;
+    }
+
+    if (!enif_get_list_cell(env, argv[0], &head, &tail)
+	|| !enif_get_uint(env, head, &il[0])) {
+	return enif_make_badarg(env);
+    }
+    for (j = 1; j < size; j++) {
+	if (!enif_get_list_cell(env, tail, &head, &tail)
+	    || !enif_get_uint(env, head, &il[j])) {
+	return enif_make_badarg(env);
+	}
+    }
+    if (!enif_is_empty_list(env, tail)) {
+	return enif_make_badarg(env);
+    }
+
+    q = (w128_t *) enif_make_new_binary(env, (N32 * 4), &r);
+    init_by_array(il, size, q);
+
+    /* freeing objects already converted into another ERL_NIF_TERM */
+    enif_free(il);
 
     return r;
 }
