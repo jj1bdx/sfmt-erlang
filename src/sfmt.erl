@@ -221,10 +221,9 @@ intstate_to_randlist(_) -> error_nifnized.
 
 gen_rand32(_) -> error_nifnized.
 
-%% Note: ran_sfmt() -> {[integer()], intstate()}
-%% intstate() content may be changed by NIFnization
+%% Note: ran_sfmt() -> {integer(), intstate()}
 
-%% @spec gen_rand32(ran_sfmt()) -> {integer(), ran_sfmt()).
+%% @spec gen_rand32(ran_sfmt()) -> {integer(), ran_sfmt()}.
 %% @doc generates a 32-bit random number from the given ran_sfmt()
 %% @note NIFnized
 
@@ -244,8 +243,7 @@ gen_rand32(_) -> error_nifnized.
 
 seed0() ->
     I = init_gen_rand(1234),
-    R = intstate_to_randlist(I),
-    {R, I}.
+    {?N32, I}.
 
 %% @spec seed() -> ran_sfmt()
 %% @doc Initialize the process dictionary with seed0/0
@@ -261,8 +259,7 @@ seed() ->
 
 seed(N) when is_integer(N) ->
     I = init_gen_rand(N),
-    R = intstate_to_randlist(I),
-    RS = {R, I},
+    RS = {?N32, I},
     put(?PDIC_SEED, RS);
 
 %% @spec seed([integer()]) -> ran_sfmt()
@@ -273,8 +270,7 @@ seed(N) when is_integer(N) ->
 
 seed(L) when is_list(L), is_integer(hd(L)) ->
     I = init_by_list32(L),
-    R = intstate_to_randlist(I),
-    RS = {R, I},
+    RS = {?N32, I},
     put(?PDIC_SEED, RS);
 
 %% @spec seed({integer(), integer(), integer()}) -> ran_sfmt()

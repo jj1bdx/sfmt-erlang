@@ -34,6 +34,8 @@
 
 -module(sfmt_test).
 
+-define(N32, 624).
+
 -export([
 	 test_speed_rand/2,
 	 test_speed_orig_random/2,
@@ -60,7 +62,7 @@ test_sfmt_check() ->
 	    io:format("Refrand to Outarray1 test passed~n", [])
     end,
     Int4 = sfmt:init_gen_rand(1234),
-    {Outarray3, RS5} = test_rec1(10000, [], {[], Int4}),
+    {Outarray3, RS5} = test_rec1(10000, [], {?N32, Int4}),
     case Outarray3 =/= Outarray1 of
 	true ->
 	    erlang:error({error_Outarray3_Outarray1_testfailed});
@@ -86,7 +88,7 @@ test_sfmt_check() ->
 	    io:format("Refarray to Outarray5 test passed~n", [])
     end,
     Int10 = sfmt:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0]),
-    {Outarray7, RS11} = test_rec1(10000, [], {[], Int10}),
+    {Outarray7, RS11} = test_rec1(10000, [], {?N32, Int10}),
     case Outarray7 =/= Outarray5 of
 	true ->
 	    erlang:error({error_Outarray7_Outarray5_testfailed});
