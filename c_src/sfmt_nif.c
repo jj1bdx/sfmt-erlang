@@ -44,11 +44,11 @@
 /* prototypes */
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
 
-static ERL_NIF_TERM sfmt_nif_do_recursion(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_gen_rand_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
@@ -74,6 +74,7 @@ static ErlNifFunc nif_funcs[] = {
     {"intstate_to_randlist", 1, sfmt_nif_intstate_to_randlist},
     {"gen_rand_all", 1, sfmt_nif_gen_rand_all},
     {"gen_rand_list32", 2, sfmt_nif_gen_rand_list32},
+    {"init_gen_rand", 1, sfmt_nif_init_gen_rand},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
@@ -101,6 +102,7 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     return 0;
 }
 
+#if 0 /* to be removed */
 static ERL_NIF_TERM
 sfmt_nif_do_recursion(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
@@ -169,6 +171,7 @@ sfmt_nif_do_recursion(ErlNifEnv *env, int argc,
 
     return enif_make_list4(env, r0, r1, r2, r3);
 }
+#endif 
 
 static ERL_NIF_TERM
 sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, 
@@ -320,6 +323,21 @@ sfmt_nif_gen_rand_list32(ErlNifEnv *env,
     enif_free(terms);
 
     return enif_make_tuple2(env, list, r);
+}
+
+static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{ /* (integer_seed) */
+    unsigned int seed;
+    ERL_NIF_TERM r;
+    w128_t *q;
+
+    if (!enif_get_uint(env, argv[0], &seed)) {
+	return enif_make_badarg(env);
+    }
+    q = (w128_t *) enif_make_new_binary(env, (N32 * 4), &r);
+    init_gen_rand(seed, q);
+
+    return r;
 }
 
 static ERL_NIF_TERM

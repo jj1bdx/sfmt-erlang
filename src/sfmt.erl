@@ -255,25 +255,17 @@ get_idstring() -> undefined.
 
 get_min_array_size32() -> undefined.
 
+%% @spec init_gen_rand(integer()) -> intstate().
+%% @doc generates an internal state from an integer seed
+%% @note NIFnized
+
+init_gen_rand(_) -> undefined.
+
 func1(X) ->
     ((X bxor (X bsr 27)) * 1664525) band ?BITMASK32.
 
 func2(X) ->
     ((X bxor (X bsr 27)) * 1566083941) band ?BITMASK32.
-
-init_gen_rand_rec1(?N32, Acc) ->
-    lists:reverse(Acc);
-init_gen_rand_rec1(I, Acc) ->
-    [H | _] = Acc,
-    init_gen_rand_rec1(
-      I + 1, 
-      [((1812433253 * (H bxor (H bsr 30))) + I) band ?BITMASK32 | Acc]).
-
-%% @spec init_gen_rand(integer()) -> intstate().
-%% @doc generates an internal state from an integer seed
-
-init_gen_rand(Seed) ->
-    period_certification(init_gen_rand_rec1(1, [Seed])).
 
 init_by_list32_rec1(0, I, _, A) ->
     {I, A};
