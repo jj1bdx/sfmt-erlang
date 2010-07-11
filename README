@@ -3,7 +3,7 @@ sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 Edited and written by Kenji Rikitake
 Email contact: kenji.rikitake AT acm.org
 (change AT to @ for the email address)
-Version 0.2.0 10-JUL-2010
+Version 0.3.0 11-JUL-2010
 
 Copyright (c) 2010 Kenji Rikitake. All rights reserved.
 
@@ -21,11 +21,22 @@ Makoto Matsumoto (Hiroshima University)
 * Details of SFMT algorithm is accessible on the Web from:
   http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html
 
+* C NIFs based on SFMT 1.3.3 added
+  * reference: sfmt-extstate at
+    http://github.com/jj1bdx/sfmt-extstate
+  * see c_src/sfmt_nif.[ch] for the details
+  * speedup: ~40 times faster than the pure Erlang code
+    (Note: fully inline-optimized (see rebar.config))
+  * Pure Erlang code available under reference_texts/
+
 * Tested on FreeBSD/i386 7.3-RELEASE with Erlang/OTP R14A.
+
+* The build script is based on Basho's rebar at
+  http://hg.basho.com/rebar/
 
 * API functions compatible as the random module added
 
-* Refactoring Note of the pure-Erlang code:
+* Refactoring note of the pure-Erlang code:
   ++ (append) operators rewritten by ring buffer loops
   (lists consuming the head elements, and
    the corresponding accumulators)
@@ -34,10 +45,12 @@ Makoto Matsumoto (Hiroshima University)
 * TODO
 
   * Documentation
+  * NIF reload/upgrade/upload code fix;
+    not yet fully tested
 
-  * C NIFs based on SFMT 1.3.3
-    * reference: sfmt-extstate at
-      http://github.com/jj1bdx/sfmt-extstate
+* THANKS to:
+
+  * Dave "dizzyd" Smith and the Basho team, for rebar
+  * Tim Bates, for random_mt.erl implementation of Mersenne Twister
 
 [End of README]
-
