@@ -180,62 +180,57 @@
 %% @spec gen_rand_all(intstate()) - > intstate().
 %% @doc filling the internal state array with SFMT PRNG
 
-gen_rand_all(_) -> undefined.
+gen_rand_all(_) -> error_nifnized.
 
 %% @spec gen_rand_list32(integer(), intstate()) - > {[integer()], intstate()}.
 %% @doc generating the 32-bit integer list of PRNG,
 %%      where length of the list is Size
 %%      with the updated internal state
 
-gen_rand_list32(_, _) -> undefined.
+gen_rand_list32(_, _) -> error_nifnized.
 
 %% @spec get_idstring() -> string().
 %% @doc returns SFMT identification string
 %% @note NIFnized
 
-get_idstring() -> undefined.
+get_idstring() -> error_nifnized.
 
 %% @spec get_min_array_size32() -> integer().
 %% @doc returns array size of internal state
 %% @note NIFnized
 
-get_min_array_size32() -> undefined.
+get_min_array_size32() -> error_nifnized.
 
 %% @spec init_gen_rand(integer()) -> intstate().
 %% @doc generates an internal state from an integer seed
 %% @note NIFnized
 
-init_gen_rand(_) -> undefined.
+init_gen_rand(_) -> error_nifnized.
 
 %% @spec init_by_list32([integer()]) -> intstate().
 %% @doc generates an internal state from a list of 32-bit integers
 %% @note NIFnized
 
-init_by_list32(_) -> undefined.
+init_by_list32(_) -> error_nifnized.
 
 %%
 
-randlist_to_intstate(_) -> undefined.
+randlist_to_intstate(_) -> error_nifnized.
 
-intstate_to_randlist(_) -> undefined.
+intstate_to_randlist(_) -> error_nifnized.
 
-%%%%
-%% functions from here will not be NIFnized
-%%%%
+gen_rand32(_) -> error_nifnized.
 
 %% Note: ran_sfmt() -> {[integer()], intstate()}
 %% intstate() content may be changed by NIFnization
 
 %% @spec gen_rand32(ran_sfmt()) -> {integer(), ran_sfmt()).
 %% @doc generates a 32-bit random number from the given ran_sfmt()
+%% @note NIFnized
 
-gen_rand32({[], I}) ->
-    I2 = gen_rand_all(I),
-    [H|T] = intstate_to_randlist(I2),
-    {H, {T, I2}};
-gen_rand32({R, I}) ->
-    [H|T] = R,
-    {H, {T, I}}.
+%%%%
+%% functions from here will not be NIFnized
+%%%%
 
 %% compatible funtions to the random module in stdlib
 
