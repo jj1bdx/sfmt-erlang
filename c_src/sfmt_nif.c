@@ -53,6 +53,7 @@ static ERL_NIF_TERM sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, const ERL_NI
 static ERL_NIF_TERM sfmt_nif_gen_rand_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_gen_rand32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
@@ -80,6 +81,7 @@ static ErlNifFunc nif_funcs[] = {
     {"gen_rand_list32", 2, sfmt_nif_gen_rand_list32},
     {"init_gen_rand", 1, sfmt_nif_init_gen_rand},
     {"init_by_list32", 1, sfmt_nif_init_by_list32},
+    {"gen_rand32", 1, sfmt_nif_gen_rand32},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
@@ -172,7 +174,7 @@ sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc,
 static ERL_NIF_TERM
 sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
-{ /* (<<binary of (N32 * 4) bytes) */
+{ /* (<<binary of (N32 * 4) bytes>>) */
     ErlNifBinary r;
     w128_t *p;
     ERL_NIF_TERM l[N32];
@@ -329,6 +331,72 @@ static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_
     enif_free(il);
 
     return r;
+}
+
+/* 
+    gen_rand32({[], I}) ->
+        I2 = gen_rand_all(I),
+        [H|T] = intstate_to_randlist(I2),
+        {H, {T, I2}};
+    gen_rand32({R, I}) ->
+        [H|T] = R,
+        {H, {T, I}}.
+*/
+
+static ERL_NIF_TERM 
+sfmt_nif_gen_rand32(ErlNifEnv *env, 
+		    int argc, const ERL_NIF_TERM argv[])
+{ /* ({randlist(), intstate()}) */
+    int arity;
+    int j, k;
+    ErlNifBinary p;
+    ERL_NIF_TERM r, head, tail;
+    ERL_NIF_TERM l[N32];
+    const ERL_NIF_TERM *tuple_args;
+    w128_t *q;
+
+    if (!enif_get_tuple(env, argv[0], &arity, &tuple_args)
+	|| arity != 2
+        || !enif_is_list(env, tuple_args[0])
+	|| !enif_inspect_binary(env, tuple_args[1], &p)
+        || p.size != (N32 * 4)) {
+	return enif_make_badarg(env);
+    }
+
+    if (enif_is_empty_list(env, tuple_args[0])) {
+
+	/* make a new binary object first */
+	q = (w128_t *) enif_make_new_binary(env, (N32 * 4), &r);
+	/* copy the original data first before manipulating */
+	memcpy(q, p.data, N32 * 4);
+	/* the new (mutable) q has the new random data */
+	gen_rand_all(q);
+
+	/* generate a list from q */
+	for (j = 0, k = 0; j < (N32 / 4); j++, k += 4) {
+	    l[k] = enif_make_uint(env, q[j].u[0]); 
+	    l[k + 1] = enif_make_uint(env, q[j].u[1]); 
+	    l[k + 2] = enif_make_uint(env, q[j].u[2]); 
+	    l[k + 3] = enif_make_uint(env, q[j].u[3]); 
+	}
+
+	/* {hd(l), {tl(l), q}} */
+	return enif_make_tuple2(env, 
+				l[0], 
+				enif_make_tuple2(env,
+						 enif_make_list_from_array(env, &l[1], N32 - 1),
+						 r));
+    } else {
+
+	if (!enif_get_list_cell(env, tuple_args[0], &head, &tail)) {
+	    return enif_make_badarg(env);
+	}
+	/* {hd(given_list), {tl(given_list), given_intstate}} */
+	return enif_make_tuple2(env,
+				head,
+				enif_make_tuple2(env, tail, tuple_args[1]));
+    }
+
 }
 
 static ERL_NIF_TERM
