@@ -245,7 +245,7 @@ gen_rand32(_) -> error_nifnized.
 %% @doc generates a float random number from the given ran_sfmt()
 %% where the float is 0.0 =< float() =< 1.0
 
-gen_rand_float({[H|T], I}) ->
+gen_rand_float({[H|T], I}) ->   %% Is now nifnizied as gen_rand32 above
     {H, {T, I}};
 gen_rand_float({[], I}) ->
     gen_rand_float(I);
@@ -373,7 +373,7 @@ load_nif() ->
 		      filename:join(AppPath, priv);
 		  Path ->
 		      Path
-	      end,		  
+	      end,
     erlang:load_nif(filename:join(PrivDir, sfmt_nif),0).
 
 %% end of the module    

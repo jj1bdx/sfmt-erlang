@@ -56,6 +56,7 @@ static ERL_NIF_TERM sfmt_nif_gen_rand_list_float(ErlNifEnv *env, int argc, const
 static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_gen_rand32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_gen_rand_float(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
@@ -86,6 +87,7 @@ static ErlNifFunc nif_funcs[] = {
     {"init_gen_rand", 1, sfmt_nif_init_gen_rand},
     {"init_by_list32", 1, sfmt_nif_init_by_list32},
     {"gen_rand32", 1, sfmt_nif_gen_rand32},
+    {"gen_rand_float", 1, sfmt_nif_gen_rand_float},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
@@ -428,15 +430,24 @@ sfmt_nif_gen_rand32(ErlNifEnv *env,
     int arity, idx;
     ErlNifBinary p;
     ERL_NIF_TERM r;
+    ERL_NIF_TERM bin_in;
     const ERL_NIF_TERM *tuple_args;
     w128_t *q;
-
-    if (!enif_get_tuple(env, argv[0], &arity, &tuple_args)
-	|| arity != 2
-        || !enif_get_int(env, tuple_args[0], &idx)
-	|| !enif_inspect_binary(env, tuple_args[1], &p)
-        || p.size != (N32 * 4)) {
-	return enif_make_badarg(env);
+    
+    if (enif_get_tuple(env, argv[0], &arity, &tuple_args)) {
+       if(arity != 2
+	  || !enif_get_int(env, tuple_args[0], &idx)
+	  || !enif_inspect_binary(env, tuple_args[1], &p)
+	  || p.size != (N32 * 4))
+	  return enif_make_badarg(env);
+       else 
+	  bin_in = tuple_args[1];
+    } else if (!enif_inspect_binary(env, argv[0], &p)
+	       || p.size != (N32 * 4)) {
+       return enif_make_badarg(env);
+    } else {
+       idx = 0;
+       bin_in = argv[0];
     }
 
     if (idx >= N32) {
@@ -461,9 +472,63 @@ sfmt_nif_gen_rand32(ErlNifEnv *env,
 					       q[(idx / 4)].u[(idx % 4)]),
 				enif_make_tuple2(env,
 						 enif_make_int(env, idx + 1),
-						 tuple_args[1]));
+						 bin_in));
     }
 }
+
+static ERL_NIF_TERM 
+sfmt_nif_gen_rand_float(ErlNifEnv *env, 
+		       int argc, const ERL_NIF_TERM argv[])
+{ /* ({integer_index, intstate()}) */
+   int arity, idx;
+   ErlNifBinary p;
+   ERL_NIF_TERM r;
+   ERL_NIF_TERM bin_in;
+   const ERL_NIF_TERM *tuple_args;
+   w128_t *q;
+    
+   if (enif_get_tuple(env, argv[0], &arity, &tuple_args)) {
+      if(arity != 2
+	 || !enif_get_int(env, tuple_args[0], &idx)
+	 || !enif_inspect_binary(env, tuple_args[1], &p)
+	 || p.size != (N32 * 4))
+	 return enif_make_badarg(env);
+      else 
+	 bin_in = tuple_args[1];
+   } else if (!enif_inspect_binary(env, argv[0], &p)
+	      || p.size != (N32 * 4)) {
+      return enif_make_badarg(env);
+   } else {
+      idx = 0;
+      bin_in = argv[0];
+   }
+
+   if (idx >= N32) {
+      /* make a new binary object first */
+      /* (remember p is NOT mutable) */
+      q = (w128_t *) enif_make_new_binary(env, (N32 * 4), &r);
+      /* copy the original data first before manipulating */
+      memcpy(q, p.data, N32 * 4);
+      /* the new (mutable) q has the new random data */
+      gen_rand_all(q);
+      /* {table[0], {1, copied_table} */
+      return enif_make_tuple2(env,
+			      enif_make_double(env, FLOAT_CONST*q[0].u[0]),
+			      enif_make_tuple2(env,
+					       enif_make_int(env, 1),
+					       r));
+   } else {
+      q = (w128_t *) p.data;
+      /* {table[idx], {idx + 1, copied_table} */
+      return enif_make_tuple2(env,
+			      enif_make_double(env, FLOAT_CONST*
+					     q[(idx / 4)].u[(idx % 4)]),
+			      enif_make_tuple2(env,
+					       enif_make_int(env, idx + 1),
+					       bin_in));
+   }
+}
+
 
 static ERL_NIF_TERM
 sfmt_nif_get_idstring(ErlNifEnv *env, int argc, 
