@@ -254,22 +254,26 @@ static ERL_NIF_TERM
 sfmt_nif_gen_rand_list32(ErlNifEnv *env,
 			 int argc, const ERL_NIF_TERM argv[])
 { /* (size, intstate()) */
-    unsigned int size;
+    unsigned int size, req;
     ErlNifBinary p;
     ERL_NIF_TERM *terms;
     ERL_NIF_TERM r, list;
     w128_t *array, *q;
     int j, k;
     
-    if (!enif_get_uint(env, argv[0], &size)
-	|| 0 != size % 4
-	|| size < N32) {
-	return enif_make_badarg(env);
+    if (!enif_get_uint(env, argv[0], &req)) {
+       return enif_make_badarg(env);
     }
     
+    if (req < N32) {
+       size = N32;
+    } else {
+       size = req + (4 - (req % 4)) % 4;
+    }
+
     if (!enif_inspect_binary(env, argv[1], &p)
         || p.size != (N32 * 4)) {
-	return enif_make_badarg(env);
+       return enif_make_badarg(env);
     }
     
     /* list terms */
@@ -299,7 +303,7 @@ sfmt_nif_gen_rand_list32(ErlNifEnv *env,
 	terms[k + 3] = enif_make_uint(env, array[j].u[3]); 
     }
     
-    list = enif_make_list_from_array(env, terms, size);
+    list = enif_make_list_from_array(env, terms, req);
 
     /* freeing objects already converted into another ERL_NIF_TERM */
     enif_free(array);
@@ -312,17 +316,21 @@ static ERL_NIF_TERM
 sfmt_nif_gen_rand_list_float(ErlNifEnv *env,
 			 int argc, const ERL_NIF_TERM argv[])
 { /* (size, intstate()) */
-   unsigned int size;
+   unsigned int size, req;
    ErlNifBinary p;
    ERL_NIF_TERM *terms;
    ERL_NIF_TERM r, list;
    w128_t *array, *q;
    int j, k;
     
-   if (!enif_get_uint(env, argv[0], &size)
-       || 0 != size % 4
-       || size < N32) {
+   if (!enif_get_uint(env, argv[0], &req)) {
       return enif_make_badarg(env);
+   }
+    
+   if (req < N32) {
+      size = N32;
+   } else {
+      size = req + (4 - (req % 4)) % 4;
    }
     
    if (!enif_inspect_binary(env, argv[1], &p)
@@ -357,7 +365,7 @@ sfmt_nif_gen_rand_list_float(ErlNifEnv *env,
       terms[k + 3] = enif_make_double(env, FLOAT_CONST*array[j].u[3]); 
    }
     
-   list = enif_make_list_from_array(env, terms, size);
+   list = enif_make_list_from_array(env, terms, req);
 
    /* freeing objects already converted into another ERL_NIF_TERM */
    enif_free(array);

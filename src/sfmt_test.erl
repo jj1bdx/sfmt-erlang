@@ -60,7 +60,19 @@ test_sfmt_check() ->
 		{_I2, _S1} when is_integer(_I2) ->
 		    ok
 	    end
-    end,           
+    end,
+    
+    case sfmt:gen_rand_float(Int1) of
+	{_F1, S2} when is_float(_F1) ->
+	    case sfmt:gen_rand_float(S2) of
+		{_F2, _S3} when is_float(_F2) ->
+		    ok
+	    end
+    end,
+    
+    {Outarray0, _Int1} = sfmt:gen_rand_list_float(10, Int1),
+    true = is_float(hd(Outarray0)),
+    10 = length(Outarray0),
 
     {Outarray1, Int2} = sfmt:gen_rand_list32(10000, Int1),
     {Outarray2, _Int3} = sfmt:gen_rand_list32(10000, Int2),
