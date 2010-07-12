@@ -139,5 +139,7 @@ typedef struct W128_T w128_t;
 #define PARITY4	0x13c9e684U
 /* identification string for the algorithm */
 #define IDSTR	"SFMT-19937:122-18-1-11-1:dfffffef-ddfecb7f-bffaffff-bffffff6"
+/* float multiplier */
+#define FLOAT_CONST (1.0/4294967295.0) 
 
 #endif /* SFMT_NIF_H */

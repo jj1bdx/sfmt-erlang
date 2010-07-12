@@ -40,13 +40,13 @@
 -export([
 	 gen_rand_all/1,
 	 gen_rand_list32/2,
+	 gen_rand_list_float/2,
 	 get_idstring/0,
 	 get_min_array_size32/0,
 	 init_gen_rand/1,
 	 init_by_list32/1,
-	 randlist_to_intstate/1,
-	 intstate_to_randlist/1,
 	 gen_rand32/1,
+	 gen_rand_float/1,
 	 seed0/0,
 	 seed/0,
 	 seed/1,
@@ -56,6 +56,11 @@
 	 uniform_s/1,
 	 uniform_s/2
 	 ]).
+
+%% Internal
+-export([randlist_to_intstate/1,   
+	 intstate_to_randlist/1,
+	 intstate_to_randlist_float/1]).
 
 %% SFMT period parameters
 %% details on SFMT-1.3.3 source code
@@ -189,6 +194,13 @@ gen_rand_all(_) -> error_nifnized.
 
 gen_rand_list32(_, _) -> error_nifnized.
 
+%% @spec gen_rand_list_float(integer(), intstate()) - > {[float()], intstate()}.
+%% @doc generating a list of uniform floats, 0.0 =< Float =< 1.0
+%%      where length of the list is Size
+%%      with the updated internal state
+
+gen_rand_list_float(_, _) -> undefined.
+
 %% @spec get_idstring() -> string().
 %% @doc returns SFMT identification string
 %% @note NIFnized
@@ -219,6 +231,8 @@ randlist_to_intstate(_) -> error_nifnized.
 
 intstate_to_randlist(_) -> error_nifnized.
 
+intstate_to_randlist_float(_) -> undefined.
+
 gen_rand32(_) -> error_nifnized.
 
 %% Note: ran_sfmt() -> {integer(), intstate()}
@@ -226,6 +240,20 @@ gen_rand32(_) -> error_nifnized.
 %% @spec gen_rand32(ran_sfmt()|intstate) -> {integer(), ran_sfmt()}.
 %% @doc generates a 32-bit random number from the given ran_sfmt()
 %% @note NIFnized
+
+%% @spec gen_rand_float(ran_sfmt()|intstate()) -> {float(), ran_sfmt()).
+%% @doc generates a float random number from the given ran_sfmt()
+%% where the float is 0.0 =< float() =< 1.0
+
+gen_rand_float({[H|T], I}) ->
+    {H, {T, I}};
+gen_rand_float({[], I}) ->
+    gen_rand_float(I);
+gen_rand_float(I) when is_binary(I) ->
+    I2 = gen_rand_all(I),
+    [H|T] = intstate_to_randlist_float(I2),
+    {H, {T, I2}}.
+
 
 %% compatible funtions to the random module in stdlib
 
@@ -304,10 +332,10 @@ uniform() ->
 		       seed0();
 		   Val -> Val
 	       end,
-    {X, NRS} = gen_rand32(RS),
+    {X, NRS} = gen_rand_float(RS),
     % divided by 2^32 - 1
     put(?PDIC_SEED, NRS),
-    X * ?FLOAT_CONST.
+    X.
 
 %% @spec uniform(N) -> integer()
 %% @doc Returns a uniformly-distributed integer random number X
@@ -324,8 +352,7 @@ uniform(N) when N >= 1 ->
 %%      and a new state
 
 uniform_s(RS) ->
-    {X, NRS} = gen_rand32(RS),
-    {X * ?FLOAT_CONST, NRS}.
+    gen_rand_float(RS).
 
 %% @spec uniform(integer(), ran_sfmt()) -> (integer(), ran_sfmt()} 
 %%      Returns a uniformly-distributed integer random number X
@@ -333,8 +360,8 @@ uniform_s(RS) ->
 %%      and a new state
 
 uniform_s(N, RS) ->
-    {X, NRS} = gen_rand32(RS),
-    {trunc(X * ?FLOAT_CONST * N) + 1, NRS}.
+    {X, NRS} = gen_rand_float(RS),
+    {trunc(X * N) + 1, NRS}.
     
 %% On-load callback
 
