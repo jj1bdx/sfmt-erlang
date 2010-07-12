@@ -249,7 +249,11 @@ seed0() ->
 %% @doc Initialize the process dictionary with seed0/0
 
 seed() ->
-    put(?PDIC_SEED, seed0()).
+    Seed = seed0(),
+    case put(?PDIC_SEED, Seed) of
+	undefined -> Seed;
+	Old ->       Old
+    end.
 
 %% @spec seed(integer()) -> ran_sfmt()
 %% @doc Puts the seed computed from the given integer list by init_gen_rand/1
