@@ -223,13 +223,9 @@ gen_rand32(_) -> error_nifnized.
 
 %% Note: ran_sfmt() -> {integer(), intstate()}
 
-%% @spec gen_rand32(ran_sfmt()) -> {integer(), ran_sfmt()}.
+%% @spec gen_rand32(ran_sfmt()|intstate) -> {integer(), ran_sfmt()}.
 %% @doc generates a 32-bit random number from the given ran_sfmt()
 %% @note NIFnized
-
-%%%%
-%% functions from here will not be NIFnized
-%%%%
 
 %% compatible funtions to the random module in stdlib
 

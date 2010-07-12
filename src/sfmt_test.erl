@@ -52,6 +52,16 @@ test_rec1(I, Acc, RS) ->
 test_sfmt_check() ->
     {Refrand, Refarray} = test_refval(),
     Int1 = sfmt:init_gen_rand(1234),
+    
+    %% Api tests
+    case sfmt:gen_rand32(Int1) of
+	{_I1, S0} when is_integer(_I1) ->
+	    case sfmt:gen_rand32(S0) of
+		{_I2, _S1} when is_integer(_I2) ->
+		    ok
+	    end
+    end,           
+
     {Outarray1, Int2} = sfmt:gen_rand_list32(10000, Int1),
     {Outarray2, _Int3} = sfmt:gen_rand_list32(10000, Int2),
     case Refrand =/= lists:reverse(
