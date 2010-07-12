@@ -339,6 +339,14 @@ uniform_s(N, RS) ->
 %% On-load callback
 
 load_nif() ->
-    erlang:load_nif("../priv/sfmt_nif",0).
+    PrivDir = case code:priv_dir(?MODULE) of
+		  {error, _} ->
+		      EbinDir = filename:dirname(code:which(?MODULE)),
+		      AppPath = filename:dirname(EbinDir),
+		      filename:join(AppPath, priv);
+		  Path ->
+		      Path
+	      end,		  
+    erlang:load_nif(filename:join(PrivDir, sfmt_nif),0).
 
 %% end of the module    
