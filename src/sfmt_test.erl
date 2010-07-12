@@ -38,7 +38,8 @@
 
 -export([
 	 test_speed_rand/2,
-	 test_speed_orig_random/2,
+	 test_speed_sfmt_uniform/2,
+	 test_speed_orig_uniform/2,
 	 test/0
 	 ]).
 
@@ -122,33 +123,59 @@ test_speed() ->
     io:format("100 * sfmt:gen_rand_list32(100000, i)~n~p~n",
 	      [test_speed_timer()]).
 
-test_speed_orig_random_rec1(Acc, 0, _, _, _) ->
+
+test_speed_sfmt_uniform_rec1(Acc, 0, _, _, _) ->
     lists:reverse(Acc),
     ok;
-test_speed_orig_random_rec1(Acc, X, 0, R, I) ->
+test_speed_sfmt_uniform_rec1(Acc, X, 0, R, I) ->
     lists:reverse(Acc),
-    test_speed_orig_random_rec1([], X - 1, R, R, I);
-test_speed_orig_random_rec1(Acc, X, Q, R, I) ->
-    {F, I2} = random:uniform_s(I),
-    test_speed_orig_random_rec1([F|Acc], X, Q - 1, R, I2).
+    test_speed_sfmt_uniform_rec1([], X - 1, R, R, I);
+test_speed_sfmt_uniform_rec1(Acc, X, Q, R, I) ->
+    {F, I2} = sfmt:uniform_s(I),
+    test_speed_sfmt_uniform_rec1([F|Acc], X, Q - 1, R, I2).
 
-test_speed_orig_random(P, Q) ->
+test_speed_sfmt_uniform(P, Q) ->
     statistics(runtime),
-    I = random:seed(),
-    ok = test_speed_orig_random_rec1([], P, Q, Q, I),
+    I = sfmt:seed(),
+    ok = test_speed_sfmt_uniform_rec1([], P, Q, Q, I),
     statistics(runtime).
 
-test_speed_orig_random_timer() -> 
-    timer:tc(?MODULE, test_speed_orig_random, [100, 100000]).
+test_speed_sfmt_uniform_timer() -> 
+    timer:tc(?MODULE, test_speed_sfmt_uniform, [100, 100000]).
 
-test_speed_orig_random() ->
+test_speed_sfmt_uniform() ->
+    io:format("100 * sfmt:uniform_s(100000)~n~p~n",
+	      [test_speed_sfmt_uniform_timer()]).
+
+test_speed_orig_uniform_rec1(Acc, 0, _, _, _) ->
+    lists:reverse(Acc),
+    ok;
+test_speed_orig_uniform_rec1(Acc, X, 0, R, I) ->
+    lists:reverse(Acc),
+    test_speed_orig_uniform_rec1([], X - 1, R, R, I);
+test_speed_orig_uniform_rec1(Acc, X, Q, R, I) ->
+    {F, I2} = random:uniform_s(I),
+    test_speed_orig_uniform_rec1([F|Acc], X, Q - 1, R, I2).
+
+test_speed_orig_uniform(P, Q) ->
+    statistics(runtime),
+    I = random:seed(),
+    ok = test_speed_orig_uniform_rec1([], P, Q, Q, I),
+    statistics(runtime).
+
+test_speed_orig_uniform_timer() -> 
+    timer:tc(?MODULE, test_speed_orig_uniform, [100, 100000]).
+
+test_speed_orig_uniform() ->
     io:format("100 * random:uniform_s(100000)~n~p~n",
-	      [test_speed_orig_random_timer()]).
+	      [test_speed_orig_uniform_timer()]).
+
 
 test() ->
     test_sfmt_check(),
     test_speed(),
-    test_speed_orig_random().
+    test_speed_sfmt_uniform(),
+    test_speed_orig_uniform().
 
 test_refval() ->
     %% values taken from SFMT.19937.out.txt of SFMT-1.3.3
