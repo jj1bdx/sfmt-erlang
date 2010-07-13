@@ -3,7 +3,7 @@ sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 Edited and written by Kenji Rikitake
 Email contact: kenji.rikitake AT acm.org
 (change AT to @ for the email address)
-Version 0.3.0_RELEASE 13-JUL-2010
+Version 0.3.1_RELEASE 13-JUL-2010
 
 Copyright (c) 2010 Kenji Rikitake. All rights reserved.
 
@@ -29,6 +29,8 @@ Makoto Matsumoto (Hiroshima University)
   * speedup: ~40 times faster than the pure Erlang code
     (Note: fully inline-optimized (see rebar.config))
   * Pure Erlang code available under reference_texts/
+  * gen_rand32/1 and gen_rand_float/1 use Erlang lists
+    (Dan Gudmudsson showed the list version is faster)
 
 * Tested on FreeBSD/i386 7.3-RELEASE with Erlang/OTP R14A.
 
@@ -51,6 +53,7 @@ Makoto Matsumoto (Hiroshima University)
     not yet fully tested
 
 * Code authors:
+
   Mutsuo Saito
   Makoto Matsumoto
   Kenji Rikitake
