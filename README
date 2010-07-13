@@ -3,7 +3,7 @@ sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 Edited and written by Kenji Rikitake
 Email contact: kenji.rikitake AT acm.org
 (change AT to @ for the email address)
-Version 0.3.0 11-JUL-2010
+Version 0.3.0_RELEASE 13-JUL-2010
 
 Copyright (c) 2010 Kenji Rikitake. All rights reserved.
 
@@ -50,9 +50,16 @@ Makoto Matsumoto (Hiroshima University)
   * NIF reload/upgrade/upload code fix;
     not yet fully tested
 
+* Code authors:
+  Mutsuo Saito
+  Makoto Matsumoto
+  Kenji Rikitake
+  Dan Gudmundsson
+
 * THANKS to:
 
-  * Dave "dizzyd" Smith and the Basho team, for rebar
+  * Dave "dizzyd" Smith, Tuncer Ayaz, and the Basho team, for rebar
   * Tim Bates, for random_mt.erl implementation of Mersenne Twister
+  * Dan Gudmundsson for the code improvement
 
 [End of README]
