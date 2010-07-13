@@ -233,13 +233,20 @@ intstate_to_randlist(_) -> error_nifnized.
 
 intstate_to_randlist_float(_) -> undefined.
 
-gen_rand32(_) -> error_nifnized.
-
 %% Note: ran_sfmt() -> {integer(), intstate()}
 
 %% @spec gen_rand32(ran_sfmt()|intstate) -> {integer(), ran_sfmt()}.
 %% @doc generates a 32-bit random number from the given ran_sfmt()
 %% @note NIFnized
+
+gen_rand32({[H|T], I}) ->   %% Is now nifnizied
+    {H, {T, I}};
+gen_rand32({_, I}) ->
+    gen_rand32(I);
+gen_rand32(I) when is_binary(I) ->
+    I2 = gen_rand_all(I),
+    [H|T] = intstate_to_randlist(I2),
+    {H, {T, I2}}.
 
 %% @spec gen_rand_float(ran_sfmt()|intstate()) -> {float(), ran_sfmt()).
 %% @doc generates a float random number from the given ran_sfmt()
@@ -247,13 +254,12 @@ gen_rand32(_) -> error_nifnized.
 
 gen_rand_float({[H|T], I}) ->   %% Is now nifnizied as gen_rand32 above
     {H, {T, I}};
-gen_rand_float({[], I}) ->
+gen_rand_float({_, I}) ->
     gen_rand_float(I);
 gen_rand_float(I) when is_binary(I) ->
     I2 = gen_rand_all(I),
     [H|T] = intstate_to_randlist_float(I2),
     {H, {T, I2}}.
-
 
 %% compatible funtions to the random module in stdlib
 

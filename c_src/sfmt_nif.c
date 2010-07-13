@@ -86,8 +86,8 @@ static ErlNifFunc nif_funcs[] = {
     {"gen_rand_list_float", 2, sfmt_nif_gen_rand_list_float},
     {"init_gen_rand", 1, sfmt_nif_init_gen_rand},
     {"init_by_list32", 1, sfmt_nif_init_by_list32},
-    {"gen_rand32", 1, sfmt_nif_gen_rand32},
-    {"gen_rand_float", 1, sfmt_nif_gen_rand_float},
+    // {"gen_rand32", 1, sfmt_nif_gen_rand32},
+    // {"gen_rand_float", 1, sfmt_nif_gen_rand_float},
     {"get_idstring", 0, sfmt_nif_get_idstring},
     {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
 };
