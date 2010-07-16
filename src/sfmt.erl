@@ -238,9 +238,9 @@ intstate_to_randlist_float(_) -> undefined.
 
 %% @spec gen_rand32(ran_sfmt()|intstate) -> {integer(), ran_sfmt()}.
 %% @doc generates a 32-bit random number from the given ran_sfmt()
-%% @note NIFnized
+%% @note once nifnized, but the speed of list-based code is faster
 
-gen_rand32({[H|T], I}) ->   %% Is now nifnizied
+gen_rand32({[H|T], I}) ->
     {H, {T, I}};
 gen_rand32({_, I}) ->
     gen_rand32(I);
@@ -252,8 +252,9 @@ gen_rand32(I) when is_binary(I) ->
 %% @spec gen_rand_float(ran_sfmt()|intstate()) -> {float(), ran_sfmt()).
 %% @doc generates a float random number from the given ran_sfmt()
 %% where the float is 0.0 =< float() =< 1.0
+%% @note once nifnized, but the speed of list-based code is faster
 
-gen_rand_float({[H|T], I}) ->   %% Is now nifnizied as gen_rand32 above
+gen_rand_float({[H|T], I}) ->
     {H, {T, I}};
 gen_rand_float({_, I}) ->
     gen_rand_float(I);
