@@ -2,7 +2,7 @@
 
 * Version 0.3.2_RELEASE 14-JUL-2010
 * Edited and written by Kenji Rikitake (Kyoto University)
-* Email contact: kenji.rikitake AT acm.org (change AT to @ for the email address)
+* Email contact: <kenji.rikitake@acm.org>
 
 Copyright (c) 2010 Kenji Rikitake and Kyoto University. All rights
 reserved.
@@ -10,17 +10,16 @@ reserved.
 Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
 University. All rights reserved.
 
-See LICENSE.txt for the license (new/simplified BSD license).
-(Note: license of rebar is Apache 2.0 License.)
+See LICENSE.txt for the license (new/simplified BSD license). (Note:
+license of rebar is Apache 2.0 License.)
 
-This software is based on SFMT ver. 1.3.3
-(SIMD oriented Fast Mersenne Twister(SFMT))
-by 
-Mutsuo Saito (Hiroshima University) and
-Makoto Matsumoto (Hiroshima University)
+This software is based on SFMT ver. 1.3.3 (SIMD oriented Fast Mersenne
+Twister(SFMT)) by Mutsuo Saito (Hiroshima University) and Makoto
+Matsumoto (Hiroshima University)
 
-Details of SFMT algorithm is accessible on the Web from:
-http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html
+# Details of SFMT algorithm
+
+See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 # C NIFs based on SFMT 1.3.3 added from 0.3.0_RELEASE
 
@@ -38,7 +37,9 @@ http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html
 
 # Building 
 
-The build script is Basho's rebar at http://hg.basho.com/rebar/ 
+    make compile
+
+The build script is Basho's rebar at <http://hg.basho.com/rebar/> 
 (which requires Erlang/OTP to run)
 
 # API compatible with the random module
@@ -75,5 +76,3 @@ made the code ~50% faster
 During the compatibility test of this software, Kenji Rikitake
 used the supercomputer service provided by Academic Center for
 Computing and Media Studies (ACCMS), Kyoto University.
-
-[End of README]
