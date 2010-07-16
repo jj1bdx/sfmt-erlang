@@ -79,20 +79,7 @@
   #define PRE_ALWAYS inline
 #endif
 
-/* 128-bit SIMD data type for SSE2 or standard C */
-
-#if defined(HAVE_SSE2)
-  #include <emmintrin.h>
-
-/** 128-bit data structure */
-union W128_T {
-    __m128i si;
-    uint32_t u[4];
-};
-/** 128-bit data type */
-typedef union W128_T w128_t;
-
-#else /* HAVE_SSE2 */
+/* 128-bit SIMD data type for standard C */
 
 /** 128-bit data structure */
 struct W128_T {
@@ -100,8 +87,6 @@ struct W128_T {
 };
 /** 128-bit data type */
 typedef struct W128_T w128_t;
-
-#endif /* HAVE_SSE2 */
 
 /* 
    SFMT parameter section

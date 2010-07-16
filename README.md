@@ -28,6 +28,8 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 * speedup: ~40 times faster than the pure Erlang code (when fully inline-optimized (see rebar.config))
 * Pure Erlang code available under `reference_texts/`
 * `gen_rand32/1` and `gen_rand_float/1` use Erlang lists (Dan Gudmudsson showed the list version is faster)
+* NOTE: SSE2 code and options removed due to causing crash of Erlang BEAM
+  (and even if the code enabled the performance increase is minimal)
 
 # Tested platforms
 
