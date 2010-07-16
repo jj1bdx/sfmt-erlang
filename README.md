@@ -37,7 +37,11 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 # Building 
 
+* Use GNU make and then
+
     make compile
+
+(Note: on FreeBSD, GNU make should be invoked as 'gmake'.)
 
 The build script is Basho's rebar at <http://hg.basho.com/rebar/> 
 (which requires Erlang/OTP to run)
