@@ -23,11 +23,11 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 # C NIFs based on SFMT 1.3.3 added from 0.3.0_RELEASE
 
-* reference: sfmt-extstate at http://github.com/jj1bdx/sfmt-extstate
-* see c_src/sfmt_nif.[ch] for the details
+* reference: sfmt-extstate at <http://github.com/jj1bdx/sfmt-extstate>
+* see `c_src/sfmt_nif.[ch]` for the details
 * speedup: ~40 times faster than the pure Erlang code (when fully inline-optimized (see rebar.config))
-* Pure Erlang code available under reference_texts/
-* gen_rand32/1 and gen_rand_float/1 use Erlang lists (Dan Gudmudsson showed the list version is faster)
+* Pure Erlang code available under `reference_texts/`
+* `gen_rand32/1` and `gen_rand_float/1` use Erlang lists (Dan Gudmudsson showed the list version is faster)
 
 # Tested platforms
 
@@ -41,7 +41,7 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
     make compile
 
-(Note: on FreeBSD, GNU make should be invoked as 'gmake'.)
+(Note: on FreeBSD, GNU make should be invoked as `gmake`.)
 
 The build script is Basho's rebar at <http://hg.basho.com/rebar/> 
 (which requires Erlang/OTP to run)
@@ -52,7 +52,7 @@ The build script is Basho's rebar at <http://hg.basho.com/rebar/>
 
 # Refactoring note of the pure-Erlang code
 
-* Rewriting ++ (append) operators by ring buffer loops
+* Rewriting `++` (append) operators by ring buffer loops
 (as a pair of lists consuming the head elements, and the corresponding accumulators)
 made the code ~50% faster
 
