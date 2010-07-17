@@ -1,5 +1,15 @@
-%% Module sfmt
-%% SIMD-oriented Fast Mersenne Twister (SFMT)
+%% @author Kenji Rikitake <kenji.rikitake@acm.org>
+%% @author Mutsuo Saito
+%% @author Makoto Matsumoto
+%% @author Dan Gudmundsson
+%% @doc SIMD-oriented Fast Mersenne Twister (SFMT).
+%% The module provides skeleton functions for the NIFs
+%% and the interface functions.
+%% @reference <a href="http://github.com/jj1bdx/sfmt-erlang">GitHub page
+%% for sfmt-erlang</a>
+%% @copyright 2010 Kenji Rikitake and Kyoto University.
+%% Copyright (c) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and
+%% Hiroshima University.
 
 %% Copyright (c) 2010 Kenji Rikitake and Kyoto University. All rights
 %% reserved.
@@ -147,10 +157,10 @@ nif_stub_error(Line) ->
 %% /* end */
 %% and 128-bit list is a flat concatenation
 %% of 128-bit number
-%%
-%% @type w128() = [integer(), integer(), integer(), integer()].
+
+%% @type w128() = [integer()]. Note: the number of elements is four (4).
 %% @type intstate() = [w128()].
-%% 
+
 %% Recursion algorithm for gen_rand_all and gen_rand_list32:
 %%
 %% a[]: output array (of S w128() elements)
@@ -181,72 +191,73 @@ nif_stub_error(Line) ->
 %% i.e., 
 %% ni[0] = a[S-N], ni[1] = a[S-N+1], ... ni[N-1] = a[S-1].
 
-%% @spec gen_rand_all(intstate()) - > intstate().
-%% @doc filling the internal state array with SFMT PRNG
+%% @spec gen_rand_all(intstate()) -> intstate()
+%% @doc filling the internal state array with SFMT PRNG.
 
 gen_rand_all(_) -> ?nif_stub.
 
-%% @spec gen_rand_list32(integer(), intstate()) - > {[integer()], intstate()}.
+%% @spec gen_rand_list32(integer(), intstate()) -> {[integer()], intstate()}
 %% @doc generating the 32-bit integer list of PRNG,
 %%      where length of the list is Size
-%%      with the updated internal state
+%%      with the updated internal state.
 
 gen_rand_list32(_, _) -> ?nif_stub.
 
-%% @spec gen_rand_list_float(integer(), intstate()) - > {[float()], intstate()}.
-%% @doc generating a list of uniform floats, 0.0 =< Float =< 1.0
+%% @spec gen_rand_list_float(integer(), intstate()) -> {[float()], intstate()}
+%% @doc generating a list of uniform floats of [0.0, 1.0]
 %%      where length of the list is Size
-%%      with the updated internal state
+%%      with the updated internal state.
 
 gen_rand_list_float(_, _) -> ?nif_stub.
 
-%% @spec get_idstring() -> string().
-%% @doc returns SFMT identification string
-%% @note NIFnized
+%% @spec get_idstring() -> string()
+%% @doc returns SFMT identification string.
+%% (Note: NIFnized)
 
 get_idstring() -> ?nif_stub.
 
-%% @spec get_min_array_size32() -> integer().
-%% @doc returns array size of internal state
-%% @note NIFnized
+%% @spec get_min_array_size32() -> integer()
+%% @doc returns array size of internal state.
+%% (Note: NIFnized)
 
 get_min_array_size32() -> ?nif_stub.
 
-%% @spec init_gen_rand(integer()) -> intstate().
-%% @doc generates an internal state from an integer seed
-%% @note NIFnized
+%% @spec init_gen_rand(integer()) -> intstate()
+%% @doc generates an internal state from an integer seed.
+%% (Note: NIFnized)
 
 init_gen_rand(_) -> ?nif_stub.
 
-%% @spec init_by_list32([integer()]) -> intstate().
-%% @doc generates an internal state from a list of 32-bit integers
-%% @note NIFnized
+%% @spec init_by_list32([integer()]) -> intstate()
+%% @doc generates an internal state from a list of 32-bit integers.
+%% (Note: NIFnized)
 
 init_by_list32(_) -> ?nif_stub.
 
-%% @spec randlist_to_intstate(randlist()) -> intstate().
-%% @doc converts a valid internal state from a list of N32 32-bit integers
-%% @note NIFnized
+%% @spec randlist_to_intstate(randlist()) -> intstate()
+%% @doc converts a valid internal state from a list of N32 32-bit integers.
+%% (Note: NIFnized)
 
 randlist_to_intstate(_) -> ?nif_stub.
 
-%% @spec instate_to_randlist(intstate()) -> randlist().
-%% @doc converts an internal state table to a list of N32 32-bit integers
-%% @note NIFnized
+%% @spec intstate_to_randlist(intstate()) -> randlist()
+%% @doc converts an internal state table to a list of N32 32-bit integers.
+%% (Note: NIFnized)
 
 intstate_to_randlist(_) -> ?nif_stub.
 
-%% @spec instate_to_randlist(intstate()) -> [float()].
-%% @doc converts an internal state table to a list of [0,1] float
-%% @note NIFnized
+%% @spec intstate_to_randlist_float(intstate()) -> [float()]
+%% @doc converts an internal state table to a list of [0.0, 1.0] float.
+%% (Note: NIFnized)
 
 intstate_to_randlist_float(_) -> ?nif_stub.
 
-%% Note: ran_sfmt() -> {randlist(), intstate()}
+%% @type ran_sfmt() = {randlist(), intstate()}.
+%% This type represents an internal state for random number generator.
 
-%% @spec gen_rand32(ran_sfmt()|intstate) -> {integer(), ran_sfmt()}.
-%% @doc generates a 32-bit random number from the given ran_sfmt()
-%% @note once nifnized, but the speed of list-based code is faster
+%% @spec gen_rand32(ran_sfmt()|intstate) -> {integer(), ran_sfmt()}
+%% @doc generates a 32-bit random number from the given ran_sfmt().
+%% (Note: once nifnized, but the speed of list-based code is faster)
 
 gen_rand32({[H|T], I}) ->
     {H, {T, I}};
@@ -257,10 +268,10 @@ gen_rand32(I) when is_binary(I) ->
     [H|T] = intstate_to_randlist(I2),
     {H, {T, I2}}.
 
-%% @spec gen_rand_float(ran_sfmt()|intstate()) -> {float(), ran_sfmt()).
+%% @spec gen_rand_float(ran_sfmt()|intstate()) -> {float(), ran_sfmt()}
 %% @doc generates a float random number from the given ran_sfmt()
-%% where the float is 0.0 =< float() =< 1.0
-%% @note once nifnized, but the speed of list-based code is faster
+%% where the range is [0.0, 1.0].
+%% (Note: once nifnized, but the speed of list-based code is faster)
 
 gen_rand_float({[H|T], I}) ->
     {H, {T, I}};
@@ -279,14 +290,14 @@ gen_rand_float(I) when is_binary(I) ->
 -define(FLOAT_CONST, (1.0/4294967295.0)).
 
 %% @spec seed0() -> ran_sfmt()
-%% @doc Returns the default internal state
+%% @doc Returns the default internal state.
 
 seed0() ->
     I = init_gen_rand(1234),
     {?N32, I}.
 
 %% @spec seed() -> ran_sfmt()
-%% @doc Initialize the process dictionary with seed0/0
+%% @doc Initialize the process dictionary with seed0/0.
 
 seed() ->
     Seed = seed0(),
@@ -299,7 +310,7 @@ seed() ->
 %% @doc Puts the seed computed from the given integer list by init_gen_rand/1
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
-%%      and returns the old internal state
+%%      and returns the old internal state.
 
 seed(N) when is_integer(N) ->
     I = init_gen_rand(N),
@@ -310,7 +321,7 @@ seed(N) when is_integer(N) ->
 %% @doc Puts the seed computed from the given integer list by init_by_list32/1
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
-%%      and returns the old internal state
+%%      and returns the old internal state.
 
 seed(L) when is_list(L), is_integer(hd(L)) ->
     I = init_by_list32(L),
@@ -321,7 +332,7 @@ seed(L) when is_list(L), is_integer(hd(L)) ->
 %% @doc Puts the seed computed from given three integers as a tuple
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
-%%      and returns the old internal state
+%%      and returns the old internal state.
 
 seed({A1, A2, A3}) ->
     seed([A1, A2, A3]).
@@ -330,15 +341,15 @@ seed({A1, A2, A3}) ->
 %% @doc Puts the seed computed from given three integers
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
-%%      and returns the old internal state
+%%      and returns the old internal state.
 
 seed(A1, A2, A3) ->
     seed([A1, A2, A3]).
 
 %% @spec uniform() -> float()
 %% @doc Returns a uniformly-distributed float random number X
-%%      where (X >= 0.0) and (X =< 1.0)
-%%      and updates the internal state in the process dictionary
+%%      where X is in the range of [0.0, 1.0]
+%%      and updates the internal state in the process dictionary.
 
 uniform() -> 
     % if random number list doesn't exist
@@ -355,31 +366,33 @@ uniform() ->
 
 %% @spec uniform(N) -> integer()
 %% @doc Returns a uniformly-distributed integer random number X
-%%      where (X >= 1) and (X =< N)
-%%      and updates the internal state in the process dictionary
+%%      where X is in the range of [1..N]
+%%      and updates the internal state in the process dictionary.
 
 uniform(N) when N >= 1 ->
     trunc(uniform() * N) + 1.
 
-%% @spec uniform(ran_sfmt()) -> float()
+%% @spec uniform_s(ran_sfmt()) -> float()
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
-%%      where (X >= 0.0) and (X =< 1.0)
 %%      and a new state
+%%      where X is in the range of [0.0, 1.0].
 
 uniform_s(RS) ->
     gen_rand_float(RS).
 
-%% @spec uniform(integer(), ran_sfmt()) -> (integer(), ran_sfmt()} 
-%%      Returns a uniformly-distributed integer random number X
-%%      where (X >= 1) and (X =< N)
+%% @spec uniform_s(integer(), ran_sfmt()) -> {integer(), ran_sfmt()} 
+%% @doc Returns a uniformly-distributed integer random number X
 %%      and a new state
+%%      where X is in the range of [1..N].
 
 uniform_s(N, RS) ->
     {X, NRS} = gen_rand_float(RS),
     {trunc(X * N) + 1, NRS}.
     
 %% On-load callback
+
+%% @doc Loading NIF shared library file, used at the on-load callback.
 
 load_nif() ->
     PrivDir = case code:priv_dir(?MODULE) of

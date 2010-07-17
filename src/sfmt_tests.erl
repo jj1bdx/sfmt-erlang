@@ -1,4 +1,14 @@
-%% Module sfmt_tests (testing sfmt module with EUnit)
+%% @author Kenji Rikitake <kenji.rikitake@acm.org>
+%% @author Mutsuo Saito
+%% @author Makoto Matsumoto
+%% @author Dan Gudmundsson
+%% @doc SIMD-oriented Fast Mersenne Twister (SFMT) EUnit testing functions.
+%% The module provides EUnit testing functions for the SFMT functions.
+%% @reference <a href="http://github.com/jj1bdx/sfmt-erlang">GitHub page
+%% for sfmt-erlang</a>
+%% @copyright 2010 Kenji Rikitake and Kyoto University.
+%% Copyright (c) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and
+%% Hiroshima University.
 
 %% Copyright (c) 2010 Kenji Rikitake and Kyoto University. All rights
 %% reserved.
@@ -86,6 +96,10 @@ test_speed_orig_uniform(P, Q) ->
     {_, T} = statistics(runtime),
     T.
 
+%% @doc running speed test for 1000 times of
+%% 100000 calls for gen_rand32/1, uniform_s/1,
+%% and random:uniform_s/1.
+
 test_speed() ->
     io:format("~p~n", 
 	      [
@@ -100,7 +114,7 @@ test_speed() ->
 
 -include_lib("eunit/include/eunit.hrl").
 
-%% @spec gen_rand32 and gen_rand_float API tests
+%% @doc gen_rand32 and gen_rand_float API tests
 
 gen_rand_tests() ->
     I0 = sfmt:init_gen_rand(1234),
@@ -122,7 +136,7 @@ test_rec1(I, Acc, RS) ->
      {Val, RS2} = sfmt:gen_rand32(RS),
      test_rec1(I - 1, [Val | Acc], RS2).
 
-%% @spec Value tests of the first 10000 random numbers 
+%% @doc  Value tests of the first 10000 random numbers 
 %%       initialized by init_gen_rand/1 by gen_rand_list32/2.
 
 value_tests_1() ->
@@ -138,7 +152,7 @@ value_tests_1() ->
     {Outarray4, _RS5} = test_rec1(10000, [], RS4),
     ?assertEqual(Outarray4, Outarray2).
 
-%% @spec Value tests of the first 10000 random numbers 
+%% @doc  Value tests of the first 10000 random numbers 
 %%       initialized by init_by_list32/1 by gen_rand_list32/2.
 
 value_tests_2() ->
@@ -155,7 +169,7 @@ value_tests_2() ->
     {Outarray4, _RS5} = test_rec1(10000, [], RS4),
     ?assertEqual(Outarray4, Outarray2).
 
-%% simple testing function as used in EUnit
+%% @doc simple testing function as used in EUnit
 
 simple_test_() -> 
     [
@@ -164,7 +178,7 @@ simple_test_() ->
      ?_assertMatch(ok, value_tests_2())
     ].
 
-%% test value definitions
+%% @doc test value definitions (as in SFMT.19937.out.txt)
 
 test_refval() ->
     %% values taken from SFMT.19937.out.txt of SFMT-1.3.3
