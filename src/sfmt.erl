@@ -144,22 +144,39 @@
 nif_stub_error(Line) ->
     erlang:nif_error({nif_not_loaded, module, ?MODULE, line, Line}).
 
-%% internal state format: 
+%% @type w128() = [integer()]. 
+%% An 128-bit integer represented by four 32-bit unsigned integers.
+%% Note: the number of elements is four (4).
+
+%% @type randlist() = [integer()]. 
+%% A list of N 128-bit integers for the portable representation of
+%% the internal state table,
+%% represented as multiple concatenation of four 32-bit unsigned integers.
+%% Note: the number of elements is the same as N32 (624).
+
+%% @type intstate() = binary().
+%% A binary representation of N 128-bit integers for the internal state table,
+%% represented as multiple concatenation of four 32-bit unsigned integers.
+%% Note: the number of the binary bytes is the same as N32*4 (2496).
+%% Note well: intstate() is <em>not</em> portable among different host architectures
+%% due to the endianness issue.
+%% Use randlist() for transferring the internal state between the processes.
+%%
+%% The Internal state format in details:
 %% list of 32-bit unsigned ints,
 %% with the following format of
 %% little-endian 128-bit format
-%% e.g., a 128-bit X = [X0, X1, X2, X3]
+%% e.g., a 128-bit <code>X = [X0, X1, X2, X3]</code>
 %% where in C
+%% <pre><code>
 %% /* begin */
 %% union X {
 %% 	uint32_t u[4];
 %% };
 %% /* end */
-%% and 128-bit list is a flat concatenation
-%% of 128-bit number
-
-%% @type w128() = [integer()]. Note: the number of elements is four (4).
-%% @type intstate() = [w128()].
+%% </code></pre>
+%% and a 128-bit list is a flat concatenation
+%% of 128-bit numbers.
 
 %% Recursion algorithm for gen_rand_all and gen_rand_list32:
 %%
