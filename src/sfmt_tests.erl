@@ -155,9 +155,9 @@ value_tests_2() ->
     {Outarray4, _RS5} = test_rec1(10000, [], RS4),
     ?assertEqual(Outarray4, Outarray2).
 
-%% simple testing function as used in rebar
+%% simple testing function as used in EUnit
 
-simple_test() -> 
+simple_test_() -> 
     [
      ?_assertMatch(ok, gen_rand_tests()),
      ?_assertMatch(ok, value_tests_1()),
