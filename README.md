@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.3.3_RELEASE 16-JUL-2010
+* Version 0.3.4_RELEASE 17-JUL-2010
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -30,6 +30,7 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 * `gen_rand32/1` and `gen_rand_float/1` use Erlang lists (Dan Gudmudsson showed the list version is faster)
 * NOTE: SSE2 code and options removed due to causing crash of Erlang BEAM
   (and even if the code enabled the performance increase is minimal)
+* The version number of this NIF is 101 (see `NIF_LOAD_INFO` macro value)
 
 # Tested platforms
 
@@ -48,6 +49,16 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 The build script is Basho's rebar at <http://hg.basho.com/rebar/> 
 (which requires Erlang/OTP to run)
 
+# Testing
+
+* For unit testing with EUnit, do
+
+    make eunit
+
+* For testing the speed of 1000 times of invoking 100000 `gen_rand32/1` function, do 
+
+    make speed
+
 # API compatible with the random module
 
     seed0, seed/0, seed/3, uniform/0, uniform/1, uniform_s/1, uniform_s/3 
@@ -61,7 +72,7 @@ made the code ~50% faster
 # TODO
 
 * Documentation
-* NIF reload/upgrade/upload code fix; not yet fully tested
+* Code upgrading/reloading untested yet
 
 # Code authors:
 
