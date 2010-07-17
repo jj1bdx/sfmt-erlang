@@ -157,10 +157,12 @@ value_tests_2() ->
 
 %% simple testing function as used in rebar
 
-simple_test() ->
-    ?assertMatch(ok, gen_rand_tests()),
-    ?assertMatch(ok, value_tests_1()),
-    ?assertMatch(ok, value_tests_2()).
+simple_test() -> 
+    [
+     ?_assertMatch(ok, gen_rand_tests()),
+     ?_assertMatch(ok, value_tests_1()),
+     ?_assertMatch(ok, value_tests_2())
+    ].
 
 %% test value definitions
 
