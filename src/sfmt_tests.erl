@@ -1,4 +1,4 @@
-%% Module sfmt_test (testing sfmt module)
+%% Module sfmt_tests (testing sfmt module with EUnit)
 
 %% Copyright (c) 2010 Kenji Rikitake and Kyoto University. All rights
 %% reserved.
@@ -35,16 +35,73 @@
 
 -module(sfmt_tests).
 
--include_lib("eunit/include/eunit.hrl").
-
--define(N32, 624).
-
 -export([
-	 test_speed/0,
-	 simple_test/0
+	 test_speed/0
 	 ]).
 
+test_speed_rand_rec1(0, _, _) ->
+    ok;
+test_speed_rand_rec1(X, Q, I) ->
+    {_, I2} = sfmt:gen_rand_list32(Q, I),
+    test_speed_rand_rec1(X - 1, Q, I2).
+
+test_speed_rand(P, Q) ->
+    statistics(runtime),
+    I = sfmt:init_gen_rand(1234),
+    ok = test_speed_rand_rec1(P, Q, I),
+    {_, T} = statistics(runtime),
+    T.
+
+test_speed_sfmt_uniform_rec1(Acc, 0, _, _, _) ->
+    lists:reverse(Acc),
+    ok;
+test_speed_sfmt_uniform_rec1(Acc, X, 0, R, I) ->
+    lists:reverse(Acc),
+    test_speed_sfmt_uniform_rec1([], X - 1, R, R, I);
+test_speed_sfmt_uniform_rec1(Acc, X, Q, R, I) ->
+    {F, I2} = sfmt:uniform_s(I),
+    test_speed_sfmt_uniform_rec1([F|Acc], X, Q - 1, R, I2).
+
+test_speed_sfmt_uniform(P, Q) ->
+    statistics(runtime),
+    I = sfmt:seed(),
+    ok = test_speed_sfmt_uniform_rec1([], P, Q, Q, I),
+    {_, T} = statistics(runtime),
+    T.
+
+test_speed_orig_uniform_rec1(Acc, 0, _, _, _) ->
+    lists:reverse(Acc),
+    ok;
+test_speed_orig_uniform_rec1(Acc, X, 0, R, I) ->
+    lists:reverse(Acc),
+    test_speed_orig_uniform_rec1([], X - 1, R, R, I);
+test_speed_orig_uniform_rec1(Acc, X, Q, R, I) ->
+    {F, I2} = random:uniform_s(I),
+    test_speed_orig_uniform_rec1([F|Acc], X, Q - 1, R, I2).
+
+test_speed_orig_uniform(P, Q) ->
+    statistics(runtime),
+    I = random:seed(),
+    ok = test_speed_orig_uniform_rec1([], P, Q, Q, I),
+    {_, T} = statistics(runtime),
+    T.
+
+test_speed() ->
+    io:format("~p~n", 
+	      [
+	       {test_speed_rand(1000, 100000),
+		test_speed_sfmt_uniform(1000, 100000),
+		test_speed_orig_uniform(1000, 100000)}
+	      ]).
+
+%% EUnit test functions
+
+-ifdef(TEST).
+
+-include_lib("eunit/include/eunit.hrl").
+
 %% @spec gen_rand32 and gen_rand_float API tests
+
 gen_rand_tests() ->
     I0 = sfmt:init_gen_rand(1234),
     {N1, I1} = sfmt:gen_rand32(I0),
@@ -98,68 +155,14 @@ value_tests_2() ->
     {Outarray4, _RS5} = test_rec1(10000, [], RS4),
     ?assertEqual(Outarray4, Outarray2).
 
-test_sfmt_check() ->
-    [gen_rand_tests(), value_tests_1(), value_tests_2()].
-
-test_speed_rand_rec1(0, _, _) ->
-    ok;
-test_speed_rand_rec1(X, Q, I) ->
-    {_, I2} = sfmt:gen_rand_list32(Q, I),
-    test_speed_rand_rec1(X - 1, Q, I2).
-
-test_speed_rand(P, Q) ->
-    statistics(runtime),
-    I = sfmt:init_gen_rand(1234),
-    ?assertMatch(ok, test_speed_rand_rec1(P, Q, I)),
-    {_, T} = statistics(runtime),
-    T.
-
-test_speed_sfmt_uniform_rec1(Acc, 0, _, _, _) ->
-    lists:reverse(Acc),
-    ok;
-test_speed_sfmt_uniform_rec1(Acc, X, 0, R, I) ->
-    lists:reverse(Acc),
-    test_speed_sfmt_uniform_rec1([], X - 1, R, R, I);
-test_speed_sfmt_uniform_rec1(Acc, X, Q, R, I) ->
-    {F, I2} = sfmt:uniform_s(I),
-    test_speed_sfmt_uniform_rec1([F|Acc], X, Q - 1, R, I2).
-
-test_speed_sfmt_uniform(P, Q) ->
-    statistics(runtime),
-    I = sfmt:seed(),
-    ?assertMatch(ok, test_speed_sfmt_uniform_rec1([], P, Q, Q, I)),
-    {_, T} = statistics(runtime),
-    T.
-
-test_speed_orig_uniform_rec1(Acc, 0, _, _, _) ->
-    lists:reverse(Acc),
-    ok;
-test_speed_orig_uniform_rec1(Acc, X, 0, R, I) ->
-    lists:reverse(Acc),
-    test_speed_orig_uniform_rec1([], X - 1, R, R, I);
-test_speed_orig_uniform_rec1(Acc, X, Q, R, I) ->
-    {F, I2} = random:uniform_s(I),
-    test_speed_orig_uniform_rec1([F|Acc], X, Q - 1, R, I2).
-
-test_speed_orig_uniform(P, Q) ->
-    statistics(runtime),
-    I = random:seed(),
-    ok = test_speed_orig_uniform_rec1([], P, Q, Q, I),
-    {_, T} = statistics(runtime),
-    T.
-
-test_speed() ->
-    io:format("~p~n", 
-	      [[test_sfmt_check(),
-		test_speed_rand(1000, 10000),
-		test_speed_sfmt_uniform(1000, 10000),
-		test_speed_orig_uniform(1000, 10000)
-	       ]]).
+%% simple testing function as used in rebar
 
 simple_test() ->
-    ?assertEqual([ok, ok, ok], test_sfmt_check()).
+    ?assertMatch(ok, gen_rand_tests()),
+    ?assertMatch(ok, value_tests_1()),
+    ?assertMatch(ok, value_tests_2()).
 
-%% internal functions
+%% test value definitions
 
 test_refval() ->
     %% values taken from SFMT.19937.out.txt of SFMT-1.3.3
@@ -569,5 +572,7 @@ test_refval() ->
 	 2750138839,3518055702,733072558,4169325400,788493625
 	],
     {Refrand, Refarray}.
+
+-endif. % TEST
 
 %% end of module
