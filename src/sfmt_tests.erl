@@ -33,99 +33,73 @@
 %% (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 %% OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
--module(sfmt_test).
+-module(sfmt_tests).
+
+-include_lib("eunit/include/eunit.hrl").
 
 -define(N32, 624).
 
 -export([
-	 test_speed_rand/2,
-	 test_speed_sfmt_uniform/2,
-	 test_speed_orig_uniform/2,
-	 test/0
+	 test_speed/0,
+	 simple_test/0
 	 ]).
 
+%% @spec gen_rand32 and gen_rand_float API tests
+gen_rand_tests() ->
+    I0 = sfmt:init_gen_rand(1234),
+    {N1, I1} = sfmt:gen_rand32(I0),
+    ?assert(is_integer(N1)),
+    {N2, _I2} = sfmt:gen_rand32(I1),
+    ?assert(is_integer(N2)),
+    {F3, I3} = sfmt:gen_rand_float(I0),
+    ?assert(is_float(F3)),
+    {F4, _I4} = sfmt:gen_rand_float(I3),
+    ?assert(is_float(F4)),
+    {Outarray0, _I5} = sfmt:gen_rand_list_float(10, I0),
+    ?assert(is_float(hd(Outarray0))),
+    ?assertMatch(10, length(Outarray0)).
+
 test_rec1(0, Acc, RS) ->
-    {lists:reverse(Acc), RS};
+     {lists:reverse(Acc), RS};
 test_rec1(I, Acc, RS) ->
-    {Val, RS2} = sfmt:gen_rand32(RS),
-    test_rec1(I - 1, [Val | Acc], RS2).
+     {Val, RS2} = sfmt:gen_rand32(RS),
+     test_rec1(I - 1, [Val | Acc], RS2).
+
+%% @spec Value tests of the first 10000 random numbers 
+%%       initialized by init_gen_rand/1 by gen_rand_list32/2.
+
+value_tests_1() ->
+    {Refrand, _Refarray} = test_refval(),
+    Int1 = sfmt:init_gen_rand(1234),
+    {Outarray1, Int2} = sfmt:gen_rand_list32(10000, Int1),
+    ?assertEqual(Refrand, lists:reverse(
+			    lists:nthtail(10000 - length(Refrand),
+					  lists:reverse(Outarray1)))),
+    {Outarray2, _Int3} = sfmt:gen_rand_list32(10000, Int2),
+    {Outarray3, RS4} = test_rec1(10000, [], {[], Int1}),
+    ?assertEqual(Outarray3, Outarray1),
+    {Outarray4, _RS5} = test_rec1(10000, [], RS4),
+    ?assertEqual(Outarray4, Outarray2).
+
+%% @spec Value tests of the first 10000 random numbers 
+%%       initialized by init_by_list32/1 by gen_rand_list32/2.
+
+value_tests_2() ->
+    {_Refrand, Refarray} = test_refval(),
+    Int1 = sfmt:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0]),
+    {Outarray1, Int2} = sfmt:gen_rand_list32(10000, Int1),
+    ?assertEqual(Refarray,
+		 lists:reverse(
+		   lists:nthtail(10000 - length(Refarray),
+				 lists:reverse(Outarray1)))),
+    {Outarray2, _Int3} = sfmt:gen_rand_list32(10000, Int2),
+    {Outarray3, RS4} = test_rec1(10000, [], {[], Int1}),
+    ?assertEqual(Outarray3, Outarray1),
+    {Outarray4, _RS5} = test_rec1(10000, [], RS4),
+    ?assertEqual(Outarray4, Outarray2).
 
 test_sfmt_check() ->
-    {Refrand, Refarray} = test_refval(),
-    Int1 = sfmt:init_gen_rand(1234),
-    
-    %% Api tests
-    case sfmt:gen_rand32(Int1) of
-	{_I1, S0} when is_integer(_I1) ->
-	    case sfmt:gen_rand32(S0) of
-		{_I2, _S1} when is_integer(_I2) ->
-		    ok
-	    end
-    end,
-    
-    case sfmt:gen_rand_float(Int1) of
-	{_F1, S2} when is_float(_F1) ->
-	    case sfmt:gen_rand_float(S2) of
-		{_F2, _S3} when is_float(_F2) ->
-		    ok
-	    end
-    end,
-    
-    {Outarray0, _Int1} = sfmt:gen_rand_list_float(10, Int1),
-    true = is_float(hd(Outarray0)),
-    10 = length(Outarray0),
-
-    {Outarray1, Int2} = sfmt:gen_rand_list32(10000, Int1),
-    {Outarray2, _Int3} = sfmt:gen_rand_list32(10000, Int2),
-    case Refrand =/= lists:reverse(
-		       lists:nthtail(10000 - length(Refrand),
-				     lists:reverse(Outarray1))) of
-	true ->
-	    erlang:error({error_Refrand_Outarray1_testfailed});
-	false ->
-	    io:format("Refrand to Outarray1 test passed~n", [])
-    end,
-    Int4 = sfmt:init_gen_rand(1234),
-    {Outarray3, RS5} = test_rec1(10000, [], {?N32, Int4}),
-    case Outarray3 =/= Outarray1 of
-	true ->
-	    erlang:error({error_Outarray3_Outarray1_testfailed});
-	false ->
-	    io:format("Outarray3 to Outarray1 test passed~n", [])
-    end,
-    {Outarray4, _RS6} = test_rec1(10000, [], RS5),
-    case Outarray4 =/= Outarray2 of
-	true ->
-	    erlang:error({error_Outarray4_Outarray2_testfailed});
-	false ->
-	    io:format("Outarray4 to Outarray2 test passed~n", [])
-    end,
-    Int7 = sfmt:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0]),
-    {Outarray5, Int8} = sfmt:gen_rand_list32(10000, Int7),
-    {Outarray6, _Int9} = sfmt:gen_rand_list32(10000, Int8),
-    case Refarray =/= lists:reverse(
-		       lists:nthtail(10000 - length(Refarray),
-				     lists:reverse(Outarray5))) of
-	true ->
-	    erlang:error({error_Refarray_Outarray5_testfailed});
-	false ->
-	    io:format("Refarray to Outarray5 test passed~n", [])
-    end,
-    Int10 = sfmt:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0]),
-    {Outarray7, RS11} = test_rec1(10000, [], {?N32, Int10}),
-    case Outarray7 =/= Outarray5 of
-	true ->
-	    erlang:error({error_Outarray7_Outarray5_testfailed});
-	false ->
-	    io:format("Outarray7 to Outarray5 test passed~n", [])
-    end,
-    {Outarray8, _RS12} = test_rec1(10000, [], RS11),
-    case Outarray8 =/= Outarray6 of
-	true ->
-	    erlang:error({error_Outarray8_Outarray6_testfailed});
-	false ->
-	    io:format("Outarray8 to Outarray6 test passed~n", [])
-    end.
+    [gen_rand_tests(), value_tests_1(), value_tests_2()].
 
 test_speed_rand_rec1(0, _, _) ->
     ok;
@@ -136,16 +110,9 @@ test_speed_rand_rec1(X, Q, I) ->
 test_speed_rand(P, Q) ->
     statistics(runtime),
     I = sfmt:init_gen_rand(1234),
-    ok = test_speed_rand_rec1(P, Q, I),
-    statistics(runtime).
-
-test_speed_timer() -> 
-    timer:tc(?MODULE, test_speed_rand, [100, 100000]).
-
-test_speed() ->
-    io:format("100 * sfmt:gen_rand_list32(100000, i)~n~p~n",
-	      [test_speed_timer()]).
-
+    ?assertMatch(ok, test_speed_rand_rec1(P, Q, I)),
+    {_, T} = statistics(runtime),
+    T.
 
 test_speed_sfmt_uniform_rec1(Acc, 0, _, _, _) ->
     lists:reverse(Acc),
@@ -160,15 +127,9 @@ test_speed_sfmt_uniform_rec1(Acc, X, Q, R, I) ->
 test_speed_sfmt_uniform(P, Q) ->
     statistics(runtime),
     I = sfmt:seed(),
-    ok = test_speed_sfmt_uniform_rec1([], P, Q, Q, I),
-    statistics(runtime).
-
-test_speed_sfmt_uniform_timer() -> 
-    timer:tc(?MODULE, test_speed_sfmt_uniform, [100, 100000]).
-
-test_speed_sfmt_uniform() ->
-    io:format("100 * sfmt:uniform_s(100000)~n~p~n",
-	      [test_speed_sfmt_uniform_timer()]).
+    ?assertMatch(ok, test_speed_sfmt_uniform_rec1([], P, Q, Q, I)),
+    {_, T} = statistics(runtime),
+    T.
 
 test_speed_orig_uniform_rec1(Acc, 0, _, _, _) ->
     lists:reverse(Acc),
@@ -184,21 +145,21 @@ test_speed_orig_uniform(P, Q) ->
     statistics(runtime),
     I = random:seed(),
     ok = test_speed_orig_uniform_rec1([], P, Q, Q, I),
-    statistics(runtime).
+    {_, T} = statistics(runtime),
+    T.
 
-test_speed_orig_uniform_timer() -> 
-    timer:tc(?MODULE, test_speed_orig_uniform, [100, 100000]).
+test_speed() ->
+    io:format("~p~n", 
+	      [[test_sfmt_check(),
+		test_speed_rand(1000, 10000),
+		test_speed_sfmt_uniform(1000, 10000),
+		test_speed_orig_uniform(1000, 10000)
+	       ]]).
 
-test_speed_orig_uniform() ->
-    io:format("100 * random:uniform_s(100000)~n~p~n",
-	      [test_speed_orig_uniform_timer()]).
+simple_test() ->
+    ?assertEqual([ok, ok, ok], test_sfmt_check()).
 
-
-test() ->
-    test_sfmt_check(),
-    test_speed(),
-    test_speed_sfmt_uniform(),
-    test_speed_orig_uniform().
+%% internal functions
 
 test_refval() ->
     %% values taken from SFMT.19937.out.txt of SFMT-1.3.3
@@ -609,9 +570,4 @@ test_refval() ->
 	],
     {Refrand, Refarray}.
 
-
-	    
-	
-
-    
-    
+%% end of module
