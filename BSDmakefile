@@ -3,7 +3,8 @@
 
 .PHONY: ${.TARGETS}
 
-.for CMD in ${.TARGETS}
-${CMD}:
-	@gmake ${CMD}
-.endfor
+all:
+	@gmake all
+
+.DEFAULT:
+	@gmake ${.TARGET}
