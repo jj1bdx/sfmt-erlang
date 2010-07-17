@@ -124,6 +124,9 @@
 -define(BITMASK32, 16#ffffffff).
 -define(BITMASK64, 16#ffffffffffffffff).
 
+%% NIF version number (on the load_info argument of load_nif/2)
+-define(NIF_LOAD_INFO, 101).
+
 %% NIF loading error macros
 %% (see the crypto module's crypto.c)
 -define(nif_stub, nif_stub_error(?LINE)).
@@ -387,6 +390,6 @@ load_nif() ->
 		  Path ->
 		      Path
 	      end,
-    erlang:load_nif(filename:join(PrivDir, sfmt_nif),0).
+    erlang:load_nif(filename:join(PrivDir, sfmt_nif), ?NIF_LOAD_INFO).
 
 %% end of the module    

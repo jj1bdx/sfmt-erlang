@@ -134,6 +134,9 @@ typedef struct W128_T w128_t;
 /* float multiplier */
 #define FLOAT_CONST (1.0/4294967295.0) 
 
+/* version number for load_info */
+#define NIF_LOAD_INFO (101)
+
 /* prototypes */
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info);
 static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info);
@@ -163,6 +166,9 @@ static int get_min_array_size32(void);
 static void init_gen_rand(uint32_t seed, w128_t *intstate);
 static void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate);
 
+/* number of users of this dynamic library */
+static int lib_refc = 0;
+
 static ErlNifFunc nif_funcs[] = {
     {"randlist_to_intstate", 1, sfmt_nif_randlist_to_intstate},
     {"intstate_to_randlist", 1, sfmt_nif_intstate_to_randlist},
@@ -186,8 +192,23 @@ static ERL_NIF_TERM atom_error3;
 static ERL_NIF_TERM atom_error_sfmt_nomem;
 static ERL_NIF_TERM atom_ok;
 
+/* see is_ok_load_info() in c_src/crypto.c of the crypto module */
+static int check_load_info(ErlNifEnv* env, ERL_NIF_TERM load_info)
+{
+    int i;
+
+    /* check the version number of the load info */
+    return enif_get_int(env,load_info,&i) && 
+	i == NIF_LOAD_INFO;
+}
+
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 {
+    /* checking version number on the argument load_info */
+    if (!check_load_info(env, load_info)) {
+	return -1;
+    }
+
     /* initializing atoms */
     atom_error = enif_make_atom(env,"error");
     atom_error1 = enif_make_atom(env,"error1");
@@ -196,23 +217,69 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     atom_error_sfmt_nomem = enif_make_atom(env,"error_sfmt_nomem");
     atom_ok = enif_make_atom(env,"ok");
 
+    *priv_data = NULL;
+
+    /* increase the reference count of this library */
+    lib_refc++;
+
     return 0;
 }
 
 static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 {
+    /* Don't know how to do this */
+    if (*priv_data != NULL) {
+	return -1; 
+    }
+
+    /* No support for real library upgrade.
+       The tricky thing is to know
+       when to (re)set the callbacks for allocation and locking. */
+    if (lib_refc == 0) {
+	return -2;
+    }
+
+    /* checking version number on the argument load_info */
+    if (!check_load_info(env, load_info)) {
+	return -1;
+    }
 
     return 0;
 }
 
 static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info)
 {
+    int i;
+
+    /* Don't know how to do this */
+    if (*old_priv_data != NULL) {
+	return -1;
+    }
+
+    /* reloading first */
+    i = reload(env, priv_data, load_info);
+
+    /* return the error code from reload() if necessary */
+    if (0 != i) {
+	return i;
+    }
+
+    /* increase the reference count of this library */
+    lib_refc++;
 
     return 0;
 }
 
 static void unload(ErlNifEnv* env, void* priv_data)
 {
+    /* this is yet a skeleton code */
+    /* perform resource unlock and deallocation here,
+       but in this module no resource are retained
+       outside of the scope of each function */
+    if (--lib_refc <= 0) {
+	/* do nothing */
+    }
+    /*else NIF library still used by other (new) module code */
 }
 
 static ERL_NIF_TERM
