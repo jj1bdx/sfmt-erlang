@@ -58,7 +58,9 @@
 	 uniform_s/2
 	 ]).
 
-%% Internal
+%% Internal conversion between the internal state table
+%% and the external representation of randlist
+%% (i.e., a list of N32 integer elements)
 -export([randlist_to_intstate/1,   
 	 intstate_to_randlist/1,
 	 intstate_to_randlist_float/1]).
@@ -122,6 +124,13 @@
 -define(BITMASK32, 16#ffffffff).
 -define(BITMASK64, 16#ffffffffffffffff).
 
+%% NIF loading error macros
+%% (see the crypto module's crypto.c)
+-define(nif_stub, nif_stub_error(?LINE)).
+
+nif_stub_error(Line) ->
+    erlang:nif_error({nif_not_loaded, module, ?MODULE, line, Line}).
+
 %% internal state format: 
 %% list of 32-bit unsigned ints,
 %% with the following format of
@@ -138,21 +147,7 @@
 %%
 %% @type w128() = [integer(), integer(), integer(), integer()].
 %% @type intstate() = [w128()].
-
-%% @spec rshift128(w128(), integer()) -> w128().
-%% @doc SIMD 128-bit right shift simulation for little endian SIMD
-%%      of Shift*8 bits
-%% @note no longer required
-
-%% @spec lshift128(w128(), integer()) -> w128().
-%% @doc SIMD 128-bit left shift simulation for little endian SIMD
-%%      of Shift*8 bits
-%% @note no longer required
-
-%% @spec do_recursion(w128(), w128(), w128(), w128()) -> w128().
-%% @doc the recursion formula operation of SFMT
-%% @note no longer required
-
+%% 
 %% Recursion algorithm for gen_rand_all and gen_rand_list32:
 %%
 %% a[]: output array (of S w128() elements)
@@ -186,55 +181,65 @@
 %% @spec gen_rand_all(intstate()) - > intstate().
 %% @doc filling the internal state array with SFMT PRNG
 
-gen_rand_all(_) -> error_nifnized.
+gen_rand_all(_) -> ?nif_stub.
 
 %% @spec gen_rand_list32(integer(), intstate()) - > {[integer()], intstate()}.
 %% @doc generating the 32-bit integer list of PRNG,
 %%      where length of the list is Size
 %%      with the updated internal state
 
-gen_rand_list32(_, _) -> error_nifnized.
+gen_rand_list32(_, _) -> ?nif_stub.
 
 %% @spec gen_rand_list_float(integer(), intstate()) - > {[float()], intstate()}.
 %% @doc generating a list of uniform floats, 0.0 =< Float =< 1.0
 %%      where length of the list is Size
 %%      with the updated internal state
 
-gen_rand_list_float(_, _) -> undefined.
+gen_rand_list_float(_, _) -> ?nif_stub.
 
 %% @spec get_idstring() -> string().
 %% @doc returns SFMT identification string
 %% @note NIFnized
 
-get_idstring() -> error_nifnized.
+get_idstring() -> ?nif_stub.
 
 %% @spec get_min_array_size32() -> integer().
 %% @doc returns array size of internal state
 %% @note NIFnized
 
-get_min_array_size32() -> error_nifnized.
+get_min_array_size32() -> ?nif_stub.
 
 %% @spec init_gen_rand(integer()) -> intstate().
 %% @doc generates an internal state from an integer seed
 %% @note NIFnized
 
-init_gen_rand(_) -> error_nifnized.
+init_gen_rand(_) -> ?nif_stub.
 
 %% @spec init_by_list32([integer()]) -> intstate().
 %% @doc generates an internal state from a list of 32-bit integers
 %% @note NIFnized
 
-init_by_list32(_) -> error_nifnized.
+init_by_list32(_) -> ?nif_stub.
 
-%%
+%% @spec randlist_to_intstate(randlist()) -> intstate().
+%% @doc converts a valid internal state from a list of N32 32-bit integers
+%% @note NIFnized
 
-randlist_to_intstate(_) -> error_nifnized.
+randlist_to_intstate(_) -> ?nif_stub.
 
-intstate_to_randlist(_) -> error_nifnized.
+%% @spec instate_to_randlist(intstate()) -> randlist().
+%% @doc converts an internal state table to a list of N32 32-bit integers
+%% @note NIFnized
 
-intstate_to_randlist_float(_) -> undefined.
+intstate_to_randlist(_) -> ?nif_stub.
 
-%% Note: ran_sfmt() -> {integer(), intstate()}
+%% @spec instate_to_randlist(intstate()) -> [float()].
+%% @doc converts an internal state table to a list of [0,1] float
+%% @note NIFnized
+
+intstate_to_randlist_float(_) -> ?nif_stub.
+
+%% Note: ran_sfmt() -> {randlist(), intstate()}
 
 %% @spec gen_rand32(ran_sfmt()|intstate) -> {integer(), ran_sfmt()}.
 %% @doc generates a 32-bit random number from the given ran_sfmt()
