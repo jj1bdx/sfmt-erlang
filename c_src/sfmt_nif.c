@@ -146,6 +146,7 @@ static void unload(ErlNifEnv* env, void* priv_data);
 static ERL_NIF_TERM sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_intstate_to_list_max(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_gen_rand_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_gen_rand_list_float(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
@@ -173,6 +174,7 @@ static ErlNifFunc nif_funcs[] = {
     {"randlist_to_intstate", 1, sfmt_nif_randlist_to_intstate},
     {"intstate_to_randlist", 1, sfmt_nif_intstate_to_randlist},
     {"intstate_to_randlist_float", 1, sfmt_nif_intstate_to_randlist_float},
+    {"intstate_to_list_max", 2, sfmt_nif_intstate_to_list_max},
     {"gen_rand_all", 1, sfmt_nif_gen_rand_all},
     {"gen_rand_list32", 2, sfmt_nif_gen_rand_list32},
     {"gen_rand_list_float", 2, sfmt_nif_gen_rand_list_float},
@@ -376,6 +378,45 @@ sfmt_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc,
     }
 
     return enif_make_list_from_array(env, l, N32);
+}
+
+static ERL_NIF_TERM
+sfmt_nif_intstate_to_list_max(ErlNifEnv *env, int argc, 
+				    const ERL_NIF_TERM argv[])
+{ /* (integer(), <<binary of (N32 * 4) bytes>>) */
+    ErlNifBinary r;
+    w128_t *p;
+    ERL_NIF_TERM l[N32];
+    unsigned int j, k, val;
+    unsigned int max, sv;
+
+    if (!enif_get_uint(env, argv[0], &max)
+        || max <= 1
+	|| !enif_inspect_binary(env, argv[1], &r)
+        || r.size != (N32 * 4)) {
+	return enif_make_badarg(env);
+    }
+    p = (w128_t *)r.data;
+
+    /* compute how many bits to right-shift first */
+    for (j = 1, k = 2; j < 32; j++, k <<= 1) {
+	if (max <= k) {
+	    break;
+	}
+    }
+    sv = 32 - j;
+
+    /* right-shift each random integer first */
+    /* then choose those less than max only */
+    for (j = 0, k = 0; j < N32; j++) {
+	val = (p[j / 4].u[j % 4]) >> sv;
+	if (val < max) {
+	    l[k] = enif_make_uint(env, val);
+	    k++;
+	}
+    }
+    /* variable k is the size of the list */
+    return enif_make_list_from_array(env, l, k);
 }
 
 static ERL_NIF_TERM
