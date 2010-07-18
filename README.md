@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.3.4_RELEASE 17-JUL-2010
+* Version 0.4.0_RELEASE 18-JUL-2010
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -21,15 +21,10 @@ Matsumoto (Hiroshima University)
 
 See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
-# C NIFs based on SFMT 1.3.3 added from 0.3.0_RELEASE
+# C NIFs based on SFMT 1.3.3 added (from 0.3.0_RELEASE)
 
 * reference: sfmt-extstate at <http://github.com/jj1bdx/sfmt-extstate>
-* see `c_src/sfmt_nif.[ch]` for the details
-* speedup: ~40 times faster than the pure Erlang code (when fully inline-optimized (see rebar.config))
-* Pure Erlang code available under `reference_texts/`
-* `gen_rand32/1` and `gen_rand_float/1` use Erlang lists (Dan Gudmudsson showed the list version is faster)
-* NOTE: SSE2 code and options removed due to causing crash of Erlang BEAM
-  (and even if the code enabled the performance increase is minimal)
+* see `c_src/sfmt_nif.c` for the details
 * The version number of this NIF is 101 (see `NIF_LOAD_INFO` macro value)
 
 # Tested platforms
@@ -46,8 +41,16 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 (Note: on FreeBSD, GNU make should be invoked as `gmake`.)
 
-The build script is Basho's rebar at <http://hg.basho.com/rebar/> 
-(which requires Erlang/OTP to run)
+The build script is Basho's rebar at <http://hg.basho.com/rebar/>,
+which will be automatically fetched under the directory `support/`.
+
+# Documentation
+
+* For the HTML documentation files under the `doc/` directory, do
+
+    make doc
+
+    The documentation will be accessible at `doc/index.html`.
 
 # Testing
 
@@ -55,37 +58,33 @@ The build script is Basho's rebar at <http://hg.basho.com/rebar/>
 
     make eunit
 
-* For testing the speed of 1000 times of invoking 100000 `gen_rand32/1` function, do 
+* For testing the speed of 100 times of invoking 100000 `gen_rand32/1` function, do 
 
     make speed
+
+    (Previously this was 1000 times x 100000 invocations, but that was practically too slow.)
 
 # API compatible with the random module
 
     seed0, seed/0, seed/3, uniform/0, uniform/1, uniform_s/1, uniform_s/3 
 
-# Refactoring note of the pure-Erlang code
-
-* Rewriting `++` (append) operators by ring buffer loops
-(as a pair of lists consuming the head elements, and the corresponding accumulators)
-made the code ~50% faster
-
 # TODO
 
-* Documentation
+* More documentation
 * Code upgrading/reloading untested yet
 
 # Code authors:
 
+* Kenji Rikitake
 * Mutsuo Saito
 * Makoto Matsumoto
-* Kenji Rikitake
 * Dan Gudmundsson
 
 # THANKS to:
 
 * Dave "dizzyd" Smith
 * Tuncer Ayaz
-* Tim Bates (random_mt.erl implementation of Mersenne Twister)
+* Tim Bates (random_mt.erl implementator of Mersenne Twister)
 * Dan Gudmundsson
 
 # ACKNOWLEDGMENT
@@ -93,3 +92,15 @@ made the code ~50% faster
 During the compatibility test of this software, Kenji Rikitake
 used the supercomputer service provided by Academic Center for
 Computing and Media Studies (ACCMS), Kyoto University.
+
+# Notes on refactoring
+
+* Speedup by NIF: ~40 times faster than the pure Erlang code
+  (when fully inline-optimized (see rebar.config))
+* For the pure-Erlang code: ewriting `++` (append) operators by ring buffer loops
+  (as a pair of lists consuming the head elements, and the corresponding accumulators)
+  made the code ~50% faster; the pure Erlang code available under `reference_texts/`
+* `gen_rand32/1`, `gen_rand32_max/2`, and `gen_rand_float/1` use Erlang lists 
+  (Dan Gudmudsson showed the list version is faster)
+* SSE2 code and options in sfmt-extstate were removed due to causing crash of Erlang BEAM
+  (and even if the SSE2 code was enabled the performance increase would be minimal)
