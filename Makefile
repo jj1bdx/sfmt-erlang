@@ -1,6 +1,6 @@
 # GNU Make dependent
 
-.PHONY: compile clean doc eunit speed
+.PHONY: compile clean c_doc doc eunit speed
 
 REBAR=$(shell sh -c 'PATH=$(PATH):support which rebar||support/getrebar||echo false')
 
@@ -10,7 +10,10 @@ compile:
 clean:
 	$(REBAR) clean
 
-doc:
+c_doc:
+	doxygen
+
+doc: c_doc
 	$(REBAR) doc
 
 eunit:
