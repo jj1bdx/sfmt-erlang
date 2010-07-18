@@ -1,5 +1,14 @@
 /* sfmt_nif.c: C NIF SFMT API functions for Erlang */
 /* based on SFMT-1.3.3 and sfmt-extstate 0.1.0_RELEASE */
+/*
+ * @file  sfmt_nif.c
+ * @brief SFMT PRNG C NIF library
+ *
+ * @author Mutsuo Saito (Hiroshima University)
+ * @author Makoto Matsumoto (Hiroshima University)
+ * @author Kenji Rikitake (Kyoto University)
+ * @author Dan Gudmundsson
+ */
 /* 
 
    Copyright (c) 2010 Kenji Rikitake and Kyoto University. All rights
@@ -194,7 +203,11 @@ static ERL_NIF_TERM atom_error3;
 static ERL_NIF_TERM atom_error_sfmt_nomem;
 static ERL_NIF_TERM atom_ok;
 
-/* see is_ok_load_info() in c_src/crypto.c of the crypto module */
+/**
+ * see is_ok_load_info() in c_src/crypto.c of the crypto module
+ * @param env ErlNifEnv pointer for the calling process
+ * @param load_info ERL_NIF_TERM to identify the NIF library
+ */
 static int check_load_info(ErlNifEnv* env, ERL_NIF_TERM load_info)
 {
     int i;
@@ -204,6 +217,12 @@ static int check_load_info(ErlNifEnv* env, ERL_NIF_TERM load_info)
 	i == NIF_LOAD_INFO;
 }
 
+/**
+ * loads NIF module and defines Erlang atoms 
+ * @param env ErlNifEnv pointer for the calling process
+ * @param priv_data pointing the private data for the NIF library to keep between the NIF calls
+ * @param load_info ERL_NIF_TERM to identify the NIF library
+ */
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 {
     /* checking version number on the argument load_info */
@@ -227,6 +246,12 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
     return 0;
 }
 
+/**
+ * reloads NIF module
+ * @param env ErlNifEnv pointer for the calling process
+ * @param priv_data pointing the private data for the NIF library to keep between the NIF calls
+ * @param load_info ERL_NIF_TERM to identify the NIF library
+ */
 static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 {
     /* Don't know how to do this */
@@ -249,6 +274,13 @@ static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
     return 0;
 }
 
+/**
+ * upgrades NIF module
+ * @param env ErlNifEnv pointer for the calling process
+ * @param priv_data pointing the private data for the NIF library to keep between the NIF calls
+ * @param old_priv_data pointing the private data given from the last calls of load() or reload()
+ * @param load_info ERL_NIF_TERM to identify the NIF library
+ */
 static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info)
 {
     int i;
@@ -272,6 +304,11 @@ static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_N
     return 0;
 }
 
+/**
+ * upgrades NIF module
+ * @param env ErlNifEnv pointer for the calling process
+ * @param priv_data pointing the private data for the NIF library to keep between the NIF calls
+ */
 static void unload(ErlNifEnv* env, void* priv_data)
 {
     /* this is yet a skeleton code */
