@@ -163,8 +163,14 @@ gen_rand_tests() ->
     ?assert(is_float(F4)),
     {Outarray0, _I5} = sfmt:gen_rand_list_float(10, I0),
     ?assert(is_float(hd(Outarray0))),
-    ?assertMatch(10, length(Outarray0)).
-
+    ?assertMatch(10, length(Outarray0)),
+    {N6, I6} = sfmt:gen_rand32_max(10000, I0),
+    ?assert(is_integer(N6)),
+    ?assert(N6 < 10000),
+    {N7, _I7} = sfmt:gen_rand32_max(10000, I6),
+    ?assert(is_integer(N7)),
+    ?assert(N7 < 10000).
+    
 test_rec1(0, Acc, RS) ->
      {lists:reverse(Acc), RS};
 test_rec1(I, Acc, RS) ->
