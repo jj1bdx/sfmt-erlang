@@ -76,6 +76,7 @@ which will be automatically fetched under the directory `support/`.
 
 # TODO
 
+* No more new feature; more load testing needed
 * More documentation
 * Code upgrading/reloading behavior check
 
