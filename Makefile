@@ -13,7 +13,7 @@ clean:
 c_doc:
 	doxygen
 
-doc: c_doc
+doc: 
 	$(REBAR) doc
 
 eunit:
