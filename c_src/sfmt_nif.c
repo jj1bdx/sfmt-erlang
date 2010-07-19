@@ -1,8 +1,7 @@
-/* sfmt_nif.c: C NIF SFMT API functions for Erlang */
-/* based on SFMT-1.3.3 and sfmt-extstate 0.1.0_RELEASE */
-/*
+/**
  * @file  sfmt_nif.c
- * @brief SFMT PRNG C NIF library
+ * @brief SFMT PRNG C NIF library for Erlang,
+ * based on SFMT-1.3.3 and sfmt-extstate 0.1.0_RELEASE.
  *
  * @author Mutsuo Saito (Hiroshima University)
  * @author Makoto Matsumoto (Hiroshima University)
@@ -91,13 +90,11 @@
   #define PRE_ALWAYS inline
 #endif
 
-/* 128-bit SIMD data type for standard C */
-
-/** 128-bit data structure */
+/** 128-bit data structure. */
 struct W128_T {
     uint32_t u[4];
 };
-/** 128-bit data type */
+/** 128-bit SIMD data type. */
 typedef struct W128_T w128_t;
 
 /* 
@@ -138,12 +135,12 @@ typedef struct W128_T w128_t;
 #define PARITY2	(0x00000000U)
 #define PARITY3	(0x00000000U)
 #define PARITY4	(0x13c9e684U)
-/* identification string for the algorithm */
+/** Identification string for the algorithm. */
 #define IDSTR	"SFMT-19937:122-18-1-11-1:dfffffef-ddfecb7f-bffaffff-bffffff6"
-/* float multiplier */
+/** Float multiplier. */
 #define FLOAT_CONST (1.0/4294967295.0) 
 
-/* version number for load_info */
+/** Version number for load_info. */
 #define NIF_LOAD_INFO (101)
 
 /* prototypes */
@@ -163,8 +160,8 @@ static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_N
 static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt_nif_get_lib_refc(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
-/* prototypes of sfmt-extstate functions */
 static inline void rshift128(w128_t *out, w128_t const *in, int shift);
 static inline void lshift128(w128_t *out, w128_t const *in, int shift);
 static inline void do_recursion(w128_t *r, w128_t *a, w128_t *b, w128_t *c, w128_t *d);
@@ -176,9 +173,10 @@ static int get_min_array_size32(void);
 static void init_gen_rand(uint32_t seed, w128_t *intstate);
 static void init_by_array(uint32_t *init_key, int key_length, w128_t *intstate);
 
-/* number of users of this dynamic library */
+/** Number of users of this dynamic library. */
 static int lib_refc = 0;
 
+/** Function list passed to the Erlang BEAM for this NIF. */
 static ErlNifFunc nif_funcs[] = {
     {"randlist_to_intstate", 1, sfmt_nif_randlist_to_intstate},
     {"intstate_to_randlist", 1, sfmt_nif_intstate_to_randlist},
@@ -190,23 +188,31 @@ static ErlNifFunc nif_funcs[] = {
     {"init_gen_rand", 1, sfmt_nif_init_gen_rand},
     {"init_by_list32", 1, sfmt_nif_init_by_list32},
     {"get_idstring", 0, sfmt_nif_get_idstring},
-    {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32}
+    {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32},
+    {"get_lib_refc", 0, sfmt_nif_get_lib_refc}
 };
 
+/* Function call macro to initialize NIF. */
 ERL_NIF_INIT(sfmt, nif_funcs, load, reload, upgrade, unload)
 
-/* atom variables */
+/** An Erlang atom container. */
 static ERL_NIF_TERM atom_error;
+/** An Erlang atom container. */
 static ERL_NIF_TERM atom_error1;
+/** An Erlang atom container. */
 static ERL_NIF_TERM atom_error2;
+/** An Erlang atom container. */
 static ERL_NIF_TERM atom_error3;
+/** An Erlang atom container. */
 static ERL_NIF_TERM atom_error_sfmt_nomem;
+/** An Erlang atom container. */
 static ERL_NIF_TERM atom_ok;
 
 /**
- * see is_ok_load_info() in c_src/crypto.c of the crypto module
- * @param env ErlNifEnv pointer for the calling process
- * @param load_info ERL_NIF_TERM to identify the NIF library
+ * Checks the version number of the load info from Erlang.
+ * See is_ok_load_info() in c_src/crypto.c of the crypto module.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param load_info ERL_NIF_TERM to identify the NIF library.
  */
 static int check_load_info(ErlNifEnv* env, ERL_NIF_TERM load_info)
 {
@@ -218,10 +224,10 @@ static int check_load_info(ErlNifEnv* env, ERL_NIF_TERM load_info)
 }
 
 /**
- * loads NIF module and defines Erlang atoms 
- * @param env ErlNifEnv pointer for the calling process
- * @param priv_data pointing the private data for the NIF library to keep between the NIF calls
- * @param load_info ERL_NIF_TERM to identify the NIF library
+ * Loads NIF module and defines Erlang atoms.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param priv_data pointing the private data for the NIF library to keep between the NIF calls.
+ * @param load_info ERL_NIF_TERM to identify the NIF library.
  */
 static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 {
@@ -247,10 +253,10 @@ static int load(ErlNifEnv *env, void **priv_data, ERL_NIF_TERM load_info)
 }
 
 /**
- * reloads NIF module
- * @param env ErlNifEnv pointer for the calling process
- * @param priv_data pointing the private data for the NIF library to keep between the NIF calls
- * @param load_info ERL_NIF_TERM to identify the NIF library
+ * Reloads NIF module.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param priv_data pointing the private data for the NIF library to keep between the NIF calls.
+ * @param load_info ERL_NIF_TERM to identify the NIF library.
  */
 static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 {
@@ -275,11 +281,11 @@ static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info)
 }
 
 /**
- * upgrades NIF module
- * @param env ErlNifEnv pointer for the calling process
- * @param priv_data pointing the private data for the NIF library to keep between the NIF calls
- * @param old_priv_data pointing the private data given from the last calls of load() or reload()
- * @param load_info ERL_NIF_TERM to identify the NIF library
+ * Upgrades NIF module.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param priv_data pointing the private data for the NIF library to keep between the NIF calls.
+ * @param old_priv_data pointing the private data given from the last calls of load() or reload().
+ * @param load_info ERL_NIF_TERM to identify the NIF library.
  */
 static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info)
 {
@@ -305,9 +311,9 @@ static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_N
 }
 
 /**
- * upgrades NIF module
- * @param env ErlNifEnv pointer for the calling process
- * @param priv_data pointing the private data for the NIF library to keep between the NIF calls
+ * Unloads NIF module.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param priv_data pointing the private data for the NIF library to keep between the NIF calls.
  */
 static void unload(ErlNifEnv* env, void* priv_data)
 {
@@ -321,6 +327,12 @@ static void unload(ErlNifEnv* env, void* priv_data)
     /*else NIF library still used by other (new) module code */
 }
 
+/**
+ * NIF code of randlist_to_intstate/1.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
@@ -367,6 +379,12 @@ sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc,
     return r;
 }
 
+/**
+ * NIF code of intstat_to_randlist/1.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
@@ -392,6 +410,12 @@ sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc,
    return enif_make_list_from_array(env, l, N32);
 }
 
+/**
+ * NIF code of intstat_to_randlist_float/1.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc, 
 				    const ERL_NIF_TERM argv[])
@@ -417,6 +441,12 @@ sfmt_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc,
     return enif_make_list_from_array(env, l, N32);
 }
 
+/**
+ * NIF code of intstat_to_list_max/1.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_intstate_to_list_max(ErlNifEnv *env, int argc, 
 				    const ERL_NIF_TERM argv[])
@@ -456,6 +486,13 @@ sfmt_nif_intstate_to_list_max(ErlNifEnv *env, int argc,
     return enif_make_list_from_array(env, l, k);
 }
 
+/**
+ * NIF code of gen_rand_all/1.
+ * Also a wrapper of gen_rand_all().
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, 
 		      const ERL_NIF_TERM argv[])
@@ -479,6 +516,13 @@ sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc,
     return r;
 }
 
+/**
+ * NIF code of gen_rand_list32/2.
+ * Also a wrapper of gen_rand_array().
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_gen_rand_list32(ErlNifEnv *env,
 			 int argc, const ERL_NIF_TERM argv[])
@@ -541,6 +585,13 @@ sfmt_nif_gen_rand_list32(ErlNifEnv *env,
     return enif_make_tuple2(env, list, r);
 }
 
+/**
+ * NIF code of gen_rand_list_float/2.
+ * Also a wrapper of gen_rand_array().
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_gen_rand_list_float(ErlNifEnv *env,
 			 int argc, const ERL_NIF_TERM argv[])
@@ -603,7 +654,13 @@ sfmt_nif_gen_rand_list_float(ErlNifEnv *env,
    return enif_make_tuple2(env, list, r);
 }
 
-
+/**
+ * NIF code of init_gen_rand/1.
+ * Also a wrapper of init_gen_rand().
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 { /* (integer_seed) */
     unsigned int seed;
@@ -619,6 +676,13 @@ static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_N
     return r;
 }
 
+/**
+ * NIF code of init_by_list32/1.
+ * Also a wrapper of init_by_array().
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 { /* ([arbitrary_length_of_integer_list]) */
     w128_t *q;
@@ -660,6 +724,13 @@ static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_
     return r;
 }
 
+/**
+ * NIF code of get_idstring/0.
+ * Also a wrapper of get_idstring().
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_get_idstring(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
@@ -667,11 +738,30 @@ sfmt_nif_get_idstring(ErlNifEnv *env, int argc,
     return enif_make_string(env, get_idstring(), ERL_NIF_LATIN1);
 }
 
+/**
+ * NIF code of get_min_array_size32/0.
+ * Also a wrapper of get_min_array_size32().
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
 static ERL_NIF_TERM
 sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
 { /* () */
     return enif_make_uint(env, (unsigned int) get_min_array_size32());
+}
+
+/**
+ * NIF code of get_lib_refc/0.
+ * @param env ErlNifEnv pointer for the calling process.
+ * @param argc Erlang function arity.
+ * @param argv ERL_NIF_TERM pointers for the arguments.
+ */
+static ERL_NIF_TERM
+sfmt_nif_get_lib_refc(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+{ /* () */
+    return enif_make_int(env, lib_refc);
 }
 
 /* sfmt-extstate static C function code follows */

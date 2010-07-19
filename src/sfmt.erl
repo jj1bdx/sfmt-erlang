@@ -54,6 +54,7 @@
 	 gen_rand_list_float/2,
 	 get_idstring/0,
 	 get_min_array_size32/0,
+	 get_lib_refc/0,
 	 init_gen_rand/1,
 	 init_by_list32/1,
 	 gen_rand32/1,
@@ -239,6 +240,12 @@ get_idstring() -> ?nif_stub.
 %% (Note: NIFnized)
 
 get_min_array_size32() -> ?nif_stub.
+
+%% @spec get_lib_refc() -> integer()
+%% @doc returns NIF library reference count.
+%% (Note: NIFnized)
+
+get_lib_refc() -> ?nif_stub.
 
 %% @spec init_gen_rand(Seed::integer()) -> intstate()
 %% @doc generates an internal state from an integer seed.
