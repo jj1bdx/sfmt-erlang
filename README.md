@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.4.0_RELEASE 18-JUL-2010
+* Version 0.4.1_RELEASE 19-JUL-2010
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -23,8 +23,8 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 # C NIFs based on SFMT 1.3.3 added (from 0.3.0_RELEASE)
 
-* reference: sfmt-extstate at <http://github.com/jj1bdx/sfmt-extstate>
-* see `c_src/sfmt_nif.c` for the details
+* See `c_src/sfmt_nif.c` for the details
+* Also refer to sfmt-extstate at <http://github.com/jj1bdx/sfmt-extstate>
 * The version number of this NIF is 101 (see `NIF_LOAD_INFO` macro value)
 
 # Tested platforms
@@ -46,11 +46,17 @@ which will be automatically fetched under the directory `support/`.
 
 # Documentation
 
-* For the HTML documentation files under the `doc/` directory, do
+* For the HTML documentation files of the Erlang source 
 
     make doc
 
     The documentation will be accessible at `doc/index.html`.
+
+* For the HTML documentation files of the C NIF source (Note: Doxygen required)
+
+    make c_doc
+
+    The documentation will be accessible at `c_doc/index.html`.
 
 # Testing
 
@@ -71,7 +77,7 @@ which will be automatically fetched under the directory `support/`.
 # TODO
 
 * More documentation
-* Code upgrading/reloading untested yet
+* Code upgrading/reloading behavior check
 
 # Code authors:
 
