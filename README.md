@@ -104,7 +104,7 @@ Computing and Media Studies (ACCMS), Kyoto University.
 
 * Speedup by NIF: ~40 times faster than the pure Erlang code
   (when fully inline-optimized (see rebar.config))
-* For the pure-Erlang code: ewriting `++` (append) operators by ring buffer loops
+* For the pure-Erlang code: writing `++` (append) operators by ring buffer loops
   (as a pair of lists consuming the head elements, and the corresponding accumulators)
   made the code ~50% faster; the pure Erlang code available under `reference_texts/`
 * `gen_rand32/1`, `gen_rand32_max/2`, and `gen_rand_float/1` use Erlang lists 
