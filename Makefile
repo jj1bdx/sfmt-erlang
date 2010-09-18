@@ -2,7 +2,7 @@
 
 .PHONY: compile clean c_doc doc eunit speed
 
-REBAR=$(shell sh -c 'PATH=$(PATH):support which rebar||support/getrebar||echo false')
+REBAR=$(shell sh -c "PATH='$(PATH)':support which rebar||support/getrebar||echo false")
 
 compile:
 	$(REBAR) compile
