@@ -456,10 +456,10 @@ load_nif() ->
 		  {error, _} ->
 		      EbinDir = filename:dirname(code:which(?MODULE)),
 		      AppPath = filename:dirname(EbinDir),
-		      filename:join(AppPath, priv);
+		      filename:join(AppPath, "priv");
 		  Path ->
 		      Path
 	      end,
-    erlang:load_nif(filename:join(PrivDir, sfmt_nif), ?NIF_LOAD_INFO).
+    erlang:load_nif(filename:join(PrivDir, "sfmt_nif"), ?NIF_LOAD_INFO).
 
 %% end of the module    
