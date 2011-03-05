@@ -3,14 +3,15 @@
 %% @author Makoto Matsumoto
 %% @author Dan Gudmundsson
 %% @doc SIMD-oriented Fast Mersenne Twister (SFMT) EUnit testing functions.
-%% The module provides EUnit testing functions for the SFMT functions.
+%% The module provides EUnit testing functions for the sfmt module functions.
+%% (for period ((2^19937) - 1))
 %% @reference <a href="http://github.com/jj1bdx/sfmt-erlang">GitHub page
 %% for sfmt-erlang</a>
-%% @copyright 2010 Kenji Rikitake and Kyoto University.
+%% @copyright 2010-2011 Kenji Rikitake and Kyoto University.
 %% Copyright (c) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and
 %% Hiroshima University.
 
-%% Copyright (c) 2010 Kenji Rikitake and Kyoto University. All rights
+%% Copyright (c) 2010-2011 Kenji Rikitake and Kyoto University. All rights
 %% reserved.
 %%
 %% Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima

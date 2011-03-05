@@ -1,8 +1,8 @@
 /**
- * @file  sfmt_nif.c
+ * @file  sfmt607_nif.c
  * @brief SFMT PRNG C NIF library for Erlang,
  * based on SFMT-1.3.3 and sfmt-extstate 0.1.0_RELEASE.
- * For period ((2^19937) - 1).
+ * For period ((2^607) - 1).
  *
  * @author Mutsuo Saito (Hiroshima University)
  * @author Makoto Matsumoto (Hiroshima University)
@@ -106,38 +106,38 @@ typedef struct W128_T w128_t;
 
 /** Mersenne Exponent. The period of the sequence 
  *  is a multiple of 2^MEXP-1. */
-#define MEXP (19937)
+#define MEXP (607)
 /** SFMT generator has an internal state array of 128-bit integers,
  * and N is its size. */
-#define N (156) /* ((MEXP / 128) + 1) */
+#define N (5) /* ((MEXP / 128) + 1) */
 /** N32 is the size of internal state array when regarded as an array
  * of 32-bit integers.*/
-#define N32 (624) /* (N * 4) */
+#define N32 (20) /* (N * 4) */
 /** the pick up position of the array. */
-#define POS1 (122) 
+#define POS1 (2) 
 /** the parameter of shift left as four 32-bit registers. */
-#define SL1 (18)
+#define SL1 (15)
 /** the parameter of shift left as one 128-bit register. 
  * The 128-bit integer is shifted by (SL2 * 8) bits. */
-#define SL2 (1)
+#define SL2 (3)
 /** the parameter of shift right as four 32-bit registers. */
-#define SR1 (11)
+#define SR1 (13)
 /** the parameter of shift right as one 128-bit register. 
  * The 128-bit integer is shifted by (SL2 * 8) bits. */
-#define SR2 (1)
+#define SR2 (3)
 /** A bitmask, used in the recursion.  These parameters are introduced
  * to break symmetry of SIMD. */
-#define MSK1 (0xdfffffefU)
-#define MSK2 (0xddfecb7fU)
-#define MSK3 (0xbffaffffU)
-#define MSK4 (0xbffffff6U)
+#define MSK1 (0xfdff37ffU)
+#define MSK2 (0xef7f3f7dU)
+#define MSK3 (0xff777b7dU)
+#define MSK4 (0x7ff7fb2fU)
 /** These definitions are part of a 128-bit period certification vector. */
 #define PARITY1	(0x00000001U)
 #define PARITY2	(0x00000000U)
 #define PARITY3	(0x00000000U)
-#define PARITY4	(0x13c9e684U)
+#define PARITY4	(0x5986f054U)
 /** Identification string for the algorithm. */
-#define IDSTR	"SFMT-19937:122-18-1-11-1:dfffffef-ddfecb7f-bffaffff-bffffff6"
+#define IDSTR	"SFMT-607:2-15-3-13-3:fdff37ff-ef7f3f7d-ff777b7d-7ff7fb2"
 /** Float multiplier. */
 #define FLOAT_CONST (1.0/4294967295.0) 
 
@@ -150,18 +150,18 @@ static int reload(ErlNifEnv* env, void** priv_data, ERL_NIF_TERM load_info);
 static int upgrade(ErlNifEnv* env, void** priv_data, void** old_priv_data, ERL_NIF_TERM load_info);
 static void unload(ErlNifEnv* env, void* priv_data);
 
-static ERL_NIF_TERM sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_intstate_to_list_max(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_gen_rand_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_gen_rand_list_float(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
-static ERL_NIF_TERM sfmt_nif_get_lib_refc(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_randlist_to_intstate(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_intstate_to_randlist(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_intstate_to_list_max(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_gen_rand_all(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_gen_rand_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_gen_rand_list_float(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_get_idstring(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_get_min_array_size32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
+static ERL_NIF_TERM sfmt607_nif_get_lib_refc(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[]);
 
 static inline void rshift128(w128_t *out, w128_t const *in, int shift);
 static inline void lshift128(w128_t *out, w128_t const *in, int shift);
@@ -179,22 +179,22 @@ static int lib_refc = 0;
 
 /** Function list passed to the Erlang BEAM for this NIF. */
 static ErlNifFunc nif_funcs[] = {
-    {"randlist_to_intstate", 1, sfmt_nif_randlist_to_intstate},
-    {"intstate_to_randlist", 1, sfmt_nif_intstate_to_randlist},
-    {"intstate_to_randlist_float", 1, sfmt_nif_intstate_to_randlist_float},
-    {"intstate_to_list_max", 2, sfmt_nif_intstate_to_list_max},
-    {"gen_rand_all", 1, sfmt_nif_gen_rand_all},
-    {"gen_rand_list32", 2, sfmt_nif_gen_rand_list32},
-    {"gen_rand_list_float", 2, sfmt_nif_gen_rand_list_float},
-    {"init_gen_rand", 1, sfmt_nif_init_gen_rand},
-    {"init_by_list32", 1, sfmt_nif_init_by_list32},
-    {"get_idstring", 0, sfmt_nif_get_idstring},
-    {"get_min_array_size32", 0, sfmt_nif_get_min_array_size32},
-    {"get_lib_refc", 0, sfmt_nif_get_lib_refc}
+    {"randlist_to_intstate", 1, sfmt607_nif_randlist_to_intstate},
+    {"intstate_to_randlist", 1, sfmt607_nif_intstate_to_randlist},
+    {"intstate_to_randlist_float", 1, sfmt607_nif_intstate_to_randlist_float},
+    {"intstate_to_list_max", 2, sfmt607_nif_intstate_to_list_max},
+    {"gen_rand_all", 1, sfmt607_nif_gen_rand_all},
+    {"gen_rand_list32", 2, sfmt607_nif_gen_rand_list32},
+    {"gen_rand_list_float", 2, sfmt607_nif_gen_rand_list_float},
+    {"init_gen_rand", 1, sfmt607_nif_init_gen_rand},
+    {"init_by_list32", 1, sfmt607_nif_init_by_list32},
+    {"get_idstring", 0, sfmt607_nif_get_idstring},
+    {"get_min_array_size32", 0, sfmt607_nif_get_min_array_size32},
+    {"get_lib_refc", 0, sfmt607_nif_get_lib_refc}
 };
 
 /* Function call macro to initialize NIF. */
-ERL_NIF_INIT(sfmt, nif_funcs, load, reload, upgrade, unload)
+ERL_NIF_INIT(sfmt607, nif_funcs, load, reload, upgrade, unload)
 
 /** An Erlang atom container. */
 static ERL_NIF_TERM atom_error;
@@ -335,7 +335,7 @@ static void unload(ErlNifEnv* env, void* priv_data)
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc, 
+sfmt607_nif_randlist_to_intstate(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
 { /* ([list of N32 elements]) */
     w128_t *i;
@@ -387,7 +387,7 @@ sfmt_nif_randlist_to_intstate(ErlNifEnv *env, int argc,
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc, 
+sfmt607_nif_intstate_to_randlist(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
 { /* (<<binary of (N32 * 4) bytes>>) */
    ErlNifBinary r;
@@ -418,7 +418,7 @@ sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc,
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc, 
+sfmt607_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc, 
 				    const ERL_NIF_TERM argv[])
 { /* (<<binary of (N32 * 4) bytes>>) */
     ErlNifBinary r;
@@ -449,7 +449,7 @@ sfmt_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc,
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_intstate_to_list_max(ErlNifEnv *env, int argc, 
+sfmt607_nif_intstate_to_list_max(ErlNifEnv *env, int argc, 
 				    const ERL_NIF_TERM argv[])
 { /* (integer(), <<binary of (N32 * 4) bytes>>) */
     ErlNifBinary r;
@@ -495,7 +495,7 @@ sfmt_nif_intstate_to_list_max(ErlNifEnv *env, int argc,
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc, 
+sfmt607_nif_gen_rand_all(ErlNifEnv *env, int argc, 
 		      const ERL_NIF_TERM argv[])
 { /* (<<binary of (N32 * 4) bytes) */
     ErlNifBinary p;
@@ -525,7 +525,7 @@ sfmt_nif_gen_rand_all(ErlNifEnv *env, int argc,
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_gen_rand_list32(ErlNifEnv *env,
+sfmt607_nif_gen_rand_list32(ErlNifEnv *env,
 			 int argc, const ERL_NIF_TERM argv[])
 { /* (size, intstate()) */
     unsigned int size, req;
@@ -594,7 +594,7 @@ sfmt_nif_gen_rand_list32(ErlNifEnv *env,
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_gen_rand_list_float(ErlNifEnv *env,
+sfmt607_nif_gen_rand_list_float(ErlNifEnv *env,
 			 int argc, const ERL_NIF_TERM argv[])
 { /* (size, intstate()) */
    unsigned int size, req;
@@ -662,7 +662,7 @@ sfmt_nif_gen_rand_list_float(ErlNifEnv *env,
  * @param argc Erlang function arity.
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
-static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+static ERL_NIF_TERM sfmt607_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 { /* (integer_seed) */
     unsigned int seed;
     ERL_NIF_TERM r;
@@ -684,7 +684,7 @@ static ERL_NIF_TERM sfmt_nif_init_gen_rand(ErlNifEnv *env, int argc, const ERL_N
  * @param argc Erlang function arity.
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
-static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+static ERL_NIF_TERM sfmt607_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 { /* ([arbitrary_length_of_integer_list]) */
     w128_t *q;
     uint32_t *il;
@@ -733,7 +733,7 @@ static ERL_NIF_TERM sfmt_nif_init_by_list32(ErlNifEnv *env, int argc, const ERL_
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_get_idstring(ErlNifEnv *env, int argc, 
+sfmt607_nif_get_idstring(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
 { /* () */
     return enif_make_string(env, get_idstring(), ERL_NIF_LATIN1);
@@ -747,7 +747,7 @@ sfmt_nif_get_idstring(ErlNifEnv *env, int argc,
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc, 
+sfmt607_nif_get_min_array_size32(ErlNifEnv *env, int argc, 
 			      const ERL_NIF_TERM argv[])
 { /* () */
     return enif_make_uint(env, (unsigned int) get_min_array_size32());
@@ -760,7 +760,7 @@ sfmt_nif_get_min_array_size32(ErlNifEnv *env, int argc,
  * @param argv ERL_NIF_TERM pointers for the arguments.
  */
 static ERL_NIF_TERM
-sfmt_nif_get_lib_refc(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
+sfmt607_nif_get_lib_refc(ErlNifEnv *env, int argc, const ERL_NIF_TERM argv[])
 { /* () */
     return enif_make_int(env, lib_refc);
 }

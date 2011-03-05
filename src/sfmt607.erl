@@ -5,7 +5,7 @@
 %% @doc SIMD-oriented Fast Mersenne Twister (SFMT).
 %% The module provides skeleton functions for the NIFs
 %% and the interface functions.
-%% The module defines a PRNG of period ((2^19937) - 1).
+%% The module defines a PRNG of period ((2^607) - 1).
 %% @reference <a href="http://github.com/jj1bdx/sfmt-erlang">GitHub page
 %% for sfmt-erlang</a>
 %% @copyright 2010-2011 Kenji Rikitake and Kyoto University.
@@ -45,7 +45,7 @@
 %% (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 %% OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
--module(sfmt).
+-module(sfmt607).
 
 -on_load(load_nif/0).
 
@@ -84,15 +84,15 @@
 %%
 %% Mersenne Exponent. The period of the sequence 
 %%  is a multiple of 2^MEXP-1.
--define(MEXP, 19937).
+-define(MEXP, 607).
 %% SFMT generator has an internal state array of 128-bit integers,
 %% and N is its size.
 %% -define(N, ((?MEXP div 128) + 1)).
--define(N, 156).
+-define(N, 5).
 %% N32 is the size of internal state array when regarded as an array
 %% of 32-bit integers.
 %% -define(N32, (?N * 4)).
--define(N32, 624).
+-define(N32, 20).
 %% for init_by_list32/1:
 %% LAG =
 %% 	if
@@ -106,33 +106,33 @@
 %% 		3
 %% 	end,
 %% MID = (?N32 - LAG) div 2
--define(LAG, 11).
--define(MID, 306).
+-define(LAG, 3).
+-define(MID, 8).
 %% the pick up position of the array.
--define(POS1, 122).
+-define(POS1, 2).
 %% the parameter of shift left as four 32-bit registers.
--define(SL1, 18).
+-define(SL1, 15).
 %% the parameter of shift left as one 128-bit register. 
 %% The 128-bit integer is shifted by (SL2 * 8) bits.
--define(SL2, 1).
+-define(SL2, 3).
 %% the parameter of shift right as four 32-bit registers.
--define(SR1, 11).
+-define(SR1, 13).
 %% the parameter of shift right as one 128-bit register. 
 %% The 128-bit integer is shifted by (SL2 * 8) bits.
--define(SR2, 1).
+-define(SR2, 3).
 %% A bitmask, used in the recursion.  These parameters are introduced
 %% to break symmetry of SIMD.
--define(MSK1, 16#dfffffef).
--define(MSK2, 16#ddfecb7f).
--define(MSK3, 16#bffaffff).
--define(MSK4, 16#bffffff6).
+-define(MSK1, 16#fdff37ff).
+-define(MSK2, 16#ef7f3f7d).
+-define(MSK3, 16#ff777b7d).
+-define(MSK4, 16#7ff7fb2f).
 %% These definitions are part of a 128-bit period certification vector.
 -define(PARITY1, 16#00000001).
 -define(PARITY2, 16#00000000).
 -define(PARITY3, 16#00000000).
--define(PARITY4, 16#13c9e684).
+-define(PARITY4, 16#5986f054).
 %% identification string for the algorithm
--define(IDSTR, "SFMT-19937:122-18-1-11-1:dfffffef-ddfecb7f-bffaffff-bffffff6").
+-define(IDSTR, "SFMT-607:2-15-3-13-3:fdff37ff-ef7f3f7d-ff777b7d-7ff7fb2").
 
 %% NIF version number (on the load_info argument of load_nif/2)
 -define(NIF_LOAD_INFO, 101).
@@ -461,6 +461,6 @@ load_nif() ->
 		  Path ->
 		      Path
 	      end,
-    erlang:load_nif(filename:join(PrivDir, "sfmt_nif"), ?NIF_LOAD_INFO).
+    erlang:load_nif(filename:join(PrivDir, "sfmt607_nif"), ?NIF_LOAD_INFO).
 
 %% end of the module    

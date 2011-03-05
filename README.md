@@ -1,10 +1,10 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.4.1_RELEASE 19-JUL-2010 (revised 17-SEP-2010 for R14B)
+* Version 0.5.0_BETA 6-MAR-2011
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
-Copyright (c) 2010 Kenji Rikitake and Kyoto University. All rights
+Copyright (c) 2010-2011 Kenji Rikitake and Kyoto University. All rights
 reserved.
 
 Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -21,6 +21,12 @@ Matsumoto (Hiroshima University)
 
 See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
+# new module sfmt607 added (from 0.5.0_BETA)
+
+* For the comparison of two different periods
+* sfmt607's period: ((2^607) - 1)
+* sfmt's period: ((2^19937) - 1)
+
 # C NIFs based on SFMT 1.3.3 added (from 0.3.0_RELEASE)
 
 * See `c_src/sfmt_nif.c` for the details
@@ -29,7 +35,7 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 # Tested platforms
 
-* FreeBSD/i386 7.3-RELEASE with Erlang/OTP R14B
+* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R14B
 * RedHat Enterprise Linux AS V4 of x86_64 with Erlang/OTP R14B
   (on the Thin Cluster of the Kyoto University ACCMS Supercomputer System)
 
