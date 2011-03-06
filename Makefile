@@ -22,4 +22,5 @@ eunit:
 speed:
 	erl -pa ./ebin -noshell -s sfmt_tests test_speed -s init stop
 	erl -pa ./ebin -noshell -s sfmt607_tests test_speed -s init stop
+	erl -pa ./ebin -noshell -s sfmt4253_tests test_speed -s init stop
 	erl -pa ./ebin -noshell -s sfmt216091_tests test_speed -s init stop
