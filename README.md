@@ -29,7 +29,7 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 * sfmt607's period: (2^607 - 1)
 * sfmt4253's period: (2^4253 - 1)
 * sfmt's period: (2^19937 - 1)
-* sfmt216091's period: (2^607 - 1)
+* sfmt216091's period: (2^216091 - 1)
 
 * PDIC_SEED now named differently for each period (bugfix, from 0.5.2_RELEASE)
 
@@ -41,8 +41,8 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 # Tested platforms
 
-* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R14B
-* RedHat Enterprise Linux AS V4 of x86_64 with Erlang/OTP R14B
+* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R14B01
+* RedHat Enterprise Linux AS V4 of x86_64 with Erlang/OTP R14B01
   (on the Thin Cluster of the Kyoto University ACCMS Supercomputer System)
 
 # Building 
