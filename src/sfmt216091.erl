@@ -343,7 +343,7 @@ gen_rand_float(I) when is_binary(I) ->
 %% compatible funtions to the random module in stdlib
 
 %% entry in the process dictionary
--define(PDIC_SEED, sfmt_seed).
+-define(PDIC_SEED, sfmt216091_seed).
 %% (1 / ((2 ^ 32) - 1)) (for [0, 1]-interval conversion)
 -define(FLOAT_CONST, (1.0/4294967295.0)).
 
