@@ -47,7 +47,8 @@
 -module(sfmt4253_tests).
 
 -export([
-	 test_speed/0
+	 test_speed/0,
+	 test_short_speed/0
 	 ]).
 
 test_speed_rand_rec1(0, _, _) ->
@@ -142,6 +143,19 @@ test_speed() ->
 		test_speed_orig_uniform(100, 100000),
 	        test_speed_rand_max(100, 100000),
 		test_speed_orig_uniform_n(100, 100000)}
+	      ]).
+
+%% @doc running speed test for 10 times of
+%% 10000 calls for sfmt:gen_rand32/1, sfmt:uniform_s/1,
+%% random:uniform_s/1, sfmt:gen_rand32_max/2, and random:uniform_s/2.
+
+test_short_speed() ->
+    io:format("{rand, sfmt_uniform, orig_uniform, rand_max, orig_uniform_n}~n~p~n",
+	      [{test_speed_rand(10, 10000),
+		test_speed_sfmt_uniform(10, 10000),
+		test_speed_orig_uniform(10, 10000),
+	        test_speed_rand_max(10, 10000),
+		test_speed_orig_uniform_n(10, 10000)}
 	      ]).
 
 %% EUnit test functions
