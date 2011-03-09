@@ -57,29 +57,51 @@ dump() ->
 
 -include_lib("eunit/include/eunit.hrl").
 
+%% @doc seeding tests
+
+seed_tests() ->
+    random_wh06:seed(100,1000,10000,100000),
+    S1 = get(random_wh06_seed),
+    ?assertEqual({101,1001,10001,100001}, S1),
+    random_wh06:seed(10000000000,100000000000,10000000000000,100000000000000),
+    S2 = get(random_wh06_seed),
+    ?assertEqual({1410065689,1215757069,1317187169,300940949}, S2),
+    random_wh06:seed(0,2,3,4),
+    S3 = get(random_wh06_seed),
+    ?assertEqual({1,3,4,5}, S3), 
+    random_wh06:seed(1,0,3,4),
+    S4 = get(random_wh06_seed),
+    ?assertEqual({2,1,4,5}, S4),
+    random_wh06:seed(1,2,0,4),
+    S5 = get(random_wh06_seed),
+    ?assertEqual({2,3,1,5}, S5),
+    random_wh06:seed(1,2,3,0),
+    S6 = get(random_wh06_seed),
+    ?assertEqual({2,3,4,1}, S6).
+
 %% @doc random_wh06:uniform() value loop (without output)
 
 uniform_test1_rec1(0, Acc) ->
-     lists:reverse(Acc);
+    lists:reverse(Acc);
 uniform_test1_rec1(I, Acc) ->
-     random_wh06:uniform(),
-     uniform_test1_rec1(I - 1, [get(random_wh06_seed)| Acc]).
+    random_wh06:uniform(),
+    uniform_test1_rec1(I - 1, [get(random_wh06_seed)| Acc]).
 
 %% @doc random_wh06:uniform() value loop (with output)
 
 uniform_test2_rec1(0, Acc) ->
-     lists:reverse(Acc);
+    lists:reverse(Acc);
 uniform_test2_rec1(I, Acc) ->
-     V = random_wh06:uniform(),
-     uniform_test2_rec1(I - 1, [{V, get(random_wh06_seed)}| Acc]).
+    V = random_wh06:uniform(),
+    uniform_test2_rec1(I - 1, [{V, get(random_wh06_seed)}| Acc]).
 
 %% @doc random_wh06:uniform_s() value loop (with output and state)
 
 uniform_s_test3_rec1(0, Acc, _) ->
-     lists:reverse(Acc);
+    lists:reverse(Acc);
 uniform_s_test3_rec1(I, Acc, RS) ->
-     {V, RS2} = random_wh06:uniform_s(RS),
-     uniform_s_test3_rec1(I - 1, [{V, RS2} | Acc], RS2).
+    {V, RS2} = random_wh06:uniform_s(RS),
+    uniform_s_test3_rec1(I - 1, [{V, RS2} | Acc], RS2).
 
 %% @doc Value tests of the first 1000 random numbers 
 %% Note: internal state only
@@ -111,6 +133,7 @@ value_tests_3() ->
 
 simple_test_() -> 
     [
+     ?_assertMatch(ok, seed_tests()),
      ?_assertMatch(ok, value_tests_1()),
      ?_assertMatch(ok, value_tests_2()),
      ?_assertMatch(ok, value_tests_3())
