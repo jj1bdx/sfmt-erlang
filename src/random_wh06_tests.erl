@@ -36,6 +36,10 @@
 
 -module(random_wh06_tests).
 
+%% dump functions are not necessary for non-testing purpose
+
+-ifdef(VALUE_GEN_TEST).
+
 -export([dump/0, dump_next_sequence/0]).
 
 %% @doc dumping reference output for the regression test
@@ -70,6 +74,8 @@ dump_next_sequence() ->
 		   {123456789, 345678901, 567890123, 789012345}
 		   ))]),
     ok.
+
+-endif. % VALUE_GEN_TEST
 
 %% EUnit test functions
 
