@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.6.0_RELEASE 10-MAR-2011
+* Version 0.6.1_BETA 11-MAR-2011
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -23,13 +23,15 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 * new module sfmt607 and sfmt216091 added (from 0.5.1_RELEASE)
 * new module sfmt4253 added (from 0.5.3_RELEASE)
+* new module sfmt86243 added (from 0.6.1_BETA)
 
 ## Supported SFMT PRNG periods
 
-* sfmt607's period: (2^607 - 1)
-* sfmt4253's period: (2^4253 - 1)
-* sfmt's period: (2^19937 - 1)
-* sfmt216091's period: (2^216091 - 1)
+* sfmt607: (2^607 - 1)
+* sfmt4253: (2^4253 - 1)
+* sfmt: (2^19937 - 1)
+* sfmt86243: (2^86243 - 1)
+* sfmt216091: (2^216091 - 1)
 
 ## C NIFs based on SFMT 1.3.3 added (from 0.3.0_RELEASE)
 
