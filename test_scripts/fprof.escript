@@ -10,6 +10,7 @@ main(_) ->
     code:load_file(sfmt),
     code:load_file(sfmt607_tests),
     code:load_file(sfmt4253_tests),
+    code:load_file(sfmt86243_tests),
     code:load_file(sfmt216091_tests),
     code:load_file(sfmt_tests),
 
@@ -30,6 +31,12 @@ main(_) ->
     fprof:trace(stop),
     fprof:profile(),
     fprof:analyse({dest, "short_19937.txt"}),
+
+    fprof:trace(start),
+    sfmt86243_tests:test_short_speed(),
+    fprof:trace(stop),
+    fprof:profile(),
+    fprof:analyse({dest, "short_86243.txt"}),
 
     fprof:trace(start),
     sfmt216091_tests:test_short_speed(),
