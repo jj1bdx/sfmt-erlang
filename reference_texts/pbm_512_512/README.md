@@ -4,7 +4,7 @@ The test results look *much more randomized* than the PHP Windows result
 shown in 
 <http://cod.ifies.com/2008/05/php-rand01-on-windows-openssl-rand-on.html>
 
-## list of results
+## list of results, tested with R14B01 on FreeBSD 8.2-RELEASE
 
 * n_random.pbm: random:uniform/0
 * n_wh06.pbm: random_wh06:uniform/0
