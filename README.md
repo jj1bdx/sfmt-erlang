@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.6.1_BETA 11-MAR-2011
+* Version 0.6.2_RELEASE 20-MAR-2011
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -47,6 +47,10 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
     B. A. Wichmann and I. D. Hill,
     "Generating good pseudo-random numbers",
     Computational Statistics & Data Analysis 51 (2006) 1614-1622.    
+
+## Simple test of 512x512 pixmap included (from 0.6.2_RELEASE)
+
+* see the files under `reference_texts/pbm_512_512/` for the details
 
 ## Notable bugfixes
 
