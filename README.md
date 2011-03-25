@@ -124,11 +124,15 @@ which will be automatically fetched under the directory `support/`.
 * Dan Gudmundsson
 * Richard O'Keefe
 
-## ACKNOWLEDGMENT
+## ACKNOWLEDGMENTS
 
 During the compatibility test of this software, Kenji Rikitake
 used the supercomputer service provided by Academic Center for
 Computing and Media Studies (ACCMS), Kyoto University.
+
+Erlang Solutions kindly gave Kenji Rikitake
+an opportunity to give a presentation
+about this software at Erlang Factory SF Bay 2011.
 
 ## Notes on refactoring
 
