@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.6.2_RELEASE 20-MAR-2011
+* Version 0.6.2_RELEASE 20-MAR-2011 (README.md revised 26-MAY-2011)
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -58,8 +58,8 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 ## Tested platforms
 
-* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R14B02
-* RedHat Enterprise Linux AS V4 of x86_64 with Erlang/OTP R14B02
+* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R14B03
+* RedHat Enterprise Linux AS V4 of x86_64 with Erlang/OTP R14B03
   (on the Thin Cluster of the Kyoto University ACCMS Supercomputer System)
 
 ## Building 
