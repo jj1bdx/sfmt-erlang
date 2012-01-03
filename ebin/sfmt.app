@@ -1,6 +1,7 @@
 {application, sfmt, [
     {description, "SFMT PRNG for Erlang"},
     {vsn, "0.5.3"},
+    {registered, []},
     {modules, 
 	[sfmt, sfmt_tests,
 	 sfmt607, sfmt607_tests,
