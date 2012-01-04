@@ -4,7 +4,7 @@
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
-Copyright (c) 2010-2011 Kenji Rikitake and Kyoto University. All rights
+Copyright (c) 2010-2012 Kenji Rikitake and Kyoto University. All rights
 reserved.
 
 Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -58,7 +58,8 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 ## Tested platforms
 
-* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R14B03
+* FreeBSD/amd64 9.0-PRERELEASE with Erlang/OTP R15B
+* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R15B
 * RedHat Enterprise Linux AS V4 of x86_64 with Erlang/OTP R14B03
   (on the Thin Cluster of the Kyoto University ACCMS Supercomputer System)
 
@@ -123,6 +124,7 @@ which will be automatically fetched under the directory `support/`.
 * Tim Bates (random_mt.erl implementator of Mersenne Twister)
 * Dan Gudmundsson
 * Richard O'Keefe
+* Yurii Rashkovskii
 
 ## ACKNOWLEDGMENTS
 
