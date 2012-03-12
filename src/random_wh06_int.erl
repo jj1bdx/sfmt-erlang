@@ -3,6 +3,8 @@
 %% which succeeds the old AS183 algorithm in 1982.
 
 %% This version uses big integers, as Michael Truog proposed.
+%% reference git commit data URL:
+%% https://github.com/okeuday/sfmt-erlang/commit/209f0c1300d454f4d2c16d0c952a7e748677e8d3
 
 %% Copyright (c) 2010 Kenji Rikitake All rights reserved.
 %% Copyright (c) 2012 Michael Truog All rights reserved.
