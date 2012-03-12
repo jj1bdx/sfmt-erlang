@@ -3,6 +3,7 @@
 %% which succeeds the old AS183 algorithm in 1982.
 
 %% Copyright (c) 2010 Kenji Rikitake All rights reserved.
+%% Copyright (c) 2012 Michael Truog All rights reserved.
 
 %%
 %% %CopyrightBegin%
@@ -30,9 +31,9 @@
 %%  Computational Statistics & Data Analysis 51 (2006) 1614-1622.
 
 -export([seed/0, seed/1, seed/4,
-	 uniform/0, uniform/1,
-	 uniform_s/1, uniform_s/2, seed0/0,
-	 next_sequence/1]).
+         uniform/0, uniform/1,
+         uniform_s/1, uniform_s/2, seed0/0,
+         next_sequence/1]).
 
 %%-----------------------------------------------------------------------
 %% The type of the state
@@ -71,137 +72,94 @@ seed({A1, A2, A3, A4}) ->
 %% (by Richard O'Keefe)
 seed(A1, A2, A3, A4) ->
     put(random_wh06_seed,
-	{abs(A1) rem 2147483578 + 1,
-	 abs(A2) rem 2147483542 + 1,
-	 abs(A3) rem 2147483422 + 1,
-	 abs(A4) rem 2147483122 + 1}).
+        {abs(A1) rem 2147483579,
+         abs(A2) rem 2147483543,
+         abs(A3) rem 2147483423,
+         abs(A4) rem 2147483123}).
 
 -spec reseed(ran()) -> ran().
 
 reseed({A1, A2, A3, A4}) ->
     case seed(A1, A2, A3, A4) of
-	undefined -> seed0();
-	{_,_,_,_} = Tuple -> Tuple
-    end.	
+        undefined -> seed0();
+        {_,_,_,_} = Tuple -> Tuple
+    end.        
 
 %% uniform()
-%%  Returns a random float between 0 and 1.
+%%  Returns a random integer between 0 and 21267638781707063560975648195455661512.
 
 -spec uniform() -> float().
 
 uniform() ->
     {A1, A2, A3, A4} = case get(random_wh06_seed) of
-			   undefined -> seed0();
-			   Tuple -> Tuple
-		       end,
-    B1 = 11600 * (A1 rem 185127) -
-	 10379 * (A1 div 185127),
-    B2 = 47003 * (A2 rem 45688) -
-	 10479 * (A2 div 45688),
-    B3 = 23000 * (A3 rem 93368) -
-	 19423 * (A3 div 93368),
-    B4 = 33000 * (A4 rem 65075) -
-	 8123 * (A4 div 65075),
+                           undefined -> seed0();
+                           Tuple -> Tuple
+                       end,
 
-    C1 = if
-	     B1 < 0 -> B1 + 2147483579;
-	     true -> B1
-	 end,
-    C2 = if
-	     B2 < 0 -> B2 + 2147483543;
-	     true -> B2
-	 end,
-    C3 = if
-	     B3 < 0 -> B3 + 2147483423;
-	     true -> B3
-	 end,
-    C4 = if
-	     B4 < 0 -> B4 + 2147483123;
-	     true -> B4
-	 end,
+    B1 = (11600 * A1) rem 2147483579,
+    B2 = (47003 * A2) rem 2147483543,
+    B3 = (23000 * A3) rem 2147483423,
+    B4 = (33000 * A4) rem 2147483123,
 
-    put(random_wh06_seed, {C1, C2, C3, C4}),
+    put(random_wh06_seed, {B1, B2, B3, B4}),
 
-    R = (C1 * 0.0000000004656613022697297188506231646486) +
-	(C2 * 0.0000000004656613100759859932486569933169) +
-	(C3 * 0.0000000004656613360968421314794009471615) +
-	(C4 * 0.0000000004656614011489951998100056779817),
-    R - trunc(R).
+    I = ((B1 * 9903516371291919229607132747) +
+         (B2 * 9903516537312557910938853791) +
+         (B3 * 9903517090714727049595319831) +
+         (B4 * 9903518474220420479167438931))
+        rem 21267638781707063560975648195455661513,
+
+    I.
 
 %% uniform(N) -> I
-%%  Given an integer N >= 1, uniform(N) returns a random integer
+%%  Given an integer N >= 1, N =< 21267638781707063560975648195455661513,
+%%  uniform(N) returns a random integer
 %%  between 1 and N.
 
 -spec uniform(pos_integer()) -> pos_integer().
 
-uniform(N) when is_integer(N), N >= 1 ->
-    trunc(uniform() * N) + 1.
+uniform(N) when is_integer(N), N >= 1, N =< 21267638781707063560975648195455661513 ->
+    (uniform() rem N) + 1.
 
 %%% Functional versions
 
 %% uniform_s(State) -> {F, NewState}
-%%  Returns a random float between 0 and 1.
+%%  Returns a random integer between 0 and 21267638781707063560975648195455661512.
 
 -spec uniform_s(ran()) -> {float(), ran()}.
 
 uniform_s({A1, A2, A3, A4}) ->
-    B1 = 11600 * (A1 rem 185127) -
-	 10379 * (A1 div 185127),
-    B2 = 47003 * (A2 rem 45688) -
-	 10479 * (A2 div 45688),
-    B3 = 23000 * (A3 rem 93368) -
-	 19423 * (A3 div 93368),
-    B4 = 33000 * (A4 rem 65075) -
-	 8123 * (A4 div 65075),
+    B1 = (11600 * A1) rem 2147483579,
+    B2 = (47003 * A2) rem 2147483543,
+    B3 = (23000 * A3) rem 2147483423,
+    B4 = (33000 * A4) rem 2147483123,
 
-    C1 = if
-	     B1 < 0 -> B1 + 2147483579;
-	     true -> B1
-	 end,
-    C2 = if
-	     B2 < 0 -> B2 + 2147483543;
-	     true -> B2
-	 end,
-    C3 = if
-	     B3 < 0 -> B3 + 2147483423;
-	     true -> B3
-	 end,
-    C4 = if
-	     B4 < 0 -> B4 + 2147483123;
-	     true -> B4
-	 end,
+    I = ((B1 * 9903516371291919229607132747) +
+         (B2 * 9903516537312557910938853791) +
+         (B3 * 9903517090714727049595319831) +
+         (B4 * 9903518474220420479167438931))
+        rem 21267638781707063560975648195455661513,
 
-    R = (C1 * 0.0000000004656613022697297188506231646486) +
-	(C2 * 0.0000000004656613100759859932486569933169) +
-	(C3 * 0.0000000004656613360968421314794009471615) +
-	(C4 * 0.0000000004656614011489951998100056779817),
-
-    {R - trunc(R), {C1, C2, C3, C4}}.
+    {I, {B1, B2, B3, B4}}.
 
 %% uniform_s(N, State) -> {I, NewState}
-%%  Given an integer N >= 1, uniform(N) returns a random integer
+%%  Given an integer N >= 1, N =< 21267638781707063560975648195455661513,
+%%  uniform(N) returns a random integer
 %%  between 1 and N.
 
 -spec uniform_s(pos_integer(), ran()) -> {integer(), ran()}.
 
-uniform_s(N, State0) when is_integer(N), N >= 1 ->
-    {F, State1} = uniform_s(State0),
-    {trunc(F * N) + 1, State1}.
+uniform_s(N, State0) when is_integer(N), N >= 1, N =< 21267638781707063560975648195455661513 ->
+    {I, State1} = uniform_s(State0),
+    {(I rem N) + 1, State1}.
 
 %% generating another seed for multiple sequences
-%% from a given seed changing the first two parameters
 
 -spec next_sequence(ran()) -> ran().
 
 next_sequence({A1, A2, A3, A4}) ->
-    B1 = 46340 * (A1 rem 46341) - (41639 * (A1 div 46341)),
-    B2 = 22000 * (A2 rem 97612) - (19543 * (A2 div 97612)),
-    C1 = if
-	     B1 < 0 -> B1 + 2147483579;
-	     true -> B1
-	 end,
-    C2 = if
-	     B2 < 0 -> B2 + 2147483543;
-	     true -> B2
-	 end,
-    {C1, C2, A3, A4}.
+    B1 = (11600 * A1) rem 2147483579,
+    B2 = (47003 * A2) rem 2147483543,
+    B3 = (23000 * A3) rem 2147483423,
+    B4 = (33000 * A4) rem 2147483123,
+    {B1, B2, B3, B4}.
