@@ -115,6 +115,7 @@ which will be automatically fetched under the directory `support/`.
 * Mutsuo Saito
 * Makoto Matsumoto
 * Dan Gudmundsson
+* Michael Truog
 
 ## THANKS to:
 
