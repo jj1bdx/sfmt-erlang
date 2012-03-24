@@ -1,0 +1,8 @@
+{application, sfmt, [
+    {description, "SFMT PRNG for Erlang"},
+    {vsn, "0.5.3"},
+    {env, []},
+    {registered, []},
+    {modules, []},
+    {applications, [kernel, stdlib]}
+]}.
