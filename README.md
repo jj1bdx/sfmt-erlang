@@ -58,8 +58,8 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 ## Notable bugfixes
 
-* Catched up with the latest rebar configuration file (from 0.7_RELEASE)
-* Dynamically building ebin/sfmt.app (from 0.7_RELEASE)
+* Catched up with the latest rebar configuration file (from 0.7.0_RELEASE)
+* Dynamically building ebin/sfmt.app (from 0.7.0_RELEASE)
 * PDIC_SEED now named differently for each period (bugfix, from 0.5.2_RELEASE)
 
 ## Tested platforms
