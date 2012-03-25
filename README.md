@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.6.2_RELEASE 20-MAR-2011 (README.md revised 26-MAY-2011)
+* Version 0.7_RELEASE 25-MAR-2012 (README.md revised 26-MAY-2011)
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -48,20 +48,24 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
     "Generating good pseudo-random numbers",
     Computational Statistics & Data Analysis 51 (2006) 1614-1622.    
 
+* See `src/random_wh06_int.erl` for a bigint version (by Michael Truog)
+
+    Note: this bigint version is not tested yet (no eunit test case)
+
 ## Simple test of 512x512 pixmap included (from 0.6.2_RELEASE)
 
 * see the files under `reference_texts/pbm_512_512/` for the details
 
 ## Notable bugfixes
 
+* Catched up with the latest rebar configuration file (from 0.7_RELEASE)
+* Dynamically building ebin/sfmt.app (from 0.7_RELEASE)
 * PDIC_SEED now named differently for each period (bugfix, from 0.5.2_RELEASE)
 
 ## Tested platforms
 
 * FreeBSD/amd64 9.0-PRERELEASE with Erlang/OTP R15B
 * FreeBSD/i386 8.2-RELEASE with Erlang/OTP R15B
-* RedHat Enterprise Linux AS V4 of x86_64 with Erlang/OTP R14B03
-  (on the Thin Cluster of the Kyoto University ACCMS Supercomputer System)
 
 ## Building 
 
@@ -116,6 +120,7 @@ which will be automatically fetched under the directory `support/`.
 * Mutsuo Saito
 * Makoto Matsumoto
 * Dan Gudmundsson
+* Michael Truog
 
 ## THANKS to:
 
