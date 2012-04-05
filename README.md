@@ -64,8 +64,8 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 ## Tested platforms
 
-* FreeBSD/amd64 9.0-PRERELEASE with Erlang/OTP R15B
-* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R15B
+* FreeBSD/amd64 9.0-PRERELEASE with Erlang/OTP R15B01
+* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R15B01
 
 ## Building 
 
