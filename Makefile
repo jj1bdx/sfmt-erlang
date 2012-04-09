@@ -1,8 +1,9 @@
-# GNU Make dependent
+# for both BSD/GNU Make
 
 .PHONY: compile clean c_doc doc eunit speed
 
-REBAR=@`sh -c "PATH='$(PATH)':support which rebar||support/getrebar||echo false"`
+REBAR=@`sh -c "PATH='$(PATH)':support which rebar\
+       ||support/getrebar||echo false"`
 
 compile:
 	$(REBAR) compile
