@@ -59,10 +59,10 @@ pgm_output(X, Y, F) when is_integer(X), is_integer(Y) ->
 
 test() ->
     io:format("P1~n# random:uniform/0~n"),
-    random:seed(),
+    _ = random:seed(),
     pgm_output(512,512,fun random:uniform/0),
     io:format("P1~n# random_wh06:uniform/0~n"),
-    random_wh06:seed(),
+    _ = random_wh06:seed(),
     pgm_output(512,512,fun random_wh06:uniform/0),
     io:format("P1~n# sfmt:uniform/0~n"),
     sfmt:seed(),
