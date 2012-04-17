@@ -92,7 +92,7 @@ reseed({A1, A2, A3, A4}) ->
 %% uniform()
 %%  Returns a random integer between 0 and 21267638781707063560975648195455661512.
 
--spec uniform() -> float().
+-spec uniform() -> integer().
 
 uniform() ->
     {A1, A2, A3, A4} = case get(random_wh06_seed) of
@@ -130,7 +130,7 @@ uniform(N) when is_integer(N), N >= 1, N =< 212676387817070635609756481954556615
 %% uniform_s(State) -> {F, NewState}
 %%  Returns a random integer between 0 and 21267638781707063560975648195455661512.
 
--spec uniform_s(ran()) -> {float(), ran()}.
+-spec uniform_s(ran()) -> {integer(), ran()}.
 
 uniform_s({A1, A2, A3, A4}) ->
     B1 = (11600 * A1) rem 2147483579,
