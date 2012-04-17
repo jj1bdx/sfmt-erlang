@@ -58,75 +58,75 @@ test_speed_rand_rec1(X, Q, I) ->
     test_speed_rand_rec1(X - 1, Q, I2).
 
 test_speed_rand(P, Q) ->
-    statistics(runtime),
+    _ = statistics(runtime),
     I = sfmt86243:init_gen_rand(1234),
     ok = test_speed_rand_rec1(P, Q, I),
     {_, T} = statistics(runtime),
     T.
 
 test_speed_sfmt_uniform_rec1(Acc, 0, _, _, _) ->
-    lists:reverse(Acc),
+    _ = lists:reverse(Acc),
     ok;
 test_speed_sfmt_uniform_rec1(Acc, X, 0, R, I) ->
-    lists:reverse(Acc),
+    _ = lists:reverse(Acc),
     test_speed_sfmt_uniform_rec1([], X - 1, R, R, I);
 test_speed_sfmt_uniform_rec1(Acc, X, Q, R, I) ->
     {F, I2} = sfmt86243:uniform_s(I),
     test_speed_sfmt_uniform_rec1([F|Acc], X, Q - 1, R, I2).
 
 test_speed_sfmt_uniform(P, Q) ->
-    statistics(runtime),
+    _ = statistics(runtime),
     I = sfmt86243:seed(),
     ok = test_speed_sfmt_uniform_rec1([], P, Q, Q, I),
     {_, T} = statistics(runtime),
     T.
 
 test_speed_orig_uniform_rec1(Acc, 0, _, _, _) ->
-    lists:reverse(Acc),
+    _ = lists:reverse(Acc),
     ok;
 test_speed_orig_uniform_rec1(Acc, X, 0, R, I) ->
-    lists:reverse(Acc),
+    _ = lists:reverse(Acc),
     test_speed_orig_uniform_rec1([], X - 1, R, R, I);
 test_speed_orig_uniform_rec1(Acc, X, Q, R, I) ->
     {F, I2} = random:uniform_s(I),
     test_speed_orig_uniform_rec1([F|Acc], X, Q - 1, R, I2).
 
 test_speed_orig_uniform(P, Q) ->
-    statistics(runtime),
+    _ = statistics(runtime),
     I = random:seed(),
     ok = test_speed_orig_uniform_rec1([], P, Q, Q, I),
     {_, T} = statistics(runtime),
     T.
 
 test_speed_rand_max_rec1(Acc, 0, _, _, _) ->
-    lists:reverse(Acc),
+    _ = lists:reverse(Acc),
     ok;
 test_speed_rand_max_rec1(Acc, X, 0, R, I) ->
-    lists:reverse(Acc),
+    _ = lists:reverse(Acc),
     test_speed_rand_max_rec1([], X - 1, R, R, I);
 test_speed_rand_max_rec1(Acc, X, Q, R, I) ->
     {F, I2} = sfmt86243:gen_rand32_max(10000, I),
     test_speed_rand_max_rec1([F|Acc], X, Q - 1, R, I2).
 
 test_speed_rand_max(P, Q) ->
-    statistics(runtime),
+    _ = statistics(runtime),
     I = sfmt86243:init_gen_rand(1234),
     ok = test_speed_rand_max_rec1([], P, Q, Q, I),
     {_, T} = statistics(runtime),
     T.
 
 test_speed_orig_uniform_n_rec1(Acc, 0, _, _, _) ->
-    lists:reverse(Acc),
+    _ = lists:reverse(Acc),
     ok;
 test_speed_orig_uniform_n_rec1(Acc, X, 0, R, I) ->
-    lists:reverse(Acc),
+    _ = lists:reverse(Acc),
     test_speed_orig_uniform_n_rec1([], X - 1, R, R, I);
 test_speed_orig_uniform_n_rec1(Acc, X, Q, R, I) ->
     {F, I2} = random:uniform_s(10000, I),
     test_speed_orig_uniform_n_rec1([F|Acc], X, Q - 1, R, I2).
 
 test_speed_orig_uniform_n(P, Q) ->
-    statistics(runtime),
+    _ = statistics(runtime),
     I = random:seed(),
     ok = test_speed_orig_uniform_n_rec1([], P, Q, Q, I),
     {_, T} = statistics(runtime),
