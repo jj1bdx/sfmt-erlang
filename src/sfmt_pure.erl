@@ -479,10 +479,13 @@ seed0() ->
     {R, I}.
 
 %% @spec seed() -> ran_sfmt()
-%% @doc Initialize the process dictionary with seed0/0
+%% @doc Initialize the process dictionary with seed0/0,
+%%      and return seed0/0 value.
 
 seed() ->
-    put(?PDIC_SEED, seed0()).
+    RS = seed0(),
+    put(?PDIC_SEED, RS),
+    RS.
 
 %% @spec seed(integer()) -> ran_sfmt()
 %% @doc Puts the seed computed from the given integer list by init_gen_rand/1
