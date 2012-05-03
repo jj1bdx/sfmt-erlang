@@ -1,8 +1,8 @@
 {application, sfmt, [
     {description, "SFMT PRNG for Erlang"},
-    {vsn, "0.7.1"},
+    {vsn, "0.8.0"},
     {env, []},
     {registered, []},
-    {modules, [sfmt]},
+    {modules, [sfmt, sfmt_pure]},
     {applications, [kernel, stdlib]}
 ]}.
