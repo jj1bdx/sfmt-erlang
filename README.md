@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.7.1_RELEASE 18-APR-2012
+* Version 0.8.0_RELEASE 3-MAY-2012
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -24,12 +24,13 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 * new module sfmt607 and sfmt216091 added (from 0.5.1_RELEASE)
 * new module sfmt4253 added (from 0.5.3_RELEASE)
 * new module sfmt86243 added (from 0.6.1_BETA)
+* Pure SFMT module now added as working code by request (from 0.8.0_RELEASE)
 
 ## Supported SFMT PRNG periods
 
 * sfmt607: (2^607 - 1)
 * sfmt4253: (2^4253 - 1)
-* sfmt: (2^19937 - 1)
+* sfmt: (2^19937 - 1) (also on sfmt_pure)
 * sfmt86243: (2^86243 - 1)
 * sfmt216091: (2^216091 - 1)
 
@@ -64,16 +65,14 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 ## Tested platforms
 
-* FreeBSD/amd64 9.0-PRERELEASE with Erlang/OTP R15B01
-* FreeBSD/i386 8.2-RELEASE with Erlang/OTP R15B01
+* FreeBSD/amd64 9.0-STABLE with Erlang/OTP R15B01
+* FreeBSD/i386 8.3-RELEASE with Erlang/OTP R15B01
 
 ## Building 
 
-* Use GNU make and then
+* Use GNU/BSD make and then
 
     make compile
-
-(Note: on FreeBSD, GNU make should be invoked as `gmake`.)
 
 The build script is Basho's rebar at <https://github.com/basho/rebar>,
 which will be automatically fetched under the directory `support/`.
@@ -131,6 +130,7 @@ which will be automatically fetched under the directory `support/`.
 * Richard O'Keefe
 * Yurii Rashkovskii
 * Kostis Sagonas (for code verification by dialyzer)
+* Michael Gebetsroither (for ths suggestion of Pure Erlang code workable)
 
 ## ACKNOWLEDGMENTS
 
