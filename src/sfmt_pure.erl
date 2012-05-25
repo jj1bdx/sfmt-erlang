@@ -488,13 +488,14 @@ seed() ->
     RS.
 
 %% @spec seed(integer()) -> ran_sfmt()
-%% @doc Puts the seed computed from the given integer list by init_gen_rand/1
+%% @doc Puts the seed computed from the given integer
+%%      as a single-element list by init_by_list32/1
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
 %%      and returns the old internal state
 
 seed(N) when is_integer(N) ->
-    I = init_gen_rand(N),
+    I = init_by_list32([N]),
     % this operation is intstate() type dependent
     R = I,
     RS = {R, I},
