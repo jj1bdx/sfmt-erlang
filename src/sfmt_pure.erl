@@ -114,6 +114,10 @@
 -define(BITMASK32, 16#ffffffff).
 -define(BITMASK64, 16#ffffffffffffffff).
 
+-type w128() :: [integer()].
+-type intstate() :: [w128()].
+-type ran_sfmt() :: {[integer()], intstate()}.
+
 %% internal state format: 
 %% list of 32-bit unsigned ints,
 %% with the following format of
@@ -128,12 +132,10 @@
 %% and 128-bit list is a flat concatenation
 %% of 128-bit number
 %%
-%% @type w128() = [integer(), integer(), integer(), integer()].
-%% @type intstate() = [w128()].
 
-%% @spec rshift128(w128(), integer()) -> w128().
 %% @doc SIMD 128-bit right shift simulation for little endian SIMD
 %%      of Shift*8 bits
+-spec rshift128(w128(), integer()) -> w128().
 
 rshift128(In, Shift) ->
     [I0, I1, I2, I3] = In,
@@ -145,9 +147,9 @@ rshift128(In, Shift) ->
     [OL band ?BITMASK32, OL bsr 32, 
      OH band ?BITMASK32, OH bsr 32].
 
-%% @spec lshift128(w128(), integer()) -> w128().
 %% @doc SIMD 128-bit left shift simulation for little endian SIMD
 %%      of Shift*8 bits
+-spec lshift128(w128(), integer()) -> w128().
 
 lshift128(In, Shift) ->
     [I0, I1, I2, I3] = In,
@@ -159,8 +161,8 @@ lshift128(In, Shift) ->
     [OL band ?BITMASK32, OL bsr 32, 
      OH band ?BITMASK32, OH bsr 32].
 
-%% @spec do_recursion(w128(), w128(), w128(), w128()) -> w128().
 %% @doc the recursion formula operation of SFMT
+-spec do_recursion(w128(), w128(), w128(), w128()) -> w128().
 
 do_recursion(A, B, C, D) ->
     [A0, A1, A2, A3] = A,
@@ -247,8 +249,8 @@ gen_rand_recursion(K, Acc, Int,
 		       [Q0, Q1, Q2, Q3],
 		       [X0, X1, X2, X3]).
 
-%% @spec gen_rand_all(intstate()) - > intstate().
 %% @doc filling the internal state array with SFMT PRNG
+-spec gen_rand_all(intstate()) -> intstate().
 
 gen_rand_all(Int) ->
     [T3, T2, T1, T0, S3, S2, S1, S0 | _] = lists:reverse(Int),
@@ -256,10 +258,10 @@ gen_rand_all(Int) ->
 		       lists:nthtail(?POS1 * 4, Int), [],
 		       [S0, S1, S2, S3], [T0, T1, T2, T3]).
 
-%% @spec gen_rand_list32(integer(), intstate()) - > {[integer()], intstate()}.
 %% @doc generating the 32-bit integer list of PRNG,
 %%      where length of the list is Size
 %%      with the updated internal state
+-spec gen_rand_list32(integer(), intstate()) -> {[integer()], intstate()}.
 
 gen_rand_list32(Size, Int) when Size >= ?N32, Size rem 4 =:= 0 ->
     [T3, T2, T1, T0, S3, S2, S1, S0 | _] = lists:reverse(Int),
@@ -323,14 +325,14 @@ period_certification(Int) ->
 	    period_modification(Int)
     end.
 
-%% @spec get_idstring() -> string().
 %% @doc returns SFMT identification string
+-spec get_idstring() -> string().
 
 get_idstring() ->
     ?IDSTR.
 
-%% @spec get_min_array_size32() -> integer().
 %% @doc returns array size of internal state
+-spec get_min_array_size32() -> integer().
 
 get_min_array_size32() ->
     ?N32.
@@ -349,8 +351,8 @@ init_gen_rand_rec1(I, Acc) ->
       I + 1, 
       [((1812433253 * (H bxor (H bsr 30))) + I) band ?BITMASK32 | Acc]).
 
-%% @spec init_gen_rand(integer()) -> intstate().
 %% @doc generates an internal state from an integer seed
+-spec init_gen_rand(integer()) -> intstate().
 
 init_gen_rand(Seed) ->
     period_certification(init_gen_rand_rec1(1, [Seed])).
@@ -404,8 +406,8 @@ init_by_list32_rec2(K, I, A) ->
     I2 = (I + 1) rem ?N32,
     init_by_list32_rec2(K - 1, I2, A4).
 
-%% @spec init_by_list32([integer()]) -> intstate().
 %% @doc generates an internal state from a list of 32-bit integers
+-spec init_by_list32([integer()]) -> intstate().
 
 init_by_list32(Key) ->
     Keylength = length(Key),
@@ -445,9 +447,9 @@ init_by_list32(Key) ->
 %% Note: ran_sfmt() -> {[integer()], intstate()}
 %% intstate() content may be changed by NIFnization
 
-%% @spec gen_rand32(intstate()) -> {integer(), ran_sfmt()).
-%% @spec gen_rand32(ran_sfmt()) -> {integer(), ran_sfmt()).
 %% @doc generates a 32-bit random number from the given ran_sfmt()
+-spec gen_rand32(intstate()) -> {integer(), ran_sfmt()};
+                (ran_sfmt()) -> {integer(), ran_sfmt()}.
 
 gen_rand32(L) when is_list(L), length(L) =:= ?N32 ->
     % when intstate() is directly passed
@@ -534,7 +536,7 @@ seed(A1, A2, A3) ->
 
 %% @spec uniform() -> float()
 %% @doc Returns a uniformly-distributed float random number X
-%%      where (X >= 0.0) and (X =< 1.0)
+%%      where `(X >= 0.0)' and `(X =< 1.0)'
 %%      and updates the internal state in the process dictionary
 
 uniform() -> 
@@ -552,26 +554,26 @@ uniform() ->
 
 %% @spec uniform(N) -> integer()
 %% @doc Returns a uniformly-distributed integer random number X
-%%      where (X >= 1) and (X =< N)
+%%      where `(X >= 1)' and `(X =< N)'
 %%      and updates the internal state in the process dictionary
 
 uniform(N) when N >= 1 ->
     trunc(uniform() * N) + 1.
 
-%% @spec uniform(ran_sfmt()) -> float()
+%% @spec uniform_s(ran_sfmt()) -> float()
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
-%%      where (X >= 0.0) and (X =< 1.0)
+%%      where `(X >= 0.0)' and `(X =< 1.0)'
 %%      and a new state
 
 uniform_s(RS) ->
     {X, NRS} = gen_rand32(RS),
     {X * ?FLOAT_CONST, NRS}.
 
-%% @spec uniform(integer(), ran_sfmt()) -> (integer(), ran_sfmt()} 
 %%      Returns a uniformly-distributed integer random number X
 %%      where (X >= 1) and (X =< N)
 %%      and a new state
+-spec uniform_s(integer(), ran_sfmt()) -> {integer(), ran_sfmt()}.
 
 uniform_s(N, RS) ->
     {X, NRS} = gen_rand32(RS),
