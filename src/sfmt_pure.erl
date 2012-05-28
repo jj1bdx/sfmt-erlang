@@ -453,8 +453,10 @@ init_by_list32(Key) ->
 
 gen_rand32(L) when is_list(L), length(L) =:= ?N32 ->
     % when intstate() is directly passed
-    [H|T] = L,
-    {H, {T, L}};
+    % note: given intstate() is re-initialized by gen_rand_all/1
+    L2 = gen_rand_all(L),
+    [H|T] = L2,
+    {H, {T, L2}};
 gen_rand32({[], I}) ->
     I2 = gen_rand_all(I),
     % this operation is intstate() type dependent
