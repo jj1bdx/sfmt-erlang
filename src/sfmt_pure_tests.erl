@@ -193,13 +193,34 @@ value_tests_2() ->
     {Outarray4, _RS5} = test_rec1(10000, [], RS4),
     ?assertEqual(Outarray4, Outarray2).
 
+%% @doc  Value tests of the first 10000 random numbers
+%%       initialized by init_gen_rand/1 by gen_rand32/1.
+
+value_tests_3() ->
+    {Refrand, _Refarray} = test_refval(),
+    Int1 = sfmt_pure:init_gen_rand(1234),
+    {Outarray1, Int2} = lists:mapfoldl(fun(_X, State) -> sfmt_pure:gen_rand32(State) end,
+        Int1, lists:seq(1, 10000)),
+    ?assertEqual(Refrand, lists:reverse(
+            lists:nthtail(10000 - length(Refrand),
+                lists:reverse(Outarray1)))),
+    {Outarray2, _Int3} = lists:mapfoldl(fun(_X, State) -> sfmt_pure:gen_rand32(State) end,
+        Int2, lists:seq(1, 10000)),
+    {Outarray3, RS4} = test_rec1(10000, [], {[], Int1}),
+    io:format("~p - ~p", [lists:flatlength(Outarray3), lists:flatlength(Outarray1)]),
+    ?assertEqual(Outarray3, Outarray1),
+    {Outarray4, _RS5} = test_rec1(10000, [], RS4),
+    ?assertEqual(Outarray4, Outarray2).
+
+
 %% @doc simple testing function as used in EUnit
 
 simple_test_() -> 
     [
      ?_assertMatch(ok, gen_rand_tests_sub()),
      ?_assertMatch(ok, value_tests_1()),
-     ?_assertMatch(ok, value_tests_2())
+     ?_assertMatch(ok, value_tests_2()),
+     ?_assertMatch(ok, value_tests_3())
     ].
 
 %% @doc test value definitions (as in SFMT.19937.out.txt)
