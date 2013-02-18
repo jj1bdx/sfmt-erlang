@@ -115,7 +115,7 @@
 -define(BITMASK64, 16#ffffffffffffffff).
 
 -type w128() :: [integer()].
--type intstate() :: [w128()].
+-type intstate() :: [integer()].
 -type ran_sfmt() :: {[integer()], intstate()}.
 
 %% internal state format: 
