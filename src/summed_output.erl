@@ -1,16 +1,35 @@
 -module(summed_output).
--export([init/1]).
+-export([init/1, dispbar/2]).
 -define(BARNUM, 10).
+-define(BARLEN, 40).
 
 init([LI, LN]) ->
     A = array:new([{size, ?BARNUM},{default, 0}]),
-    Out = main(list_to_integer(atom_to_list(LI)),
-		list_to_integer(atom_to_list(LN))),
+    LIN = list_to_integer(atom_to_list(LI)),
+    Out = main(LIN,list_to_integer(atom_to_list(LN))),
     A2 = listup(Out, A),
     lists:map(fun(J) ->
+		      V = array:get(J, A2),
+		      io:format("~s",[dispbar(V, LIN)]),
 		      io:format("~p ~p~n", 
-				[J / ?BARNUM, array:get(J, A2)]) end,
+				[
+				 J / ?BARNUM, V]) end,
 	      lists:seq(0, ?BARNUM - 1)).
+
+dispbar(J, LI) ->
+    Len = float(J) / LI * ?BARLEN,
+    barstr(?BARLEN, Len, []).
+  
+barstr(0, _, Str) ->
+    lists:reverse(Str);
+barstr(N, Len, Str) ->
+    case N >= Len of
+	true ->
+	    NewStr = Str ++ [32];
+	false ->
+	    NewStr = Str ++ [$*]
+    end,
+    barstr(N-1, Len, NewStr).
 
 listup([], AccA) ->
     AccA;
