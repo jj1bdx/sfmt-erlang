@@ -1,7 +1,7 @@
 -module(summed_output).
 -export([init/1, dispbar/2]).
--define(BARNUM, 10).
--define(BARLEN, 40).
+-define(BARNUM, 20).
+-define(BARLEN, 50).
 
 init([LI, LN]) ->
     A = array:new([{size, ?BARNUM},{default, 0}]),
