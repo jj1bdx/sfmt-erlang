@@ -1,13 +1,27 @@
 -module(summed_output).
--export([init2/1, init/1]).
-
-init2(I) ->
-    io:format("~p~n", [I]).
+-export([init/1]).
+-define(BARNUM, 10).
 
 init([LI, LN]) ->
-    io:format("~p~n",
-	      [main(list_to_integer(atom_to_list(LI)),
-		    list_to_integer(atom_to_list(LN)))]).
+    A = array:new([{size, ?BARNUM},{default, 0}]),
+    Out = main(list_to_integer(atom_to_list(LI)),
+		list_to_integer(atom_to_list(LN))),
+    A2 = listup(Out, A),
+    lists:map(fun(J) ->
+		      io:format("~p ~p~n", 
+				[J / ?BARNUM, array:get(J, A2)]) end,
+	      lists:seq(0, ?BARNUM - 1)).
+
+listup([], AccA) ->
+    AccA;
+listup([H|T], AccA) ->
+    NewA = setarray(H, AccA),
+    listup(T, NewA).
+
+setarray(X, OldA) ->
+  I = trunc(X * float(?BARNUM)),
+  V = array:get(I, OldA),
+  array:set(I, V + 1, OldA).
 
 main(I, N) ->
     sfmt:seed(),
