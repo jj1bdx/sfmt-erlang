@@ -16,8 +16,10 @@ init([LI, LN]) ->
 				 J / ?BARNUM, V]) end,
 	      lists:seq(0, ?BARNUM - 1)),
     M = lists:sum(Out) / length(Out),
-    Var = (lists:sum(lists:map(fun(X) -> X * X end, Out)) /
-	       (length(Out) - 1)) - (M * M),
+    Var = (lists:sum(lists:map(fun(X) -> (X - M) * (X - M) end, Out)) /
+	       (length(Out) - 1)),
+    % Var = (lists:sum(lists:map(fun(X) -> X * X end, Out)) /
+    %	       (length(Out) - 1)) - (M * M),
     Sd = math:sqrt(Var),
     io:format("mean: ~p, variant: ~p, sd: ~p~n", [M, Var, Sd]).
 
