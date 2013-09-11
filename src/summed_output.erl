@@ -14,7 +14,9 @@ init([LI, LN]) ->
 		      io:format("~p ~p~n", 
 				[
 				 J / ?BARNUM, V]) end,
-	      lists:seq(0, ?BARNUM - 1)).
+	      lists:seq(0, ?BARNUM - 1)),
+    M = lists:sum(Out) / length(Out),
+    io:format("mean value: ~p~n", [M]).
 
 dispbar(J, LI) ->
     Len = float(J) / LI * ?BARLEN,
