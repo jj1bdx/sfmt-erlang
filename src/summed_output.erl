@@ -16,7 +16,10 @@ init([LI, LN]) ->
 				 J / ?BARNUM, V]) end,
 	      lists:seq(0, ?BARNUM - 1)),
     M = lists:sum(Out) / length(Out),
-    io:format("mean value: ~p~n", [M]).
+    Var = (lists:sum(lists:map(fun(X) -> X * X end, Out)) /
+	       (length(Out) - 1)) - (M * M),
+    Sd = math:sqrt(Var),
+    io:format("mean: ~p, variant: ~p, sd: ~p~n", [M, Var, Sd]).
 
 dispbar(J, LI) ->
     Len = float(J) / LI * ?BARLEN,
