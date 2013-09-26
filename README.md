@@ -77,7 +77,7 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 ## Tested platforms
 
-* FreeBSD/amd64 9-STABLE with Erlang/OTP R16B
+* FreeBSD/amd64 9-STABLE with Erlang/OTP R16B02
 * FreeBSD/i386 8-STABLE with Erlang/OTP R15B03
 * Ubuntu Linux x86\_64 12.10 with Erlang/OTP R16B
 
