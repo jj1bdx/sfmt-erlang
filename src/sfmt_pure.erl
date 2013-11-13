@@ -293,14 +293,15 @@ period_modification(Int) ->
     {NI1, F1} = period_modification_rec1(?PARITY2, I1),
     {NI2, F2} = period_modification_rec1(?PARITY3, I2),
     {NI3, F3} = period_modification_rec1(?PARITY4, I3),
+    % F[0-3] are true or false
     if
-	F0 =:= true ->
+	F0 ->
 	    [NI0, I1, I2, I3 | IR];
-	F1 =:= true ->
+	F1 ->
 	    [I0, NI1, I2, I3 | IR];
-	F2 =:= true ->
+	F2 ->
 	    [I0, I1, NI2, I3 | IR];
-	F3 =:= true ->
+	F3 ->
 	    [I0, I1, I2, NI3 | IR];
 	true ->
 	    Int
