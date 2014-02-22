@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.8.2\_RELEASE 28-MAY-2012 (README last modified 2-FEB-2014)
+* Version 0.8.2\_RELEASE 28-MAY-2012 (README last modified 22-FEB-2014)
 * Edited and written by Kenji Rikitake (Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -10,7 +10,7 @@ reserved.
 Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
 University. All rights reserved.
 
-See LICENSE.txt for the license (new/simplified BSD license). (Note:
+See the file `LICENSE` for the license (new/simplified BSD license). (Note:
 license of rebar is Apache 2.0 License.)
 
 This software is based on SFMT ver. 1.3.3 (SIMD oriented Fast Mersenne
