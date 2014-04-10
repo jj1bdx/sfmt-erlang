@@ -1,7 +1,7 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.8.2\_RELEASE 28-MAY-2012 (README last modified 22-FEB-2014)
-* Edited and written by Kenji Rikitake (Kyoto University)
+* Version 0.9.0\_BETA 10-APR-2014
+* Edited and written by Kenji Rikitake (k2r.org, formerly Kyoto University)
 * Email contact: <kenji.rikitake@acm.org>
 
 Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University. All rights
@@ -21,9 +21,7 @@ Matsumoto (Hiroshima University)
 
 See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
-* new module sfmt607 and sfmt216091 added (from 0.5.1\_RELEASE)
-* new module sfmt4253 added (from 0.5.3\_RELEASE)
-* new module sfmt86243 added (from 0.6.1\_BETA)
+* Note: only (2^19937 - 1) period is supported
 * Pure SFMT module now added as working code by request (from 0.8.0\_RELEASE)
 
 ## Seeding algorithm changed for `seed(integer())` functions
@@ -39,11 +37,7 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 ## Supported SFMT PRNG periods
 
-* sfmt607: (2^607 - 1)
-* sfmt4253: (2^4253 - 1)
 * sfmt: (2^19937 - 1) (also on sfmt\_pure)
-* sfmt86243: (2^86243 - 1)
-* sfmt216091: (2^216091 - 1)
 
 ## C NIFs based on SFMT 1.3.3 added (from 0.3.0\_RELEASE)
 
@@ -51,22 +45,10 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 * Also refer to sfmt-extstate at <http://github.com/jj1bdx/sfmt-extstate>
 * The version number of this NIF is 101 (see `NIF_LOAD_INFO` macro value)
 
-## Wichmann-Hill 2006 algorithm code also included (from 0.6.0\_RELEASE)
+## Removed code
 
-* See `src/random_wh06.erl` for the details
-* Reference for the algorithm:
-
-    B. A. Wichmann and I. D. Hill,
-    "Generating good pseudo-random numbers",
-    Computational Statistics & Data Analysis 51 (2006) 1614-1622.    
-
-* See `src/random_wh06_int.erl` for a bigint version (by Michael Truog)
-
-    Note: this bigint version is not tested yet (no eunit test case)
-
-## Simple test of 512x512 pixmap included (from 0.6.2\_RELEASE)
-
-* see the files under `reference_texts/pbm_512_512/` for the details
+* Wichmann-Hill 2006 RNG code is removed
+* netpbm test code is removed
 
 ## Notable bugfixes
 
@@ -77,14 +59,8 @@ See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
 
 ## Tested platforms
 
-* FreeBSD/amd64 10-STABLE with Erlang/OTP R16B03-1 and 17.0-rc1
-* OS X 10.9.1 Mavericks with Erlang/OTP R16B03-1 and 17.0-rc1
-
-### Past tested platforms
-
-* FreeBSD/amd64 9-STABLE with Erlang/OTP R16B02
-* FreeBSD/i386 8-STABLE with Erlang/OTP R15B03
-* Ubuntu Linux x86\_64 12.10 with Erlang/OTP R16B
+* FreeBSD/amd64 10-STABLE with Erlang/OTP 17.0
+* OS X 10.9.1 Mavericks with Erlang/OTP 17.0
 
 ## Building 
 
