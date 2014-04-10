@@ -1,6 +1,6 @@
 {application, sfmt, [
     {description, "SFMT PRNG for Erlang"},
-    {vsn, "0.8.2"},
+    {vsn, "0.9.0"},
     {env, []},
     {registered, []},
     {modules, [sfmt, sfmt_pure]},
