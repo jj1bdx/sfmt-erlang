@@ -98,45 +98,26 @@ test_speed_orig_uniform(P, Q) ->
     {_, T} = statistics(runtime),
     T.
 
-test_speed_wh06_uniform_rec1(Acc, 0, _, _, _) ->
-    _ = lists:reverse(Acc),
-    ok;
-test_speed_wh06_uniform_rec1(Acc, X, 0, R, I) ->
-    _ = lists:reverse(Acc),
-    test_speed_wh06_uniform_rec1([], X - 1, R, R, I);
-test_speed_wh06_uniform_rec1(Acc, X, Q, R, I) ->
-    {F, I2} = random_wh06:uniform_s(I),
-    test_speed_wh06_uniform_rec1([F|Acc], X, Q - 1, R, I2).
-
-test_speed_wh06_uniform(P, Q) ->
-    _ = statistics(runtime),
-    I = random_wh06:seed(),
-    ok = test_speed_wh06_uniform_rec1([], P, Q, Q, I),
-    {_, T} = statistics(runtime),
-    T.
-
 %% @doc running speed test for 100 times of
 %% 100000 calls for sfmt_pure:gen_rand32/1, sfmt_pure:uniform_s/1,
-%% random:uniform_s/1, and random_wh06:uniform_s/1.
+%% and random:uniform_s/1.
 
 test_speed() ->
-    io:format("{purerand, sfmtpure_uniform, orig_uniform, wh06_uniform}~n~p~n",
+    io:format("{purerand, sfmtpure_uniform, orig_uniform}~n~p~n",
 	      [{test_speed_purerand(100, 100000),
 		test_speed_sfmtpure_uniform(100, 100000),
-		test_speed_orig_uniform(100, 100000),
-		test_speed_wh06_uniform(100, 100000)
+		test_speed_orig_uniform(100, 100000)
 	      }]).
 
 %% @doc running speed test for 10 times of
 %% 100000 calls for sfmt_pure:gen_rand32/1, sfmt_pure:uniform_s/1,
-%% random:uniform_s/1, and random_wh06:uniform_s/1.
+%% and random:uniform_s/1.
 
 test_short_speed() ->
-    io:format("{purerand, sfmtpure_uniform, orig_uniform, wh06_uniform}~n~p~n",
+    io:format("{purerand, sfmtpure_uniform, orig_uniform}~n~p~n",
 	      [{test_speed_purerand(10, 100000),
 		test_speed_sfmtpure_uniform(10, 100000),
-		test_speed_orig_uniform(10, 100000),
-		test_speed_wh06_uniform(10, 100000)
+		test_speed_orig_uniform(10, 100000)
 	      }]).
 
 %% EUnit test functions
