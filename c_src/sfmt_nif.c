@@ -11,7 +11,7 @@
  */
 /* 
 
-   Copyright (c) 2010-2011 Kenji Rikitake and Kyoto University. All rights
+   Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University. All rights
    reserved.
    
    Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -49,30 +49,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "erl_nif.h"
 
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
-  #include <inttypes.h>
-#elif defined(_MSC_VER) || defined(__BORLANDC__)
-  typedef unsigned int uint32_t;
-  typedef unsigned __int64 uint64_t;
-  #define inline __inline
-#else
-  #include <inttypes.h>
+#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
   #if defined(__GNUC__)
     #define inline __inline__
   #endif
 #endif
 
 #ifndef PRIu64
-  #if defined(_MSC_VER) || defined(__BORLANDC__)
-    #define PRIu64 "I64u"
-    #define PRIx64 "I64x"
-  #else
-    #define PRIu64 "llu"
-    #define PRIx64 "llx"
-  #endif
+  #define PRIu64 "llu"
+  #define PRIx64 "llx"
 #endif
 
 #if defined(__GNUC__)
@@ -81,15 +70,7 @@
 #define ALWAYSINLINE
 #endif
 
-#if defined(_MSC_VER)
-  #if _MSC_VER >= 1200
-    #define PRE_ALWAYS __forceinline
-  #else
-    #define PRE_ALWAYS inline
-  #endif
-#else
-  #define PRE_ALWAYS inline
-#endif
+#define PRE_ALWAYS inline
 
 /** 128-bit data structure. */
 struct W128_T {
