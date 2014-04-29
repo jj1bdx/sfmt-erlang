@@ -23,6 +23,7 @@
 
 ## Notable bugfixes
 
+* asn1 application now starts before starting up public\_key application on `support/getrebar` (from 0.9.1\_RELEASE)
 * `gen_rand_all/1` is now properly applied in `sfmt_pure` module when `gen_rand32/1` was first invoked (from 0.8.2\_RELEASE)
 * Catched up with the latest rebar configuration file (from 0.7.0\_RELEASE)
 * Dynamically building ebin/sfmt.app (from 0.7.0\_RELEASE)
