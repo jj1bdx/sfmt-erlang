@@ -17,13 +17,13 @@
 
 ## C NIFs
 
-* MSC/BORLANDC compilation flags removed (from 0.9.1\_RELEASE)
+* MSC/BORLANDC compilation flags removed (from 0.9.1\_BETA)
 * C NIFs based on SFMT 1.3.3 added (from 0.3.0\_RELEASE)
 * The version number of this NIF is 101 (see `NIF_LOAD_INFO` macro value)
 
 ## Notable bugfixes
 
-* asn1 application now starts before starting up public\_key application on `support/getrebar` (from 0.9.1\_RELEASE)
+* asn1 application now starts before starting up public\_key application on `support/getrebar` (from 0.9.1\_BETA)
 * `gen_rand_all/1` is now properly applied in `sfmt_pure` module when `gen_rand32/1` was first invoked (from 0.8.2\_RELEASE)
 * Catched up with the latest rebar configuration file (from 0.7.0\_RELEASE)
 * Dynamically building ebin/sfmt.app (from 0.7.0\_RELEASE)
