@@ -53,14 +53,6 @@
 
 #include "erl_nif.h"
 
-#if defined(__GNUC__)
-#define ALWAYSINLINE __attribute__((always_inline))
-#else
-#define ALWAYSINLINE
-#endif
-
-#define PRE_ALWAYS inline
-
 /** 128-bit data structure. */
 struct W128_T {
     uint32_t u[4];
