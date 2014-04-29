@@ -53,17 +53,6 @@
 
 #include "erl_nif.h"
 
-#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 199901L)
-  #if defined(__GNUC__)
-    #define inline __inline__
-  #endif
-#endif
-
-#ifndef PRIu64
-  #define PRIu64 "llu"
-  #define PRIx64 "llx"
-#endif
-
 #if defined(__GNUC__)
 #define ALWAYSINLINE __attribute__((always_inline))
 #else
