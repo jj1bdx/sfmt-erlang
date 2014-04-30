@@ -4,6 +4,12 @@
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
+## Travis CI build status for the master branch
+
+[![Build Status](https://travis-ci.org/jj1bdx/sfmt-erlang.svg?branch=master)](https://travis-ci.org/jj1bdx/sfmt-erlang)
+
+## License
+
 Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University. All rights
 reserved.
 
@@ -13,15 +19,14 @@ University. All rights reserved.
 See the file `LICENSE` for the license (new/simplified BSD license). (Note:
 license of rebar is Apache 2.0 License.)
 
-This software is based on SFMT ver. 1.3.3 (SIMD oriented Fast Mersenne
-Twister(SFMT)) by Mutsuo Saito (Hiroshima University) and Makoto
-Matsumoto (Hiroshima University)
-
 ## Details of SFMT algorithm
 
-See <http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html>
+This software is based on SFMT ver. 1.3.3 (SIMD oriented Fast Mersenne
+Twister(SFMT)) by Mutsuo Saito (Hiroshima University) and Makoto Matsumoto
+(Hiroshima University). See
+<http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/SFMT/index.html> for the further details.
 
-* Period: only (2^19937 - 1) period is supported
+Note well: only (2^19937 - 1) period is supported.
 
 ## Available modules
 
