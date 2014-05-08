@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.9.1\_BETA 29-APR-2014
+* Version 0.9.1\_BETA 29-APR-2014 (documentation change: 8-MAY-2014)
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -36,6 +36,7 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## C NIFs
 
+* Compiler requirement: C99 support (modern Clang and gcc will do): `<inttypes.h>` required
 * See `c_src/sfmt_nif.c` for the details
 * Also refer to sfmt-extstate at <http://github.com/jj1bdx/sfmt-extstate>
 * The version number of this NIF is 101 (see `NIF_LOAD_INFO` macro value)
