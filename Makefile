@@ -20,6 +20,12 @@ doc:
 eunit:
 	$(REBAR) eunit
 
+dialyzer:
+	dialyzer src/*.erl
+
+firsttime-dialyzer:
+	dialyzer --build_plt --apps kernel stdlib erts mnesia eunit crypto
+
 # N: 19937, for periods (2^N - 1)
 
 speed:
