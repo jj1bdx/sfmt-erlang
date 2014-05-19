@@ -477,6 +477,8 @@ gen_rand32({R, I}) ->
 %% @spec seed0() -> ran_sfmt()
 %% @doc Returns the default internal state
 
+-spec seed0() -> ran_sfmt().
+
 seed0() ->
     I = init_gen_rand(1234),
     % this operation is intstate() type dependent
@@ -486,6 +488,8 @@ seed0() ->
 %% @spec seed() -> ran_sfmt()
 %% @doc Initialize the process dictionary with seed0/0,
 %%      and return seed0/0 value.
+
+-spec seed() -> ran_sfmt().
 
 seed() ->
     RS = seed0(),
@@ -498,6 +502,9 @@ seed() ->
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
 %%      and returns the old internal state
+
+-spec seed(integer()|[integer()]|
+    {integer(), integer(), integer()}) -> ran_sfmt().
 
 seed(N) when is_integer(N) ->
     I = init_by_list32([N]),
@@ -534,6 +541,8 @@ seed({A1, A2, A3}) ->
 %%      and initializes the random number list with the internal state
 %%      and returns the old internal state
 
+-spec seed(integer(), integer(), integer()) -> ran_sfmt().
+
 seed(A1, A2, A3) ->
     seed([A1, A2, A3]).
 
@@ -541,6 +550,8 @@ seed(A1, A2, A3) ->
 %% @doc Returns a uniformly-distributed float random number X
 %%      where `(X >= 0.0)' and `(X =< 1.0)'
 %%      and updates the internal state in the process dictionary
+
+-spec uniform() -> float().
 
 uniform() -> 
     % if random number list doesn't exist
@@ -560,6 +571,8 @@ uniform() ->
 %%      where `(X >= 1)' and `(X =< N)'
 %%      and updates the internal state in the process dictionary
 
+-spec uniform(integer()) -> integer().
+
 uniform(N) when N >= 1 ->
     trunc(uniform() * N) + 1.
 
@@ -569,6 +582,8 @@ uniform(N) when N >= 1 ->
 %%      where `(X >= 0.0)' and `(X =< 1.0)'
 %%      and a new state
 
+-spec uniform_s(RS::ran_sfmt()) -> float().
+
 uniform_s(RS) ->
     {X, NRS} = gen_rand32(RS),
     {X * ?FLOAT_CONST, NRS}.
@@ -576,6 +591,7 @@ uniform_s(RS) ->
 %%      Returns a uniformly-distributed integer random number X
 %%      where (X >= 1) and (X =< N)
 %%      and a new state
+
 -spec uniform_s(integer(), ran_sfmt()) -> {integer(), ran_sfmt()}.
 
 uniform_s(N, RS) ->
