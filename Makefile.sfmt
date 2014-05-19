@@ -10,6 +10,8 @@ ERLC_OPTS = -Werror +debug_info +warn_export_all +warn_export_vars \
 
 include erlang.mk
 
+# NIF-specific config
+
 C_SRC_DIR = ./c_src
 PRIV_DIR = ./priv
 INCLUDE_DIR =`erl -noshell -pa ebin/ -eval 'io:format("~s", [lists:concat([" -I ", filename:join(lists:concat([code:root_dir(), "/erts-", erlang:system_info(version)]), "include")])]), init:stop().'`
@@ -20,5 +22,11 @@ INCLUDE_DIR =`erl -noshell -pa ebin/ -eval 'io:format("~s", [lists:concat([" -I 
 CC = cc
 CFLAGS = -O3 -std=c99 -arch x86_64 -flat_namespace -undefined suppress -finline-functions -Wall -Wmissing-prototypes
 
-nif: c_src/sfmt_nif.c
+$(PRIV_DIR)/sfmt_nif.so: $(C_SRC_DIR)/sfmt_nif.c
 	$(CC) $(CFLAGS) $(INCLUDE_DIR) -fPIC -shared -o $(PRIV_DIR)/sfmt_nif.so c_src/sfmt_nif.c
+
+# Redefine targets for NIFs
+
+nif: $(PRIV_DIR)/sfmt_nif.so
+
+all: deps app nif
