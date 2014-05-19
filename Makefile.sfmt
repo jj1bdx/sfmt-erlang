@@ -30,3 +30,15 @@ $(PRIV_DIR)/sfmt_nif.so: $(C_SRC_DIR)/sfmt_nif.c
 nif: $(PRIV_DIR)/sfmt_nif.so
 
 all: deps app nif
+
+clean: clean-with-nif
+
+clean-with-nif:
+	$(gen_verbose) rm -rf ebin/ test/*.beam erl_crash.dump $(PRIV_DIR)/*.so
+
+c_doc:
+	doxygen
+
+speed:
+	erl -pa ./ebin -noshell -s sfmt_tests test_speed -s init stop
+	erl -pa ./ebin -noshell -s sfmt_pure_tests test_speed -s init stop
