@@ -1,36 +1,15 @@
-# for both BSD/GNU Make
+# See http://stackoverflow.com/questions/11775109/determine-if-makefile-is-executed-with-gmake
+# and http://stackoverflow.com/questions/11775197/how-to-execute-gmake-make-from-a-bash-script-file
+# for the GNUMAKE detection script
+# If stock `make` is GNU Make, use `make`; otherwise use `gmake`
+GNUMAKE=@`sh -c \
+		'if (make --version | grep "^GNU Make" 2>&1 >/dev/null); \
+		then echo make; else echo gmake; fi' 2>/dev/null`
 
-.PHONY: compile clean c_doc doc eunit speed
+TARGETMAKEFILE=	./Makefile.sfmt
 
-REBAR=@`sh -c "PATH='$(PATH)':support which rebar\
-       ||support/getrebar||echo false"`
+all:
+	$(GNUMAKE) -f $(TARGETMAKEFILE) $@
 
-compile:
-	$(REBAR) compile
-
-clean:
-	$(REBAR) clean
-
-c_doc:
-	doxygen
-
-ct:
-	$(REBAR) ct
-
-doc: 
-	$(REBAR) doc
-
-eunit:
-	$(REBAR) eunit
-
-dialyzer:
-	dialyzer src/*.erl
-
-firsttime-dialyzer:
-	dialyzer --build_plt --apps kernel stdlib erts mnesia eunit crypto
-
-# N: 19937, for periods (2^N - 1)
-
-speed:
-	erl -pa ./ebin -noshell -s sfmt_tests test_speed -s init stop
-	erl -pa ./ebin -noshell -s sfmt_pure_tests test_speed -s init stop
+.DEFAULT:
+	$(GNUMAKE) -f $(TARGETMAKEFILE) $@
