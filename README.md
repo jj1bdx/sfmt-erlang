@@ -52,7 +52,7 @@ Note well: only (2^19937 - 1) period is supported.
 * `Makefile` works on both BSD/GNU make
 * `Makefile.sfmt` is the real GNU make file; edit this file for modification
 * Building: `make`
-* C NIF Documentation: `make doc` (requires Doxygen)
+* C NIF Documentation: `make c_doc` (requires Doxygen)
 * Erlang Documentation: `make docs`
 * Testing: `make tests`
 * Execution speed benchmark: `make speed`
