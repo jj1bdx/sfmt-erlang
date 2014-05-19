@@ -14,6 +14,9 @@ clean:
 c_doc:
 	doxygen
 
+ct:
+	$(REBAR) ct
+
 doc: 
 	$(REBAR) doc
 
