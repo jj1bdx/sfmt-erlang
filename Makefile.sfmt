@@ -15,12 +15,16 @@ include erlang.mk
 C_SRC_DIR = ./c_src
 PRIV_DIR = ./priv
 INCLUDE_DIR =`erl -noshell -pa ebin/ -eval 'io:format("~s", [lists:concat([" -I ", filename:join(lists:concat([code:root_dir(), "/erts-", erlang:system_info(version)]), "include")])]), init:stop().'`
+
+# For Travis CI
+CC = gcc
+CFLAGS = -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
 # For FreeBSD
 #CC = cc
 #CFLAGS = -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
 # For OS X 64bit
-CC = cc
-CFLAGS = -O3 -std=c99 -arch x86_64 -flat_namespace -undefined suppress -finline-functions -Wall -Wmissing-prototypes
+#CC = cc
+#CFLAGS = -O3 -std=c99 -arch x86_64 -flat_namespace -undefined suppress -finline-functions -Wall -Wmissing-prototypes
 
 $(PRIV_DIR)/sfmt_nif.so: $(C_SRC_DIR)/sfmt_nif.c
 	$(CC) $(CFLAGS) $(INCLUDE_DIR) -fPIC -shared -o $(PRIV_DIR)/sfmt_nif.so c_src/sfmt_nif.c

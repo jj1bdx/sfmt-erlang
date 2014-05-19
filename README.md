@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.9.1\_BETA 29-APR-2014 (documentation change: 8-MAY-2014)
+* Version 0.10.0 19-MAY-2014
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -44,41 +44,19 @@ Note well: only (2^19937 - 1) period is supported.
 ## Tested platforms
 
 * FreeBSD/amd64 10-STABLE with Erlang/OTP 17.0
-* OS X 10.9.2 Mavericks with Erlang/OTP 17.0
+* OS X 10.9.3 Mavericks with Erlang/OTP 17.0
 * CentOS 6.5 (amd64, on Virtualbox running on OS X 10.9.2) with Erlang/OTP 17.0
 
-## Building 
+## Make options (of erlang.mk)
 
-* Use GNU/BSD make and then
-
-    make compile
-
-The build script is Basho's rebar at <https://github.com/basho/rebar>,
-which will be automatically fetched under the directory `support/`.
-
-## Documentation
-
-* For the HTML documentation files of the Erlang source 
-
-    make doc
-
-    The documentation will be accessible at `doc/index.html`.
-
-* For the HTML documentation files of the C NIF source (Note: Doxygen required)
-
-    make c_doc
-
-    The documentation will be accessible at `c_doc/index.html`.
-
-## Testing
-
-* For unit testing with EUnit, do
-
-    make eunit
-
-* For testing the speed of 100 times of invoking 100000 `gen_rand32/1` function, do 
-
-    make speed
+* `Makefile` works on both BSD/GNU make
+* `Makefile.sfmt` is the real GNU make file; edit this file for modification
+* Building: `make`
+* C NIF Documentation: `make doc` (requires Doxygen)
+* Erlang Documentation: `make docs`
+* Testing: `make tests`
+* Execution speed benchmark: `make speed`
+* See also [erlang.mk](https://github.com/extend/erlang.mk) for the details
 
 ## API compatible with the random module
 
@@ -109,6 +87,7 @@ which will be automatically fetched under the directory `support/`.
 * Kostis Sagonas
 * Michael Gebetsroither
 * Shunichi Shinohara
+* Loïc Hoguin
 
 ## ACKNOWLEDGMENTS
 
