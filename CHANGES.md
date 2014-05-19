@@ -1,5 +1,13 @@
 # List of changes on sfmt-erlang
 
+## Test framework changed from EUnit to Common Test
+
+* Common Test source included under `test/` (from 0.10.0)
+
+## Rebar dependency removed
+
+* Rebar dependency removed, now uses erlang.mk (from 0.10.0)
+
 ## Pure Erlang SFMT module
 
 * Pure Erlang SFMT module now added as working code by request (from 0.8.0\_RELEASE)
