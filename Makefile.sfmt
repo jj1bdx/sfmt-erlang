@@ -42,8 +42,13 @@ clean: clean-with-nif
 clean-with-nif:
 	$(gen_verbose) rm -rf ebin/ test/*.beam erl_crash.dump $(PRIV_DIR)/*.so
 
-c_doc:
+c_doc: ./Doxyfile
 	doxygen
+
+clean-c_doc:
+	$(gen_verbose) rm -rf ./c_doc/
+
+clean-all: clean-with-nif clean-c_doc
 
 speed:
 	erl -pa ./ebin -noshell -s sfmt_tests test_speed -s init stop
