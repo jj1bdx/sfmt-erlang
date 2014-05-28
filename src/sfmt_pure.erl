@@ -1,8 +1,12 @@
-%% Module sfmt_pure
-%% SIMD-oriented Fast Mersenne Twister (SFMT)
-%% in pure Erlang
-
-%% Copyright (c) 2010-2012 Kenji Rikitake and Kyoto University.
+%% @author Kenji Rikitake <kenji.rikitake@acm.org>
+%% @author Mutsuo Saito
+%% @author Makoto Matsumoto
+%% @copyright 2010-2014 Kenji Rikitake, Mutsuo Saito, Makoto Matsumoto, Kyoto University,
+%% Hiroshima University, The University of Tokyo
+%% @doc SIMD-oriented Fast Mersenne Twister (SFMT) in pure Erlang
+%% @end
+%%
+%% Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University.
 %% All rights reserved.
 %%
 %% Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -114,27 +118,37 @@
 -define(BITMASK32, 16#ffffffff).
 -define(BITMASK64, 16#ffffffffffffffff).
 
--type w128() :: [integer()].
--type intstate() :: [integer()].
--type ran_sfmt() :: {[integer()], intstate()}.
+%% @type w128(). Four-element list of 32-bit unsigned integers
+%% to represent a 128-bit integer.
 
-%% internal state format: 
-%% list of 32-bit unsigned ints,
-%% with the following format of
-%% little-endian 128-bit format
-%% e.g., a 128-bit X = [X0, X1, X2, X3]
-%% where in C
+-type w128() :: [integer()].
+
+%% @type intstate(). N-element list of 128-bit unsigned integers,
+%% represented as a four-element list of 32-bit integers.
+%% The number of N is 156.
+%% Each 128-bit number is represented in little endian,
+%% e.g., a 128-bit X = [X0, X1, X2, X3],
+%% where represented in programming language C:
+%% ```
 %% /* begin */
 %% union X {
 %% 	uint32_t u[4];
 %% };
 %% /* end */
-%% and 128-bit list is a flat concatenation
-%% of 128-bit number
-%%
+%% '''
+%% And the 128-bit list is a flat concatenation of 128-bit number lists,
+
+-type intstate() :: [integer()].
+
+%% @type ran_sfmt(). N-element list of 128-bit unsigned integers,
+%% represented as a list of 32-bit integers. The number of N is 156.
+
+-type ran_sfmt() :: {[integer()], intstate()}.
+
 
 %% @doc SIMD 128-bit right shift simulation for little endian SIMD
-%%      of Shift*8 bits
+%%      of Shift*8 bits.
+
 -spec rshift128(w128(), integer()) -> w128().
 
 rshift128(In, Shift) ->
@@ -148,7 +162,8 @@ rshift128(In, Shift) ->
      OH band ?BITMASK32, OH bsr 32].
 
 %% @doc SIMD 128-bit left shift simulation for little endian SIMD
-%%      of Shift*8 bits
+%%      of Shift*8 bits.
+
 -spec lshift128(w128(), integer()) -> w128().
 
 lshift128(In, Shift) ->
@@ -161,7 +176,8 @@ lshift128(In, Shift) ->
     [OL band ?BITMASK32, OL bsr 32, 
      OH band ?BITMASK32, OH bsr 32].
 
-%% @doc the recursion formula operation of SFMT
+%% @doc The recursion formula operation of SFMT.
+
 -spec do_recursion(w128(), w128(), w128(), w128()) -> w128().
 
 do_recursion(A, B, C, D) ->
@@ -182,8 +198,9 @@ do_recursion(A, B, C, D) ->
         bxor ((D3 bsl ?SL1) band ?BITMASK32)
      ].
 
-%% Recursion algorithm for gen_rand_all and gen_rand_list32:
-%%
+%% @doc Recursion algorithm for gen_rand_all and gen_rand_list32,
+%% explained as follows:
+%% ```
 %% a[]: output array (of S w128() elements)
 %% i[]: internal state (of N w128() elements)
 %% (For gen_rand_all, S =:= N)
@@ -207,16 +224,21 @@ do_recursion(A, B, C, D) ->
 %% a[X]   = r(a[X-N], a[X-(N-POS1)], a[X-1], a[X-2]);
 %% ...
 %% a[S-1] = r(a[(S-N)-1], a[S-(N-POS1)-1], a[S-2], a[S-3]);
-%%
-%% Use the last N w128() elements of a[] for the new internal state ni[]
+%% '''
+%% Use the last N `w128()' elements of `a[]' for the new internal state `ni[]',
 %% i.e., 
+%% ```
 %% ni[0] = a[S-N], ni[1] = a[S-N+1], ... ni[N-1] = a[S-1].
-
+%% '''
 %% To avoid appending two lists, 
-%% a and b of r(a, b, c, d) form ring buffers
-%% (e.g., Int and AccInt, IntP and AccIntP,
-%%  of gen_rand_recursion/8)
-%% This makes the algorithm simpler and faster
+%% `a' and `b' of `r(a, b, c, d)' form ring buffers,
+%% e.g., `Int' and `AccInt', `IntP' and `AccIntP',
+%%  of `gen_rand_recursion/8'.
+%% This makes the algorithm simpler and faster.
+
+-spec gen_rand_recursion(non_neg_integer(),
+    [integer()], [integer()], [integer()],
+    [integer()], [integer()], w128(), w128()) -> [integer()].
 
 gen_rand_recursion(0, Acc, _, _, _, _, _, _) ->
     lists:reverse(Acc);
