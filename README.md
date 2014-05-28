@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.10.0 19-MAY-2014
+* Version 0.10.0 19-MAY-2014 (last modified 28-MAY-2014)
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -52,7 +52,7 @@ Note well: only (2^19937 - 1) period is supported.
 * `Makefile` works on both BSD/GNU make
 * `Makefile.sfmt` is the real GNU make file; edit this file for modification
 * Building: `make`
-* C NIF Documentation: `make c_doc` (requires Doxygen)
+* C NIF Documentation: `make c_doc` (requires Doxygen 1.8.3.1 or later)
 * Erlang Documentation: `make docs`
 * Testing: `make tests`
 * Execution speed benchmark: `make speed`
