@@ -325,10 +325,10 @@ intstate_to_randlist_float(_) -> ?nif_stub.
 
 intstate_to_list_max(_, _) -> ?nif_stub.
 
-%% @type ran_sfmt() = {randlist(), intstate()}.
+%% @type ran_sfmt() = {non_neg_integer(), intstate()}.
 %% This type represents an internal state for random number generator.
 
--type ran_sfmt() :: {randlist(), intstate()}.
+-type ran_sfmt() :: {non_neg_integer(), intstate()}.
 
 %% @spec gen_rand32(RS::ran_sfmt()|intstate()) -> {integer(), ran_sfmt()}
 %% @doc generates a 32-bit random number from the given ran_sfmt().
@@ -483,13 +483,13 @@ uniform() ->
 uniform(N) when N >= 1 ->
     trunc(uniform() * N) + 1.
 
-%% @spec uniform_s(RS::ran_sfmt()) -> float()
+%% @spec uniform_s(RS::ran_sfmt()) -> {float(), ran_sfmt()}.
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
 %%      and a new state
 %%      where X is in the range of [0.0, 1.0].
 
--spec uniform_s(RS::ran_sfmt()) -> float().
+-spec uniform_s(RS::ran_sfmt()) -> {float(), ran_sfmt()}.
 
 uniform_s(RS) ->
     gen_rand_float(RS).
