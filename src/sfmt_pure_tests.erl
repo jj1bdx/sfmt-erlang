@@ -7,11 +7,11 @@
 %% (for period ((2^19937) - 1))
 %% @reference <a href="http://github.com/jj1bdx/sfmt-erlang">GitHub page
 %% for sfmt-erlang</a>
-%% @copyright 2010-2011 Kenji Rikitake and Kyoto University.
+%% @copyright 2010-2014 Kenji Rikitake and Kyoto University.
 %% Copyright (c) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and
 %% Hiroshima University.
 
-%% Copyright (c) 2010-2011 Kenji Rikitake and Kyoto University. All rights
+%% Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University. All rights
 %% reserved.
 %%
 %% Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -102,7 +102,7 @@ test_speed_orig_uniform(P, Q) ->
 %% 100000 calls for sfmt_pure:gen_rand32/1, sfmt_pure:uniform_s/1,
 %% and random:uniform_s/1.
 
--spec test_speed() -> tuple().
+-spec test_speed() -> ok.
 
 test_speed() ->
     io:format("{purerand, sfmtpure_uniform, orig_uniform}~n~p~n",
@@ -115,7 +115,7 @@ test_speed() ->
 %% 100000 calls for sfmt_pure:gen_rand32/1, sfmt_pure:uniform_s/1,
 %% and random:uniform_s/1.
 
--spec test_short_speed() -> tuple().
+-spec test_short_speed() -> ok.
 
 test_short_speed() ->
     io:format("{purerand, sfmtpure_uniform, orig_uniform}~n~p~n",
