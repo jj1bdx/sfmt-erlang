@@ -599,13 +599,13 @@ uniform() ->
 uniform(N) when N >= 1 ->
     trunc(uniform() * N) + 1.
 
-%% @spec uniform_s(ran_sfmt()) -> float()
+%% @spec uniform_s(ran_sfmt()) -> {float(), ran_sfmt()}
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
 %%      where `(X >= 0.0)' and `(X =< 1.0)'
 %%      and a new state
 
--spec uniform_s(RS::ran_sfmt()) -> float().
+-spec uniform_s(RS::ran_sfmt()) -> {float(), ran_sfmt()}.
 
 uniform_s(RS) ->
     {X, NRS} = gen_rand32(RS),
