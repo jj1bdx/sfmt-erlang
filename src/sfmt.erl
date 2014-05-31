@@ -8,11 +8,11 @@
 %% The module defines a PRNG of period ((2^19937) - 1).
 %% @reference <a href="http://github.com/jj1bdx/sfmt-erlang">GitHub page
 %% for sfmt-erlang</a>
-%% @copyright 2010-2011 Kenji Rikitake and Kyoto University.
+%% @copyright 2010-2014 Kenji Rikitake and Kyoto University.
 %% Copyright (c) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and
 %% Hiroshima University.
 
-%% Copyright (c) 2010-2011 Kenji Rikitake and Kyoto University. All rights
+%% Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University. All rights
 %% reserved.
 %%
 %% Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
