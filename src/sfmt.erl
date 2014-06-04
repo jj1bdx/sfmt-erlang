@@ -483,7 +483,7 @@ uniform() ->
 uniform(N) when N >= 1 ->
     trunc(uniform() * N) + 1.
 
-%% @spec uniform_s(RS::ran_sfmt()) -> {float(), ran_sfmt()}.
+%% @spec uniform_s(RS::ran_sfmt()) -> {float(), ran_sfmt()}
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
 %%      and a new state
