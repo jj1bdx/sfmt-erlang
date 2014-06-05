@@ -497,7 +497,6 @@ gen_rand32({R, I}) ->
 %% (1 / ((2 ^ 32) - 1)) (for [0, 1]-interval conversion)
 -define(FLOAT_CONST, (1.0/4294967295.0)).
 
-%% @spec seed0() -> ran_sfmt()
 %% @doc Returns the default internal state
 
 -spec seed0() -> ran_sfmt().
@@ -508,7 +507,6 @@ seed0() ->
     R = I,
     {R, I}.
 
-%% @spec seed() -> ran_sfmt()
 %% @doc Initialize the process dictionary with seed0/0,
 %%      and return seed0/0 value.
 
@@ -519,7 +517,6 @@ seed() ->
     put(?PDIC_SEED, RS),
     RS.
 
-%% @spec seed(integer()) -> ran_sfmt()
 %% @doc Puts the seed computed from the given integer
 %%      as a single-element list by init_by_list32/1
 %%      and puts the internal state into the process dictionary
@@ -536,7 +533,6 @@ seed(N) when is_integer(N) ->
     RS = {R, I},
     put(?PDIC_SEED, RS);
 
-%% @spec seed([integer()]) -> ran_sfmt()
 %% @doc Puts the seed computed from the given integer list by init_by_list32/1
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
@@ -549,7 +545,6 @@ seed(L) when is_list(L), is_integer(hd(L)) ->
     RS = {R, I},
     put(?PDIC_SEED, RS);
 
-%% @spec seed({integer(), integer(), integer()}) -> ran_sfmt()
 %% @doc Puts the seed computed from given three integers as a tuple
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
@@ -558,7 +553,6 @@ seed(L) when is_list(L), is_integer(hd(L)) ->
 seed({A1, A2, A3}) ->
     seed([A1, A2, A3]).
 
-%% @spec seed(integer(), integer(), integer()) -> ran_sfmt()
 %% @doc Puts the seed computed from given three integers
 %%      and puts the internal state into the process dictionary
 %%      and initializes the random number list with the internal state
@@ -569,7 +563,6 @@ seed({A1, A2, A3}) ->
 seed(A1, A2, A3) ->
     seed([A1, A2, A3]).
 
-%% @spec uniform() -> float()
 %% @doc Returns a uniformly-distributed float random number X
 %%      where `(X >= 0.0)' and `(X =< 1.0)'
 %%      and updates the internal state in the process dictionary
@@ -589,7 +582,6 @@ uniform() ->
     put(?PDIC_SEED, NRS),
     X * ?FLOAT_CONST.
 
-%% @spec uniform(N) -> integer()
 %% @doc Returns a uniformly-distributed integer random number X
 %%      where `(X >= 1)' and `(X =< N)'
 %%      and updates the internal state in the process dictionary
@@ -599,7 +591,6 @@ uniform() ->
 uniform(N) when N >= 1 ->
     trunc(uniform() * N) + 1.
 
-%% @spec uniform_s(ran_sfmt()) -> {float(), ran_sfmt()}
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
 %%      where `(X >= 0.0)' and `(X =< 1.0)'
