@@ -1,5 +1,10 @@
 # List of changes on sfmt-erlang
 
+## NIF code simplified
+
+* All atoms defined inside the NIF code are removed (from 0.10.0)
+* if `enif_alloc()` fails, `enif_make_badarg()` is called instead of returning `error_sfmt_nomem` (from 0.10.0)
+
 ## Test framework changed from EUnit to Common Test
 
 * Common Test source included under `test/` (from 0.10.0)
