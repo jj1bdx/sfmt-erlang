@@ -12,43 +12,21 @@ include erlang.mk
 
 # NIF-specific config
 
-C_SRC_DIR = ./c_src
-PRIV_DIR = ./priv
-INCLUDE_DIR =`erl -noshell -pa ebin/ -eval 'io:format("~s", [lists:concat([" -I ", filename:join(lists:concat([code:root_dir(), "/erts-", erlang:system_info(version)]), "include")])]), init:stop().'`
-
 # For Travis CI
-CC = gcc
-CFLAGS = -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
+#CC = gcc
+#CFLAGS = -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
 # For FreeBSD
 #CC = cc
 #CFLAGS = -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
 # For OS X 64bit
-#CC = cc
-#CFLAGS = -O3 -std=c99 -arch x86_64 -flat_namespace -undefined suppress -finline-functions -Wall -Wmissing-prototypes
-
-$(PRIV_DIR)/sfmt_nif.so: $(C_SRC_DIR)/sfmt_nif.c
-	$(CC) $(CFLAGS) $(INCLUDE_DIR) -fPIC -shared -o $(PRIV_DIR)/sfmt_nif.so c_src/sfmt_nif.c
-
-# Redefine targets for NIFs
-
-nif: $(PRIV_DIR)/sfmt_nif.so
-
-deps: deps-with-nif
-
-deps-with-nif: nif
-
-clean: clean-with-nif
-
-clean-with-nif:
-	$(gen_verbose) rm -rf ebin/ test/*.beam erl_crash.dump $(PRIV_DIR)/*.so
+CC = cc
+CFLAGS = -O3 -std=c99 -arch x86_64 -flat_namespace -undefined suppress -finline-functions -Wall -Wmissing-prototypes
 
 c_doc: ./Doxyfile
 	doxygen
 
 clean-c_doc:
 	$(gen_verbose) rm -rf ./c_doc/
-
-clean-all: clean-with-nif clean-c_doc
 
 speed:
 	erl -pa ./ebin -noshell -s sfmt_tests test_speed -s init stop
