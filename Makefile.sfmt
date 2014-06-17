@@ -12,6 +12,9 @@ include erlang.mk
 
 # NIF-specific config
 
+C_SRC_OUTPUT = $(CURDIR)/priv/sfmt_nif.so
+
+# See also https://github.com/extend/erlang.mk/pull/70
 # For Travis CI
 CC = gcc
 CFLAGS = -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
