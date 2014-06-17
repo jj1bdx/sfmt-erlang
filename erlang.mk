@@ -239,7 +239,17 @@ clean-app:
 C_SRC_DIR = $(CURDIR)/c_src
 C_SRC_ENV ?= $(C_SRC_DIR)/env.mk
 C_SRC_OPTS ?=
-C_SRC_OUTPUT ?= $(CURDIR)/priv/sfmt_nif.so
+C_SRC_OUTPUT ?= $(CURDIR)/priv/$(PROJECT).so
+
+# For Travis CI
+CC ?= gcc
+#CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
+# For FreeBSD
+#CC ?= cc
+#CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
+# For OS X 64bit
+#CC ?= cc
+#CFLAGS ?= -O3 -std=c99 -arch x86_64 -flat_namespace -undefined suppress -finline-functions -Wall -Wmissing-prototypes
 
 # Verbosity.
 
