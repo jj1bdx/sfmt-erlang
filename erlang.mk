@@ -239,7 +239,7 @@ clean-app:
 C_SRC_DIR = $(CURDIR)/c_src
 C_SRC_ENV ?= $(C_SRC_DIR)/env.mk
 C_SRC_OPTS ?=
-C_SRC_OUTPUT ?= $(CURDIR)/priv/$(PROJECT).so
+C_SRC_OUTPUT ?= $(CURDIR)/priv/sfmt_nif.so
 
 # Verbosity.
 
