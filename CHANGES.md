@@ -12,6 +12,7 @@
 ## Rebar dependency removed
 
 * Rebar dependency removed, now uses erlang.mk (from 0.10.0)
+* Uses erlang.mk NIF support (from 0.10.0)
 
 ## Pure Erlang SFMT module
 
