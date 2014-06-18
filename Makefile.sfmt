@@ -14,17 +14,6 @@ include erlang.mk
 
 C_SRC_OUTPUT = $(CURDIR)/priv/sfmt_nif.so
 
-# See also https://github.com/extend/erlang.mk/pull/70
-# For Travis CI
-CC = gcc
-CFLAGS = -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
-# For FreeBSD
-#CC = cc
-#CFLAGS = -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
-# For OS X 64bit
-#CC = cc
-#CFLAGS = -O3 -std=c99 -arch x86_64 -flat_namespace -undefined suppress -finline-functions -Wall -Wmissing-prototypes
-
 c_doc: ./Doxyfile
 	doxygen
 
