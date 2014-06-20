@@ -825,10 +825,12 @@ static void period_certification(w128_t *intstate) {
 
     intstate32 = &intstate[0].u[0];
 
-    for (i = 0; i < 4; i++)
+    for (i = 0; i < 4; i++) {
         inner ^= intstate32[i] & parity[i];
-    for (i = 16; i > 0; i >>= 1)
+    }
+    for (i = 16; i > 0; i >>= 1) {
         inner ^= inner >> i;
+    }
     inner &= 1;
     /* check OK */
     if (inner == 1) {
