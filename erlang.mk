@@ -114,6 +114,9 @@ define dep_fetch
 	if [ "$$$$VS" = "git" ]; then \
 		git clone -n -- $$$$REPO $(DEPS_DIR)/$(1); \
 		cd $(DEPS_DIR)/$(1) && git checkout -q $$$$COMMIT; \
+	elif [ "$$$$VS" = "hg" ]; then \
+		hg clone -U $$$$REPO $(DEPS_DIR)/$(1); \
+		cd $(DEPS_DIR)/$(1) && hg update -q $$$$COMMIT; \
 	else \
 		echo "Unknown or invalid dependency: $(1). Please consult the erlang.mk README for instructions." >&2; \
 		exit 78; \
@@ -125,13 +128,13 @@ $(DEPS_DIR)/$(1):
 	@mkdir -p $(DEPS_DIR)
 	@if [ ! -f $(PKG_FILE2) ]; then $(call core_http_get,$(PKG_FILE2),$(PKG_FILE_URL)); fi
 ifeq (,$(dep_$(1)))
-	DEPPKG=$$$$(awk 'BEGIN { FS = "\t" }; $$$$1 == "$(1)" { print $$$$2 " " $$$$3 " " $$$$4 }' $(PKG_FILE2);); \
+	@DEPPKG=$$$$(awk 'BEGIN { FS = "\t" }; $$$$1 == "$(1)" { print $$$$2 " " $$$$3 " " $$$$4 }' $(PKG_FILE2);); \
 	VS=$$$$(echo $$$$DEPPKG | cut -d " " -f1); \
 	REPO=$$$$(echo $$$$DEPPKG | cut -d " " -f2); \
 	COMMIT=$$$$(echo $$$$DEPPKG | cut -d " " -f3); \
 	$(call dep_fetch,$(1))
 else
-	VS=$(word 1,$(dep_$(1))); \
+	@VS=$(word 1,$(dep_$(1))); \
 	REPO=$(word 2,$(dep_$(1))); \
 	COMMIT=$(word 3,$(dep_$(1))); \
 	$(call dep_fetch,$(1))
@@ -242,7 +245,7 @@ clean:: clean-app
 
 erlc-include:
 	-@if [ -d ebin/ ]; then \
-		find include/ src/ -type f -name \*.hrl -newer ebin -exec touch $(shell find src/ -type f -name "*.erl") \; 2>/dev/null || echo -n; \
+		find include/ src/ -type f -name \*.hrl -newer ebin -exec touch $(shell find src/ -type f -name "*.erl") \; 2>/dev/null || printf ''; \
 	fi
 
 clean-app:
