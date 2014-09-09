@@ -114,9 +114,6 @@ define dep_fetch
 	if [ "$$$$VS" = "git" ]; then \
 		git clone -n -- $$$$REPO $(DEPS_DIR)/$(1); \
 		cd $(DEPS_DIR)/$(1) && git checkout -q $$$$COMMIT; \
-	elif [ "$$$$VS" = "hg" ]; then \
-		hg clone -U $$$$REPO $(DEPS_DIR)/$(1); \
-		cd $(DEPS_DIR)/$(1) && hg update -q $$$$COMMIT; \
 	else \
 		echo "Unknown or invalid dependency: $(1). Please consult the erlang.mk README for instructions." >&2; \
 		exit 78; \
@@ -128,13 +125,13 @@ $(DEPS_DIR)/$(1):
 	@mkdir -p $(DEPS_DIR)
 	@if [ ! -f $(PKG_FILE2) ]; then $(call core_http_get,$(PKG_FILE2),$(PKG_FILE_URL)); fi
 ifeq (,$(dep_$(1)))
-	@DEPPKG=$$$$(awk 'BEGIN { FS = "\t" }; $$$$1 == "$(1)" { print $$$$2 " " $$$$3 " " $$$$4 }' $(PKG_FILE2);); \
+	DEPPKG=$$$$(awk 'BEGIN { FS = "\t" }; $$$$1 == "$(1)" { print $$$$2 " " $$$$3 " " $$$$4 }' $(PKG_FILE2);); \
 	VS=$$$$(echo $$$$DEPPKG | cut -d " " -f1); \
 	REPO=$$$$(echo $$$$DEPPKG | cut -d " " -f2); \
 	COMMIT=$$$$(echo $$$$DEPPKG | cut -d " " -f3); \
 	$(call dep_fetch,$(1))
 else
-	@VS=$(word 1,$(dep_$(1))); \
+	VS=$(word 1,$(dep_$(1))); \
 	REPO=$(word 2,$(dep_$(1))); \
 	COMMIT=$(word 3,$(dep_$(1))); \
 	$(call dep_fetch,$(1))
@@ -245,7 +242,7 @@ clean:: clean-app
 
 erlc-include:
 	-@if [ -d ebin/ ]; then \
-		find include/ src/ -type f -name \*.hrl -newer ebin -exec touch $(shell find src/ -type f -name "*.erl") \; 2>/dev/null || printf ''; \
+		find include/ src/ -type f -name \*.hrl -newer ebin -exec touch $(shell find src/ -type f -name "*.erl") \; 2>/dev/null || echo -n; \
 	fi
 
 clean-app:
@@ -526,72 +523,6 @@ endif
 
 list-templates:
 	@echo Available templates: $(sort $(patsubst tpl_%,%,$(filter tpl_%,$(.VARIABLES))))
-
-# Copyright (c) 2014, Loïc Hoguin <essen@ninenines.eu>
-# This file is part of erlang.mk and subject to the terms of the ISC License.
-
-.PHONY: clean-c_src
-# todo
-
-# Configuration.
-
-C_SRC_DIR = $(CURDIR)/c_src
-C_SRC_ENV ?= $(C_SRC_DIR)/env.mk
-C_SRC_OPTS ?=
-C_SRC_OUTPUT ?= $(CURDIR)/priv/$(PROJECT).so
-
-# System type and C compiler/flags.
-
-UNAME_SYS := $(shell uname -s)
-ifeq ($(UNAME_SYS), Darwin)
-	CC ?= cc
-	CFLAGS ?= -O3 -std=c99 -arch x86_64 -flat_namespace -undefined suppress -finline-functions -Wall -Wmissing-prototypes
-else ifeq ($(UNAME_SYS), FreeBSD)
-	CC ?= cc
-	CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
-else ifeq ($(UNAME_SYS), Linux)
-	CC ?= gcc
-	CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
-endif
-
-# Verbosity.
-
-c_src_verbose_0 = @echo " C_SRC " $(?F);
-c_src_verbose = $(appsrc_verbose_$(V))
-
-# Targets.
-
-ifeq ($(wildcard $(C_SRC_DIR)/Makefile),)
-
-app:: $(C_SRC_ENV)
-	@mkdir -p priv/
-	$(c_src_verbose) $(CC) $(CFLAGS) $(C_SRC_DIR)/*.c -fPIC -shared -o $(C_SRC_OUTPUT) \
-		-I $(ERTS_INCLUDE_DIR) $(C_SRC_OPTS)
-
-$(C_SRC_ENV):
-	erl -noshell -noinput -eval "file:write_file(\"$(C_SRC_ENV)\", \
-		io_lib:format(\"ERTS_INCLUDE_DIR ?= ~s/erts-~s/include/\", \
-			[code:root_dir(), erlang:system_info(version)])), \
-		init:stop()."
-
--include $(C_SRC_ENV)
-
-else
-ifneq ($(wildcard $(C_SRC_DIR),))
-
-app::
-	$(MAKE) -C $(C_SRC_DIR)
-
-clean::
-	$(MAKE) -C $(C_SRC_DIR) clean
-
-endif
-endif
-
-clean:: clean-c_src
-
-clean-c_src:
-	$(gen_verbose) rm -f $(C_SRC_ENV) $(C_SRC_OUTPUT)
 
 # Copyright (c) 2013-2014, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
