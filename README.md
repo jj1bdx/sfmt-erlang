@@ -43,8 +43,8 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## Tested platforms
 
-* FreeBSD/amd64 10-STABLE with Erlang/OTP 17.1
-* OS X 10.9.3 Mavericks with Erlang/OTP 17.3
+* FreeBSD/amd64 10.1-BETA1 r271669 with Erlang/OTP 17.3
+* OS X 10.9.5 Mavericks with Erlang/OTP 17.3
 * CentOS 6.5 (amd64, on Virtualbox running on OS X 10.9.2) with Erlang/OTP 17.0
 
 ## Make options (of erlang.mk)
