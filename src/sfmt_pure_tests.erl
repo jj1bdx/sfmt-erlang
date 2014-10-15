@@ -48,7 +48,8 @@
 
 -export([
 	 test_speed/0,
-	 test_short_speed/0
+	 test_short_speed/0,
+     reds/1
 	 ]).
 
 test_speed_purerand_rec1(0, _, _) ->
@@ -123,3 +124,26 @@ test_short_speed() ->
 		test_speed_sfmtpure_uniform(10, 100000),
 		test_speed_orig_uniform(10, 100000)
 	      }]).
+
+%% @doc counting reduction of sfmt_pure:init_gen_rand/1.
+%% Code was copied from Steve Vinoski's presentation sample code
+%% at https://github.com/vinoski/bitwise
+%% under src/bitwise.erl
+
+-spec reds(integer()) -> {integer(), tuple(), tuple()}.
+
+reds(I) ->
+    Parent = self(),
+    Pid = spawn(fun() ->
+                        Self = self(),
+                        Start = os:timestamp(),
+                        R0 = process_info(Self, reductions),
+                        _ = sfmt_pure:init_gen_rand(I),
+                        R1 = process_info(Self, reductions),
+                        T = timer:now_diff(os:timestamp(), Start),
+                        Parent ! {Self,{T, R0, R1}}
+                end),
+    receive
+        {Pid,Result} ->
+            Result
+    end.
