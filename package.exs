@@ -48,7 +48,7 @@ defmodule Sfmt.Mixfile do
         "Makoto Matsumoto",
         "Dan Gudmundsson",
         "Michael Truog",
-        "olhado @ GitHub"
+        "Michael Chmielewski"
         ],
      licenses: ["simplified BSD"],
      links: %{"GitHub" => "https://github.com/jj1bdx/sfmt-erlang/"}

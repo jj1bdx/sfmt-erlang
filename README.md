@@ -74,7 +74,7 @@ Note well: only (2^19937 - 1) period is supported.
 * Makoto Matsumoto
 * Dan Gudmundsson
 * Michael Truog
-* olhado @ GitHub
+* Michael Chmielewski
 
 ## THANKS to:
 
