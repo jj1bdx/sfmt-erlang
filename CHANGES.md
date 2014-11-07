@@ -1,5 +1,10 @@
 # List of changes on sfmt-erlang
 
+## hex.pm support added
+
+* Based on the contribution from Michael Chmielewski (from 0.10.1)
+* Package name on hex.pm: sfmt
+
 ## NIF code simplified
 
 * All atoms defined inside the NIF code are removed (from 0.10.0)
