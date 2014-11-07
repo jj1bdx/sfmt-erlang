@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.10.0 19-MAY-2014 (last modified 27-JUN-2014)
+* Version 0.10.1 7-NOV-2014
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -16,8 +16,7 @@ reserved.
 Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
 University. All rights reserved.
 
-See the file `LICENSE` for the license (new/simplified BSD license). (Note:
-license of rebar is Apache 2.0 License.)
+See the file `LICENSE` for the license (new/simplified BSD license).
 
 ## Details of SFMT algorithm
 
@@ -75,13 +74,13 @@ Note well: only (2^19937 - 1) period is supported.
 * Makoto Matsumoto
 * Dan Gudmundsson
 * Michael Truog
+* olhado @ GitHub
 
 ## THANKS to:
 
 * Dave "dizzyd" Smith
 * Tuncer Ayaz
 * Tim Bates (random\_mt.erl implementator of Mersenne Twister)
-* Dan Gudmundsson
 * Richard O'Keefe
 * Yurii Rashkovskii
 * Kostis Sagonas
