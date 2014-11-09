@@ -12,7 +12,7 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-.PHONY: all deps app rel docs tests clean distclean help
+.PHONY: all deps app rel docs tests clean distclean help erlang-mk
 
 ERLANG_MK_VERSION = 1
 
@@ -72,6 +72,18 @@ define core_http_get
 endef
 endif
 
+# Automated update.
+
+ERLANG_MK_BUILD_CONFIG ?= build.config
+ERLANG_MK_BUILD_DIR ?= .erlang.mk.build
+
+erlang-mk:
+	git clone https://github.com/ninenines/erlang.mk $(ERLANG_MK_BUILD_DIR)
+	if [ -f $(ERLANG_MK_BUILD_CONFIG) ]; then cp $(ERLANG_MK_BUILD_CONFIG) $(ERLANG_MK_BUILD_DIR); fi
+	cd $(ERLANG_MK_BUILD_DIR) && make
+	cp $(ERLANG_MK_BUILD_DIR)/erlang.mk ./erlang.mk
+	rm -rf $(ERLANG_MK_BUILD_DIR)
+
 # Copyright (c) 2013-2014, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
 
@@ -108,7 +120,7 @@ deps:: $(ALL_DEPS_DIRS)
 		if [ -f $$dep/GNUmakefile ] || [ -f $$dep/makefile ] || [ -f $$dep/Makefile ] ; then \
 			$(MAKE) -C $$dep ; \
 		else \
-			echo "include $(CURDIR)/erlang.mk" | $(MAKE) -f - -C $$dep ; \
+			echo "include $(CURDIR)/erlang.mk" | ERLC_OPTS=+debug_info $(MAKE) -f - -C $$dep ; \
 		fi ; \
 	done
 
@@ -176,8 +188,10 @@ pkg-search:
 	$(error Usage: make pkg-search q=STRING)
 endif
 
+ifeq ($(PKG_FILE2),$(CURDIR)/.erlang.mk.packages.v2)
 distclean-pkg:
 	$(gen_verbose) rm -f $(PKG_FILE2)
+endif
 
 help::
 	@printf "%s\n" "" \
@@ -217,8 +231,10 @@ app:: erlc-include ebin/$(PROJECT).app
 		echo "Empty modules entry not found in $(PROJECT).app.src. Please consult the erlang.mk README for instructions." >&2; \
 		exit 1; \
 	fi
+	$(eval GITDESCRIBE := $(shell git describe --dirty --abbrev=7 --tags --always --first-parent 2>/dev/null || true))
 	$(appsrc_verbose) cat src/$(PROJECT).app.src \
 		| sed "s/{modules,[[:space:]]*\[\]}/{modules, \[$(MODULES)\]}/" \
+		| sed "s/{id,[[:space:]]*\"git\"}/{id, \"$(GITDESCRIBE)\"}/" \
 		> ebin/$(PROJECT).app
 
 define compile_erl
@@ -278,6 +294,7 @@ help::
 bs_appsrc = "{application, $(PROJECT), [" \
 	"	{description, \"\"}," \
 	"	{vsn, \"0.1.0\"}," \
+	"	{id, \"git\"}," \
 	"	{modules, []}," \
 	"	{registered, []}," \
 	"	{applications, [" \
@@ -290,6 +307,7 @@ bs_appsrc = "{application, $(PROJECT), [" \
 bs_appsrc_lib = "{application, $(PROJECT), [" \
 	"	{description, \"\"}," \
 	"	{vsn, \"0.1.0\"}," \
+	"	{id, \"git\"}," \
 	"	{modules, []}," \
 	"	{registered, []}," \
 	"	{applications, [" \
@@ -578,7 +596,7 @@ $(C_SRC_ENV):
 	erl -noshell -noinput -eval "file:write_file(\"$(C_SRC_ENV)\", \
 		io_lib:format(\"ERTS_INCLUDE_DIR ?= ~s/erts-~s/include/\", \
 			[code:root_dir(), erlang:system_info(version)])), \
-		init:stop()."
+		erlang:halt()."
 
 -include $(C_SRC_ENV)
 
@@ -688,6 +706,7 @@ DIALYZER_PLT ?= $(CURDIR)/.$(PROJECT).plt
 export DIALYZER_PLT
 
 PLT_APPS ?=
+DIALYZER_DIRS ?= --src -r src
 DIALYZER_OPTS ?= -Werror_handling -Wrace_conditions \
 	-Wunmatched_returns # -Wunderspecs
 
@@ -716,7 +735,71 @@ dialyze:
 else
 dialyze: $(DIALYZER_PLT)
 endif
-	@dialyzer --no_native --src -r src $(DIALYZER_OPTS)
+	@dialyzer --no_native $(DIALYZER_DIRS) $(DIALYZER_OPTS)
+
+# Copyright (c) 2013-2014, Loïc Hoguin <essen@ninenines.eu>
+# This file is part of erlang.mk and subject to the terms of the ISC License.
+
+.PHONY: distclean-edoc
+
+# Configuration.
+
+EDOC_OPTS ?=
+
+# Core targets.
+
+docs:: distclean-edoc
+	$(gen_verbose) erl -noshell \
+		-eval 'edoc:application($(PROJECT), ".", [$(EDOC_OPTS)]), init:stop().'
+
+distclean:: distclean-edoc
+
+# Plugin-specific targets.
+
+distclean-edoc:
+	$(gen_verbose) rm -f doc/*.css doc/*.html doc/*.png doc/edoc-info
+
+# Copyright (c) 2014, Juan Facorro <juan@inaka.net>
+# This file is part of erlang.mk and subject to the terms of the ISC License.
+
+.PHONY: elvis distclean-elvis
+
+# Configuration.
+
+ELVIS_CONFIG ?= $(CURDIR)/elvis.config
+
+ELVIS ?= $(CURDIR)/elvis
+export ELVIS
+
+ELVIS_URL ?= https://github.com/inaka/elvis/releases/download/0.2.3/elvis
+ELVIS_CONFIG_URL ?= https://github.com/inaka/elvis/releases/download/0.2.3/elvis.config
+ELVIS_OPTS ?=
+
+# Core targets.
+
+help::
+	@printf "%s\n" "" \
+		"Elvis targets:" \
+		"  elvis       Run Elvis using the local elvis.config or download the default otherwise"
+
+ifneq ($(wildcard $(ELVIS_CONFIG)),)
+rel:: distclean-elvis
+endif
+
+distclean:: distclean-elvis
+
+# Plugin-specific targets.
+
+$(ELVIS):
+	@$(call core_http_get,$(ELVIS_CONFIG),$(ELVIS_CONFIG_URL))
+	@$(call core_http_get,$(ELVIS),$(ELVIS_URL))
+	@chmod +x $(ELVIS)
+
+elvis: $(ELVIS)
+	@$(ELVIS) rock -c $(ELVIS_CONFIG) $(ELVIS_OPTS)
+
+distclean-elvis:
+	$(gen_verbose) rm -rf $(ELVIS)
 
 # Copyright (c) 2013-2014, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
@@ -743,28 +826,6 @@ ifneq ($(wildcard src/),)
 ebin/$(PROJECT).app:: $(shell find templates -type f -name \*.dtl 2>/dev/null)
 	$(if $(strip $?),$(call compile_erlydtl,$?))
 endif
-
-# Copyright (c) 2013-2014, Loïc Hoguin <essen@ninenines.eu>
-# This file is part of erlang.mk and subject to the terms of the ISC License.
-
-.PHONY: distclean-edoc
-
-# Configuration.
-
-EDOC_OPTS ?=
-
-# Core targets.
-
-docs:: distclean-edoc
-	$(gen_verbose) erl -noshell \
-		-eval 'edoc:application($(PROJECT), ".", [$(EDOC_OPTS)]), init:stop().'
-
-distclean:: distclean-edoc
-
-# Plugin-specific targets.
-
-distclean-edoc:
-	$(gen_verbose) rm -f doc/*.css doc/*.html doc/*.png doc/edoc-info
 
 # Copyright (c) 2013-2014, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
