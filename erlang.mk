@@ -210,17 +210,27 @@ ERLC_OPTS ?= -Werror +debug_info +warn_export_all +warn_export_vars \
 	+warn_shadow_vars +warn_obsolete_guard # +bin_opt_info +warn_missing_spec
 COMPILE_FIRST ?=
 COMPILE_FIRST_PATHS = $(addprefix src/,$(addsuffix .erl,$(COMPILE_FIRST)))
+ERLC_EXCLUDE ?=
+ERLC_EXCLUDE_PATHS = $(addprefix src/,$(addsuffix .erl,$(ERLC_EXCLUDE)))
+
+ERLC_MIB_OPTS ?=
+COMPILE_MIB_FIRST ?=
+COMPILE_MIB_FIRST_PATHS = $(addprefix mibs/,$(addsuffix .mib,$(COMPILE_MIB_FIRST)))
 
 # Verbosity.
 
 appsrc_verbose_0 = @echo " APP   " $(PROJECT).app.src;
 appsrc_verbose = $(appsrc_verbose_$(V))
 
-erlc_verbose_0 = @echo " ERLC  " $(filter %.erl %.core,$(?F));
+erlc_verbose_0 = @echo " ERLC  " $(filter-out $(patsubst %,%.erl,$(ERLC_EXCLUDE)),\
+	$(filter %.erl %.core,$(?F)));
 erlc_verbose = $(erlc_verbose_$(V))
 
 xyrl_verbose_0 = @echo " XYRL  " $(filter %.xrl %.yrl,$(?F));
 xyrl_verbose = $(xyrl_verbose_$(V))
+
+mib_verbose_0 = @echo " MIB   " $(filter %.bin %.mib,$(?F));
+mib_verbose = $(mib_verbose_$(V))
 
 # Core targets.
 
@@ -239,7 +249,8 @@ app:: erlc-include ebin/$(PROJECT).app
 
 define compile_erl
 	$(erlc_verbose) erlc -v $(ERLC_OPTS) -o ebin/ \
-		-pa ebin/ -I include/ $(COMPILE_FIRST_PATHS) $(1)
+		-pa ebin/ -I include/ $(filter-out $(ERLC_EXCLUDE_PATHS),\
+		$(COMPILE_FIRST_PATHS) $(1))
 endef
 
 define compile_xyrl
@@ -248,9 +259,21 @@ define compile_xyrl
 	@rm ebin/*.erl
 endef
 
+define compile_mib
+	$(mib_verbose) erlc -v $(ERLC_MIB_OPTS) -o priv/mibs/ \
+		-I priv/mibs/ $(COMPILE_MIB_FIRST_PATHS) $(1)
+	$(mib_verbose) erlc -o include/ -- priv/mibs/*.bin
+endef
+
 ifneq ($(wildcard src/),)
 ebin/$(PROJECT).app::
 	@mkdir -p ebin/
+
+ifneq ($(wildcard mibs/),)
+ebin/$(PROJECT).app:: $(shell find mibs -type f -name \*.mib)
+	@mkdir -p priv/mibs/ include
+	$(if $(strip $?),$(call compile_mib,$?))
+endif
 
 ebin/$(PROJECT).app:: $(shell find src -type f -name \*.erl) \
 		$(shell find src -type f -name \*.core)
@@ -271,7 +294,8 @@ erlc-include:
 	fi
 
 clean-app:
-	$(gen_verbose) rm -rf ebin/
+	$(gen_verbose) rm -rf ebin/ priv/mibs/
+	$(gen_verbose) rm -f $(addprefix include/,$(addsuffix .hrl,$(notdir $(basename $(wildcard mibs/*.mib)))))
 
 # Copyright (c) 2014, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
@@ -554,7 +578,7 @@ list-templates:
 # Copyright (c) 2014, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
 
-.PHONY: clean-c_src
+.PHONY: clean-c_src distclean-c_src-env
 # todo
 
 # Configuration.
@@ -578,44 +602,59 @@ else ifeq ($(UNAME_SYS), Linux)
 	CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
 endif
 
+CFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR)
+
+LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei
+LDFLAGS += -shared
+
 # Verbosity.
 
 c_src_verbose_0 = @echo " C_SRC " $(?F);
-c_src_verbose = $(appsrc_verbose_$(V))
+c_src_verbose = $(c_src_verbose_$(V))
 
 # Targets.
 
-ifeq ($(wildcard $(C_SRC_DIR)/Makefile),)
-
-app:: $(C_SRC_ENV)
-	@mkdir -p priv/
-	$(c_src_verbose) $(CC) $(CFLAGS) $(C_SRC_DIR)/*.c -fPIC -shared -o $(C_SRC_OUTPUT) \
-		-I $(ERTS_INCLUDE_DIR) $(C_SRC_OPTS)
-
-$(C_SRC_ENV):
-	erl -noshell -noinput -eval "file:write_file(\"$(C_SRC_ENV)\", \
-		io_lib:format(\"ERTS_INCLUDE_DIR ?= ~s/erts-~s/include/\", \
-			[code:root_dir(), erlang:system_info(version)])), \
-		erlang:halt()."
-
--include $(C_SRC_ENV)
-
-else
-ifneq ($(wildcard $(C_SRC_DIR)),)
-
+ifeq ($(wildcard $(C_SRC_DIR)),)
+else ifneq ($(wildcard $(C_SRC_DIR)/Makefile),)
 app::
 	$(MAKE) -C $(C_SRC_DIR)
 
 clean::
 	$(MAKE) -C $(C_SRC_DIR) clean
 
-endif
-endif
+else
+SOURCE := $(shell find $(C_SRC_DIR) -type f -name \*.c)
+
+app:: $(C_SRC_ENV) $(C_SRC_OUTPUT)
+
+$(C_SRC_OUTPUT): $(SOURCE)
+	@mkdir -p priv/
+	$(c_src_verbose) $(CC) $(CFLAGS) $(SOURCE) \
+		$(LDFLAGS) $(LDLIBS) -o $(C_SRC_OUTPUT) $(C_SRC_OPTS)
+
+$(C_SRC_ENV):
+	@erl -noshell -noinput -eval "file:write_file(\"$(C_SRC_ENV)\", \
+		io_lib:format( \
+			\"ERTS_INCLUDE_DIR ?= ~s/erts-~s/include/~n\" \
+			\"ERL_INTERFACE_INCLUDE_DIR ?= ~s~n\" \
+			\"ERL_INTERFACE_LIB_DIR ?= ~s~n\", \
+			[code:root_dir(), erlang:system_info(version), \
+			code:lib_dir(erl_interface, include), \
+			code:lib_dir(erl_interface, lib)])), \
+		erlang:halt()."
 
 clean:: clean-c_src
 
 clean-c_src:
-	$(gen_verbose) rm -f $(C_SRC_ENV) $(C_SRC_OUTPUT)
+	$(gen_verbose) rm -f $(C_SRC_OUTPUT)
+
+distclean:: distclean-c_src-env
+
+distclean-c_src-env:
+	$(gen_verbose) rm -f $(C_SRC_ENV)
+
+-include $(C_SRC_ENV)
+endif
 
 # Copyright (c) 2013-2014, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
