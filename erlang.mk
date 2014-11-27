@@ -206,8 +206,8 @@ help::
 
 # Configuration.
 
-ERLC_OPTS ?= -Werror +debug_info +warn_export_all +warn_export_vars \
-	+warn_shadow_vars +warn_obsolete_guard # +bin_opt_info +warn_missing_spec
+ERLC_OPTS ?= -Werror +debug_info +warn_export_vars +warn_shadow_vars \
+	+warn_obsolete_guard # +bin_opt_info +warn_export_all +warn_missing_spec
 COMPILE_FIRST ?=
 COMPILE_FIRST_PATHS = $(addprefix src/,$(addsuffix .erl,$(COMPILE_FIRST)))
 ERLC_EXCLUDE ?=
@@ -294,8 +294,8 @@ erlc-include:
 	fi
 
 clean-app:
-	$(gen_verbose) rm -rf ebin/ priv/mibs/
-	$(gen_verbose) rm -f $(addprefix include/,$(addsuffix .hrl,$(notdir $(basename $(wildcard mibs/*.mib)))))
+	$(gen_verbose) rm -rf ebin/ priv/mibs/ \
+		$(addprefix include/,$(addsuffix .hrl,$(notdir $(basename $(wildcard mibs/*.mib)))))
 
 # Copyright (c) 2014, Loïc Hoguin <essen@ninenines.eu>
 # This file is part of erlang.mk and subject to the terms of the ISC License.
