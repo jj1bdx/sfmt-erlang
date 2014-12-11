@@ -56,6 +56,11 @@ Note well: only (2^19937 - 1) period is supported.
 * Execution speed benchmark: `make speed`
 * See also [erlang.mk](https://github.com/extend/erlang.mk) for the details
 
+## hex.pm support
+
+* Package name: `sfmt`
+* See `package.exs`
+
 ## API compatible with the random module
 
     seed0, seed/0, seed/3, uniform/0, uniform/1, uniform_s/1, uniform_s/3 
