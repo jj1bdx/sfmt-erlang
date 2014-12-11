@@ -42,8 +42,8 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## Tested platforms
 
-* FreeBSD/amd64 10.1-STABLE with Erlang/OTP 17.3
-* OS X 10.10.1 Yosemite with Erlang/OTP 17.3
+* FreeBSD/amd64 10.1-STABLE with Erlang/OTP 17.3.4
+* OS X 10.10.1 Yosemite with Erlang/OTP 17.3.4
 
 ## Make options (of erlang.mk)
 
