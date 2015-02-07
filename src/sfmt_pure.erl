@@ -190,8 +190,8 @@
 
 -spec rshift128(w128(), integer()) -> w128().
 
-rshift128(In, Shift) ->
-    [I0, I1, I2, I3] = In,
+rshift128([I0, I1, I2, I3], Shift) ->
+    % [I0, I1, I2, I3] = In,
     TH = (I3 bsl 32) bor (I2), 
     TL = (I1 bsl 32) bor (I0),
     OH = (TH bsr (Shift * 8)) band ?BITMASK64,
@@ -205,8 +205,8 @@ rshift128(In, Shift) ->
 
 -spec lshift128(w128(), integer()) -> w128().
 
-lshift128(In, Shift) ->
-    [I0, I1, I2, I3] = In,
+lshift128([I0, I1, I2, I3], Shift) ->
+    % [I0, I1, I2, I3] = In,
     TH = (I3 bsl 32) bor (I2), 
     TL = (I1 bsl 32) bor (I0),
     OL = (TL bsl (Shift * 8)) band ?BITMASK64,
@@ -219,12 +219,16 @@ lshift128(In, Shift) ->
 
 -spec do_recursion(w128(), w128(), w128(), w128()) -> w128().
 
-do_recursion(A, B, C, D) ->
-    [A0, A1, A2, A3] = A,
-    [B0, B1, B2, B3] = B,
+do_recursion(
+    [A0, A1, A2, A3],
+    [B0, B1, B2, B3],
+    C,
+    [D0, D1, D2, D3]) ->
+    % [A0, A1, A2, A3] = A,
+    % [B0, B1, B2, B3] = B,
     % [C0, C1, C2, C3] = C,
-    [D0, D1, D2, D3] = D,
-    [X0, X1, X2, X3] = lshift128(A, ?SL2),
+    % [D0, D1, D2, D3] = D,
+    [X0, X1, X2, X3] = lshift128([A0, A1, A2, A3], ?SL2),
     [Y0, Y1, Y2, Y3] = rshift128(C, ?SR2),
     [
      A0 bxor X0 bxor ((B0 bsr ?SR1) band ?MSK1) bxor Y0
