@@ -49,7 +49,8 @@
 -export([
 	 test_speed/0,
 	 test_short_speed/0,
-     reds/1
+     reds/0,
+     reds_pure/0
 	 ]).
 
 test_speed_rand_rec1(0, _, _) ->
@@ -163,20 +164,45 @@ test_short_speed() ->
         test_speed_orig_uniform_n(10, 10000)}
 	    ]).
 
-%% @doc counting reduction of sfmt:init_gen_rand/1.
+%% @doc counting reduction of sfmt:gen_rand_all/1.
 %% Code was copied from Steve Vinoski's presentation sample code
 %% at https://github.com/vinoski/bitwise
 %% under src/bitwise.erl
 
--spec reds(integer()) -> {integer(), tuple(), tuple()}.
+-spec reds() -> {integer(), tuple(), tuple()}.
 
-reds(I) ->
+reds() ->
     Parent = self(),
     Pid = spawn(fun() ->
                         Self = self(),
+                        I = sfmt:init_gen_rand(1234),
                         Start = os:timestamp(),
                         R0 = process_info(Self, reductions),
-                        _ = sfmt:init_gen_rand(I),
+                        _ = sfmt:gen_rand_all(I),
+                        R1 = process_info(Self, reductions),
+                        T = timer:now_diff(os:timestamp(), Start),
+                        Parent ! {Self,{T, R0, R1}}
+                end),
+    receive
+        {Pid,Result} ->
+            Result
+    end.
+
+%% @doc counting reduction of sfmt_pure:gen_rand_all/1.
+%% Code was copied from Steve Vinoski's presentation sample code
+%% at https://github.com/vinoski/bitwise
+%% under src/bitwise.erl
+
+-spec reds_pure() -> {integer(), tuple(), tuple()}.
+
+reds_pure() ->
+    Parent = self(),
+    Pid = spawn(fun() ->
+                        Self = self(),
+                        I = sfmt_pure:init_gen_rand(1234),
+                        Start = os:timestamp(),
+                        R0 = process_info(Self, reductions),
+                        _ = sfmt_pure:gen_rand_all(I),
                         R1 = process_info(Self, reductions),
                         T = timer:now_diff(os:timestamp(), Start),
                         Parent ! {Self,{T, R0, R1}}
