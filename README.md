@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.10.1 7-NOV-2014
+* Version 0.11.0 16-DEC-2015
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -10,7 +10,7 @@
 
 ## License
 
-Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University. All rights
+Copyright (c) 2010-2015 Kenji Rikitake and Kyoto University. All rights
 reserved.
 
 Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -42,8 +42,8 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## Tested platforms
 
-* FreeBSD/amd64 10.1-STABLE with Erlang/OTP 17.4
-* OS X 10.10.1 Yosemite with Erlang/OTP 17.4
+* FreeBSD/amd64 10.2-STABLE with Erlang/OTP 18.1.5
+* OS X 10.11.2 El Capitanwith Erlang/OTP 18.1.5
 
 ## Make options (of erlang.mk)
 
