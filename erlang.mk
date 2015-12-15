@@ -16,7 +16,7 @@
 
 ERLANG_MK_FILENAME := $(realpath $(lastword $(MAKEFILE_LIST)))
 
-ERLANG_MK_VERSION = 2.0.0-pre.2-24-g6ba732c-dirty
+ERLANG_MK_VERSION = 2.0.0-pre.2-35-g3ede3d9-dirty
 
 # Core configuration.
 
@@ -1129,7 +1129,7 @@ pkg_elvis_description = Erlang Style Reviewer
 pkg_elvis_homepage = https://github.com/inaka/elvis
 pkg_elvis_fetch = git
 pkg_elvis_repo = https://github.com/inaka/elvis
-pkg_elvis_commit = 0.2.4
+pkg_elvis_commit = master
 
 PACKAGES += emagick
 pkg_emagick_name = emagick
@@ -1770,6 +1770,14 @@ pkg_geef_homepage = https://github.com/carlosmn/geef
 pkg_geef_fetch = git
 pkg_geef_repo = https://github.com/carlosmn/geef
 pkg_geef_commit = master
+
+PACKAGES += gen_coap
+pkg_gen_coap_name = gen_coap
+pkg_gen_coap_description = Generic Erlang CoAP Client/Server
+pkg_gen_coap_homepage = https://github.com/gotthardp/gen_coap
+pkg_gen_coap_fetch = git
+pkg_gen_coap_repo = https://github.com/gotthardp/gen_coap
+pkg_gen_coap_commit = master
 
 PACKAGES += gen_cycle
 pkg_gen_cycle_name = gen_cycle
@@ -3139,6 +3147,14 @@ pkg_resource_discovery_fetch = git
 pkg_resource_discovery_repo = https://github.com/erlware/resource_discovery
 pkg_resource_discovery_commit = master
 
+PACKAGES += restc
+pkg_restc_name = restc
+pkg_restc_description = Erlang Rest Client
+pkg_restc_homepage = https://github.com/kivra/restclient
+pkg_restc_fetch = git
+pkg_restc_repo = https://github.com/kivra/restclient
+pkg_restc_commit = master
+
 PACKAGES += rfc4627_jsonrpc
 pkg_rfc4627_jsonrpc_name = rfc4627_jsonrpc
 pkg_rfc4627_jsonrpc_description = Erlang RFC4627 (JSON) codec and JSON-RPC server implementation.
@@ -3881,7 +3897,7 @@ pkg_xref_runner_description = Erlang Xref Runner (inspired in rebar xref)
 pkg_xref_runner_homepage = https://github.com/inaka/xref_runner
 pkg_xref_runner_fetch = git
 pkg_xref_runner_repo = https://github.com/inaka/xref_runner
-pkg_xref_runner_commit = 0.2.0
+pkg_xref_runner_commit = master
 
 PACKAGES += yamerl
 pkg_yamerl_name = yamerl
@@ -4066,7 +4082,10 @@ endif
 # While Makefile file could be GNUmakefile or makefile,
 # in practice only Makefile is needed so far.
 define dep_autopatch
-	if [ -f $(DEPS_DIR)/$(1)/Makefile ]; then \
+	if [ -f $(DEPS_DIR)/$(1)/erlang.mk ]; then \
+		$(call erlang,$(call dep_autopatch_appsrc.erl,$(1))); \
+		$(call dep_autopatch_erlang_mk,$(1)); \
+	elif [ -f $(DEPS_DIR)/$(1)/Makefile ]; then \
 		if [ 0 != `grep -c "include ../\w*\.mk" $(DEPS_DIR)/$(1)/Makefile` ]; then \
 			$(call dep_autopatch2,$(1)); \
 		elif [ 0 != `grep -ci rebar $(DEPS_DIR)/$(1)/Makefile` ]; then \
@@ -4074,12 +4093,7 @@ define dep_autopatch
 		elif [ -n "`find $(DEPS_DIR)/$(1)/ -type f -name \*.mk -not -name erlang.mk -exec grep -i rebar '{}' \;`" ]; then \
 			$(call dep_autopatch2,$(1)); \
 		else \
-			if [ -f $(DEPS_DIR)/$(1)/erlang.mk ]; then \
-				$(call erlang,$(call dep_autopatch_appsrc.erl,$(1))); \
-				$(call dep_autopatch_erlang_mk,$(1)); \
-			else \
-				$(call erlang,$(call dep_autopatch_app.erl,$(1))); \
-			fi \
+			$(call erlang,$(call dep_autopatch_app.erl,$(1))); \
 		fi \
 	else \
 		if [ ! -d $(DEPS_DIR)/$(1)/src/ ]; then \
@@ -4396,9 +4410,10 @@ define dep_autopatch_rebar.erl
 					Output, ": $$\(foreach ext,.c .C .cc .cpp,",
 						"$$\(patsubst %$$\(ext),%.o,$$\(filter %$$\(ext),$$\(wildcard", Input, "))))\n",
 					"\t$$\(CC) -o $$\@ $$\? $$\(LDFLAGS) $$\(ERL_LDFLAGS) $$\(DRV_LDFLAGS) $$\(EXE_LDFLAGS)",
-					case filename:extension(Output) of
-						[] -> "\n";
-						_ -> " -shared\n"
+					case {filename:extension(Output), $(PLATFORM)} of
+					    {[], _} -> "\n";
+					    {_, darwin} -> "\n";
+					    _ -> " -shared\n"
 					end])
 			end,
 			[PortSpec(S) || S <- PortSpecs]
@@ -4562,10 +4577,11 @@ $(DEPS_DIR)/$(call dep_name,$1):
 		exit 17; \
 	fi
 	$(verbose) mkdir -p $(DEPS_DIR)
-	$(dep_verbose) $(call dep_fetch_$(strip $(call dep_fetch,$1)),$1)
-	$(verbose) if [ -f $(DEPS_DIR)/$(DEP_NAME)/configure.ac -o -f $(DEPS_DIR)/$(DEP_NAME)/configure.in ]; then \
-		echo " AUTO  " $(DEP_STR); \
-		cd $(DEPS_DIR)/$(DEP_NAME) && autoreconf -Wall -vif -I m4; \
+	$(dep_verbose) $(call dep_fetch_$(strip $(call dep_fetch,$(1))),$(1))
+	$(verbose) if [ -f $(DEPS_DIR)/$(1)/configure.ac -o -f $(DEPS_DIR)/$(1)/configure.in ] \
+			&& [ ! -f $(DEPS_DIR)/$(1)/configure ]; then \
+		echo " AUTO  " $(1); \
+		cd $(DEPS_DIR)/$(1) && autoreconf -Wall -vif -I m4; \
 	fi
 	- $(verbose) if [ -f $(DEPS_DIR)/$(DEP_NAME)/configure ]; then \
 		echo " CONF  " $(DEP_STR); \
@@ -4649,6 +4665,20 @@ dtl_verbose = $(dtl_verbose_$(V))
 
 # Core targets.
 
+DTL_FILES = $(sort $(call core_find,$(DTL_PATH),*.dtl))
+
+ifneq ($(DTL_FILES),)
+
+ifdef DTL_FULL_PATH
+BEAM_FILES += $(addprefix ebin/,$(patsubst %.dtl,%_dtl.beam,$(subst /,_,$(DTL_FILES:$(DTL_PATH)%=%))))
+else
+BEAM_FILES += $(addprefix ebin/,$(patsubst %.dtl,%_dtl.beam,$(notdir $(DTL_FILES))))
+endif
+
+# Rebuild templates when the Makefile changes.
+$(DTL_FILES): $(MAKEFILE_LIST)
+	@touch $@
+
 define erlydtl_compile.erl
 	[begin
 		Module0 = case "$(strip $(DTL_FULL_PATH))" of
@@ -4667,24 +4697,10 @@ define erlydtl_compile.erl
 	halt().
 endef
 
-ifneq ($(wildcard src/),)
-
-DTL_FILES = $(sort $(call core_find,$(DTL_PATH),*.dtl))
-
-ifdef DTL_FULL_PATH
-BEAM_FILES += $(addprefix ebin/,$(patsubst %.dtl,%_dtl.beam,$(subst /,_,$(DTL_FILES:$(DTL_PATH)%=%))))
-else
-BEAM_FILES += $(addprefix ebin/,$(patsubst %.dtl,%_dtl.beam,$(notdir $(DTL_FILES))))
-endif
-
-# Rebuild templates when the Makefile changes.
-$(DTL_FILES): $(MAKEFILE_LIST)
-	@touch $@
-
-ebin/$(PROJECT).app:: $(DTL_FILES)
-	$(gen_verbose) mkdir -p ebin/
+ebin/$(PROJECT).app:: $(DTL_FILES) | ebin/
 	$(if $(strip $?),\
-		$(dtl_verbose) $(call erlang,$(call erlydtl_compile.erl,$?,-pa ebin/ $(DEPS_DIR)/erlydtl/ebin/)))
+		$(dtl_verbose) $(call erlang,$(call erlydtl_compile.erl,$?),-pa ebin/ $(DEPS_DIR)/erlydtl/ebin/))
+
 endif
 
 # Copyright (c) 2015, Loïc Hoguin <essen@ninenines.eu>
@@ -5580,12 +5596,32 @@ list-templates:
 
 C_SRC_DIR ?= $(CURDIR)/c_src
 C_SRC_ENV ?= $(C_SRC_DIR)/env.mk
-C_SRC_OUTPUT ?= $(CURDIR)/priv/$(PROJECT).so
+C_SRC_OUTPUT ?= $(CURDIR)/priv/$(PROJECT)
 C_SRC_TYPE ?= shared
 
 # System type and C compiler/flags.
 
-ifeq ($(PLATFORM),darwin)
+ifeq ($(PLATFORM),msys2)
+	C_SRC_OUTPUT_EXECUTABLE_EXTENSION ?= .exe
+	C_SRC_OUTPUT_SHARED_EXTENSION ?= .dll
+else
+	C_SRC_OUTPUT_EXECUTABLE_EXTENSION ?=
+	C_SRC_OUTPUT_SHARED_EXTENSION ?= .so
+endif
+
+ifeq ($(C_SRC_TYPE),shared)
+	C_SRC_OUTPUT_FILE = $(C_SRC_OUTPUT)$(C_SRC_OUTPUT_SHARED_EXTENSION)
+else
+	C_SRC_OUTPUT_FILE = $(C_SRC_OUTPUT)$(C_SRC_OUTPUT_EXECUTABLE_EXTENSION)
+endif
+
+ifeq ($(PLATFORM),msys2)
+# We hardcode the compiler used on MSYS2. The default CC=cc does
+# not produce working code. The "gcc" MSYS2 package also doesn't.
+	CC = /mingw64/bin/gcc
+	CFLAGS ?= -O3 -std=c99 -finline-functions -Wall -Wmissing-prototypes
+	CXXFLAGS ?= -O3 -finline-functions -Wall
+else ifeq ($(PLATFORM),darwin)
 	CC ?= cc
 	CFLAGS ?= -O3 -std=c99 -arch x86_64 -finline-functions -Wall -Wmissing-prototypes
 	CXXFLAGS ?= -O3 -arch x86_64 -finline-functions -Wall
@@ -5600,10 +5636,15 @@ else ifeq ($(PLATFORM),linux)
 	CXXFLAGS ?= -O3 -finline-functions -Wall
 endif
 
-CFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR)
-CXXFLAGS += -fPIC -I $(ERTS_INCLUDE_DIR) -I $(ERL_INTERFACE_INCLUDE_DIR)
+ifneq ($(PLATFORM),msys2)
+	CFLAGS += -fPIC
+	CXXFLAGS += -fPIC
+endif
 
-LDLIBS += -L $(ERL_INTERFACE_LIB_DIR) -lerl_interface -lei
+CFLAGS += -I"$(ERTS_INCLUDE_DIR)" -I"$(ERL_INTERFACE_INCLUDE_DIR)"
+CXXFLAGS += -I"$(ERTS_INCLUDE_DIR)" -I"$(ERL_INTERFACE_INCLUDE_DIR)"
+
+LDLIBS += -L"$(ERL_INTERFACE_LIB_DIR)" -lerl_interface -lei
 
 # Verbosity.
 
@@ -5640,15 +5681,15 @@ OBJECTS = $(addsuffix .o, $(basename $(SOURCES)))
 COMPILE_C = $(c_verbose) $(CC) $(CFLAGS) $(CPPFLAGS) -c
 COMPILE_CPP = $(cpp_verbose) $(CXX) $(CXXFLAGS) $(CPPFLAGS) -c
 
-app:: $(C_SRC_ENV) $(C_SRC_OUTPUT)
+app:: $(C_SRC_ENV) $(C_SRC_OUTPUT_FILE)
 
-test-build:: $(C_SRC_ENV) $(C_SRC_OUTPUT)
+test-build:: $(C_SRC_ENV) $(C_SRC_OUTPUT_FILE)
 
-$(C_SRC_OUTPUT): $(OBJECTS)
+$(C_SRC_OUTPUT_FILE): $(OBJECTS)
 	$(verbose) mkdir -p priv/
 	$(link_verbose) $(CC) $(OBJECTS) \
 		$(LDFLAGS) $(if $(filter $(C_SRC_TYPE),shared),-shared) $(LDLIBS) \
-		-o $(C_SRC_OUTPUT)
+		-o $(C_SRC_OUTPUT_FILE)
 
 %.o: %.c
 	$(COMPILE_C) $(OUTPUT_OPTION) $<
@@ -5665,13 +5706,13 @@ $(C_SRC_OUTPUT): $(OBJECTS)
 clean:: clean-c_src
 
 clean-c_src:
-	$(gen_verbose) rm -f $(C_SRC_OUTPUT) $(OBJECTS)
+	$(gen_verbose) rm -f $(C_SRC_OUTPUT_FILE) $(OBJECTS)
 
 endif
 
 ifneq ($(wildcard $(C_SRC_DIR)),)
 $(C_SRC_ENV):
-	$(verbose) $(ERL) -eval "file:write_file(\"$(C_SRC_ENV)\", \
+	$(verbose) $(ERL) -eval "file:write_file(\"$(call core_native_path,$(C_SRC_ENV))\", \
 		io_lib:format( \
 			\"ERTS_INCLUDE_DIR ?= ~s/erts-~s/include/~n\" \
 			\"ERL_INTERFACE_INCLUDE_DIR ?= ~s~n\" \
