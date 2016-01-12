@@ -506,10 +506,7 @@ gen_rand32({R, I}) ->
 -spec seed0() -> ran_sfmt().
 
 seed0() ->
-    I = init_gen_rand(1234),
-    % this operation is intstate() type dependent
-    R = I,
-    {R, I}.
+    {[], init_gen_rand(1234)}.
 
 %% @doc Initialize the process dictionary with seed0/0,
 %%      and return seed0/0 value.
