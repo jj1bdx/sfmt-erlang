@@ -349,7 +349,7 @@ gen_rand32_max(Max, I)
     {H, {T, I2}}.
 
 %% @doc generates a float random number from the given ran_sfmt() or intstate()
-%% where the range is [0.0, 1.0].
+%% where the range is (0.0, 1.0).
 %% (Note: once nifnized, but the speed of list-based code is faster)
 
 -spec gen_rand_float(RS::ran_sfmt()|intstate()) -> {float(), ran_sfmt()}.
@@ -367,8 +367,6 @@ gen_rand_float(I) when is_binary(I) ->
 
 %% entry in the process dictionary
 -define(PDIC_SEED, sfmt_seed).
-%% (1 / ((2 ^ 32) - 1)) (for [0, 1]-interval conversion)
--define(FLOAT_CONST, (1.0/4294967295.0)).
 
 %% @doc Returns the default internal state.
 
