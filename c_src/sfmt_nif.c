@@ -11,7 +11,7 @@
  */
 /*
 
-   Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University. All rights
+   Copyright (c) 2010-2016 Kenji Rikitake and Kyoto University. All rights
    reserved.
 
    Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima

@@ -1,7 +1,7 @@
 %% @author Kenji Rikitake <kenji.rikitake@acm.org>
 %% @author Mutsuo Saito
 %% @author Makoto Matsumoto
-%% @copyright 2010-2014 Kenji Rikitake, Mutsuo Saito, Makoto Matsumoto, Kyoto University,
+%% @copyright 2010-2016 Kenji Rikitake, Mutsuo Saito, Makoto Matsumoto, Kyoto University,
 %% Hiroshima University, The University of Tokyo
 %% @doc SIMD-oriented Fast Mersenne Twister (SFMT) in pure Erlang.
 %% The recursion algorithm for `gen_rand_all' and `gen_rand_list32' are
@@ -45,7 +45,7 @@
 %% This makes the algorithm simpler and faster.
 %% @end
 %%
-%% Copyright (c) 2010-2014 Kenji Rikitake and Kyoto University.
+%% Copyright (c) 2010-2016 Kenji Rikitake and Kyoto University.
 %% All rights reserved.
 %%
 %% Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
