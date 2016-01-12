@@ -3,7 +3,7 @@ defmodule Sfmt.Mixfile do
 
   def project do
     [app: :sfmt,
-     version: "0.10.1",
+     version: "0.12.0",
      description: description,
      package: package,
      deps: deps]
