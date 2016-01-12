@@ -42,13 +42,8 @@ defmodule Sfmt.Mixfile do
         "erlang.mk",
         "mix.exs"
         ],
-     contributors: [
-        "Kenji Rikitake",
-        "Mutsuo Saito",
-        "Makoto Matsumoto",
-        "Dan Gudmundsson",
-        "Michael Truog",
-        "Michael Chmielewski"
+     maintainers: [
+        "Kenji Rikitake"
         ],
      licenses: ["simplified BSD"],
      links: %{"GitHub" => "https://github.com/jj1bdx/sfmt-erlang/"}
