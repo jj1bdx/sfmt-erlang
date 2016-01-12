@@ -1,5 +1,15 @@
 # List of changes on sfmt-erlang
 
+## output interval changed to (0.0, 1.0)
+
+* `uniform/0` and `uniform_s/1` output `X` range: `0.0 < X < 1.0` (from 0.12.0)
+* This change fixes the scaling bug on `uniform/1`, `uniform_s/2`
+* Thx @timCF on GitHub for pointing this out
+
+## seeding semantics now consistent between sfmt and sfmt_pure modules
+
+* `sfmt_pure:seed0/0` is fixed to be consistent with `sfmt_seed0/0` (from 0.12.0)
+
 ## hex.pm support added
 
 * Based on the contribution from Michael Chmielewski (from 0.10.1)
