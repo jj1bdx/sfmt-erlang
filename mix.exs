@@ -3,7 +3,7 @@ defmodule Sfmt.Mixfile do
 
   def project do
     [app: :sfmt,
-     version: "0.12.1",
+     version: "0.12.2",
      description: description,
      package: package,
      deps: deps]
@@ -33,11 +33,12 @@ defmodule Sfmt.Mixfile do
         "test_scripts",
         ".gitignore",
         ".travis.yml",
-        "CHANGES*",
-        "CONTRIBUTING*",
+        "CHANGES.md",
+        "CONTRIBUTING.md",
         "Doxyfile",
         "LICENSE",
-        "Makefile*",
+        "Makefile",
+        "Makefile.sfmt",
         "README.md",
         "erlang.mk",
         "mix.exs"

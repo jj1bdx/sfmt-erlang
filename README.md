@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.12.1 12-JAN-2016
+* Version 0.12.2 12-JAN-2016
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
