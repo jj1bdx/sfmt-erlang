@@ -100,8 +100,8 @@ typedef struct W128_T w128_t;
 #define PARITY4        (0x13c9e684U)
 /** Identification string for the algorithm. */
 #define IDSTR        "SFMT-19937:122-18-1-11-1:dfffffef-ddfecb7f-bffaffff-bffffff6"
-/** Float multiplier. */
-#define FLOAT_CONST (1.0/4294967295.0)
+/** Float multiplier: 2^(-32) */
+#define FLOAT_CONST (1.0/4294967296.0)
 
 /** Version number for load_info. */
 #define NIF_LOAD_INFO (101)
@@ -319,7 +319,7 @@ sfmt_nif_intstate_to_randlist(ErlNifEnv *env, int argc,
 }
 
 /**
- * NIF code of intstat_to_randlist_float/1.
+ * NIF code of intstate_to_randlist_float/1.
  * @param env ErlNifEnv pointer for the calling process.
  * @param argc Erlang function arity.
  * @param argv ERL_NIF_TERM pointers for the arguments.
@@ -340,10 +340,10 @@ sfmt_nif_intstate_to_randlist_float(ErlNifEnv *env, int argc,
     p = (w128_t *)r.data;
 
     for (j = 0, k = 0; j < (N32 / 4); j++, k += 4) {
-        l[k] = enif_make_double(env, FLOAT_CONST*p[j].u[0]);
-        l[k + 1] = enif_make_double(env, FLOAT_CONST*p[j].u[1]);
-        l[k + 2] = enif_make_double(env, FLOAT_CONST*p[j].u[2]);
-        l[k + 3] = enif_make_double(env, FLOAT_CONST*p[j].u[3]);
+        l[k] = enif_make_double(env, FLOAT_CONST * (0.5 + (double)p[j].u[0]));
+        l[k + 1] = enif_make_double(env, FLOAT_CONST * (0.5 + (double)p[j].u[1]));
+        l[k + 2] = enif_make_double(env, FLOAT_CONST * (0.5 + (double)p[j].u[2]));
+        l[k + 3] = enif_make_double(env, FLOAT_CONST * (0.5 + (double)p[j].u[3]));
     }
 
     return enif_make_list_from_array(env, l, N32);
@@ -547,10 +547,10 @@ sfmt_nif_gen_rand_list_float(ErlNifEnv *env,
 
     /* generate the list terms from the result array */
     for (j = 0, k = 0; j < (size / 4); j++, k += 4) {
-       terms[k] = enif_make_double(env, FLOAT_CONST*array[j].u[0]);
-       terms[k + 1] = enif_make_double(env, FLOAT_CONST*array[j].u[1]);
-       terms[k + 2] = enif_make_double(env, FLOAT_CONST*array[j].u[2]);
-       terms[k + 3] = enif_make_double(env, FLOAT_CONST*array[j].u[3]);
+       terms[k] = enif_make_double(env, FLOAT_CONST * (0.5 + (double)array[j].u[0]));
+       terms[k + 1] = enif_make_double(env, FLOAT_CONST * (0.5 + (double)array[j].u[1]));
+       terms[k + 2] = enif_make_double(env, FLOAT_CONST * (0.5 + (double)array[j].u[2]));
+       terms[k + 3] = enif_make_double(env, FLOAT_CONST * (0.5 + (double)array[j].u[3]));
     }
 
     list = enif_make_list_from_array(env, terms, req);
