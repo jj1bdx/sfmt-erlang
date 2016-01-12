@@ -497,7 +497,7 @@ gen_rand32({R, I}) ->
 %% compatible funtions to the random module in stdlib
 
 %% entry in the process dictionary
--define(PDIC_SEED, sfmt_seed).
+-define(PDIC_SEED, sfmt_pure_seed).
 %% (1 / ((2 ^ 32)) (for (0, 1)-interval conversion)
 -define(FLOAT_CONST, (1.0/4294967296.0)).
 
