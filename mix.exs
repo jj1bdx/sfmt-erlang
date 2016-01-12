@@ -47,6 +47,7 @@ defmodule Sfmt.Mixfile do
         "Kenji Rikitake"
         ],
      licenses: ["simplified BSD"],
+     build_tools: ["make"],
      links: %{"GitHub" => "https://github.com/jj1bdx/sfmt-erlang/"}
      ]
   end
