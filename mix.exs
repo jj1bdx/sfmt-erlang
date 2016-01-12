@@ -45,10 +45,10 @@ defmodule Sfmt.Mixfile do
 
   def project do
     [app: :sfmt,
-     version: "0.12.5",
+     version: "0.12.6",
      description: description,
      package: package,
-     compilers: [:sfmt] ++ Mix.compilers,
+     compilers: [:sfmt, :app],
      deps: deps]
   end
 
@@ -89,6 +89,7 @@ defmodule Sfmt.Mixfile do
         "Kenji Rikitake"
         ],
      licenses: ["simplified BSD"],
+     build_tools: ["make"],
      links: %{"GitHub" => "https://github.com/jj1bdx/sfmt-erlang/"}
      ]
   end
