@@ -3,7 +3,7 @@ defmodule Sfmt.Mixfile do
 
   def project do
     [app: :sfmt,
-     version: "0.12.3",
+     version: "0.12.4",
      description: description,
      package: package,
      deps: deps]
@@ -41,13 +41,12 @@ defmodule Sfmt.Mixfile do
         "Makefile.sfmt",
         "README.md",
         "erlang.mk",
-        "mix.exs"
+        "package.exs"
         ],
      maintainers: [
         "Kenji Rikitake"
         ],
      licenses: ["simplified BSD"],
-     build_tools: ["make"],
      links: %{"GitHub" => "https://github.com/jj1bdx/sfmt-erlang/"}
      ]
   end
