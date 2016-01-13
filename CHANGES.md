@@ -14,6 +14,7 @@
 
 * Based on the contribution from Michael Chmielewski (from 0.10.1)
 * Package name on hex.pm: sfmt
+* hexdocs.pm supported (from 0.12.8)
 
 ## NIF code simplified
 
