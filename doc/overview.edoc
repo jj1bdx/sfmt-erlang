@@ -1,0 +1,9 @@
+@author Kenji Rikitake <kenji.rikitake@acm.org>
+@title sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
+@copyright 2010-2016 Kenji Rikitake, Kyoto University, Mutsuo Saito, Makoto Matsumoto and Hiroshima University.
+@version 0.12.7
+@doc 
+
+@reference See <a href="https://github.com/jj1bdx/sfmt-erlang/">sfmt-erlang GitHub repository</a> for the further details.
+
+@end
