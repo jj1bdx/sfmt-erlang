@@ -45,10 +45,10 @@ defmodule Sfmt.Mixfile do
 
   def project do
     [app: :sfmt,
-     version: "0.12.6",
+     version: "0.12.7",
      description: description,
      package: package,
-     compilers: [:sfmt, :app],
+     compilers: [:sfmt] ++ Mix.compilers,
      deps: deps]
   end
 

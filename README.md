@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.12.6 13-JAN-2016
+* Version 0.12.7 13-JAN-2016
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -58,7 +58,7 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## hex.pm support
 
-* NIF building errors fixed (0.12.6 and later)
+* NIF building errors fixed (0.12.7 and later)
 * Package name: `sfmt`
 * See `mix.exs`
 * Note: all builds including C and Erlang source compilation are done with `make` with `erlang.mk`
