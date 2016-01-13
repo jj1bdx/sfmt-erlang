@@ -231,7 +231,7 @@ gen_rand_all(_) -> ?nif_stub.
 
 gen_rand_list32(_, _) -> ?nif_stub.
 
-%% @doc generating a list of uniform floats of [0.0, 1.0]
+%% @doc generating a list of uniform floats of (0.0, 1.0)
 %%      where length of the list is Size
 %%      with the updated internal state.
 
@@ -430,7 +430,7 @@ seed(A1, A2, A3) ->
     seed([A1, A2, A3]).
 
 %% @doc Returns a uniformly-distributed float random number X
-%%      where X is in the range of [0.0, 1.0]
+%%      where X is in the range of 0.0 &lt; X &lt; 1.0
 %%      and updates the internal state in the process dictionary.
 
 -spec uniform() -> float().
@@ -449,7 +449,7 @@ uniform() ->
     X.
 
 %% @doc Returns a uniformly-distributed integer random number X
-%%      where X is in the range of [1..N]
+%%      where X is in the range of 1 =&lt; X =&lt; N
 %%      and updates the internal state in the process dictionary.
 
 -spec uniform(integer()) -> integer().
@@ -460,7 +460,7 @@ uniform(N) when N >= 1 ->
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
 %%      and a new state
-%%      where X is in the range of [0.0, 1.0].
+%%      where X is in the range of 0.0 &lt; X &lt; 1.0.
 
 -spec uniform_s(RS::ran_sfmt()) -> {float(), ran_sfmt()}.
 
@@ -469,7 +469,7 @@ uniform_s(RS) ->
 
 %% @doc Returns a uniformly-distributed integer random number X
 %%      and a new state
-%%      where X is in the range of [1..N].
+%%      where X is in the range of 1 =&lt; X =&lt; N.
 
 -spec uniform_s(integer(), ran_sfmt()) -> {integer(), ran_sfmt()}.
 
