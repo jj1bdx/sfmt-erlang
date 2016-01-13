@@ -40,6 +40,17 @@ defmodule Mix.Tasks.Compile.Sfmt do
   end
 end
 
+defmodule Mix.Tasks.Edoc do
+  @shortdoc "Make docs using edoc on erlang.mk"
+
+  def run(_) do
+  {result, _error_code} = System.cmd("make", ["docs"], stderr_to_stdout: true)
+  Mix.shell.info result
+  :ok
+  end
+end
+
+
 defmodule Sfmt.Mixfile do
   use Mix.Project
 
@@ -49,6 +60,7 @@ defmodule Sfmt.Mixfile do
      description: description,
      package: package,
      compilers: [:sfmt] ++ Mix.compilers,
+     aliases: [docs: ["edoc"]],
      deps: deps]
   end
 
@@ -90,7 +102,8 @@ defmodule Sfmt.Mixfile do
         ],
      licenses: ["simplified BSD"],
      build_tools: ["make"],
-     links: %{"GitHub" => "https://github.com/jj1bdx/sfmt-erlang/"}
+     links: %{"GitHub" => "https://github.com/jj1bdx/sfmt-erlang/",
+     "Docs" => "http://hexdocs.pm/sfmt"}
      ]
   end
 end
