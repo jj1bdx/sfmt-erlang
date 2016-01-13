@@ -81,7 +81,7 @@ defmodule Sfmt.Mixfile do
   defp package do
     [files: [
         "c_src",
-        "docs/overview.edoc",
+        "doc/overview.edoc",
         "reference_texts",
         "src",
         "test",
