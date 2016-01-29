@@ -456,11 +456,11 @@ uniform() ->
 
 uniform(N) when (N >= 1) and (N =< 4294967295) ->
 	Range = N + 1,
-	uniform32process(Range, rem(4294967296, Range)).
+	uniform32process(Range, (4294967296 rem Range)).
 
 uniform32process(Range, Limit) ->
 	case random32int() of
-		GoodN when (GoodN >= Limit) -> rem(GoodN, Range);
+		GoodN when (GoodN >= Limit) -> (GoodN rem Range);
 		_ -> uniform32process(Range, Limit)
 	end.
 
