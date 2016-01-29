@@ -454,7 +454,7 @@ uniform() ->
 
 -spec uniform(integer()) -> integer().
 
-uniform(N) when (N >= 1) and (N <= 4294967295) ->
+uniform(N) when (N >= 1) and (N =< 4294967295) ->
 	Range = N + 1,
 	uniform32process(Range, rem(4294967296, Range)).
 
