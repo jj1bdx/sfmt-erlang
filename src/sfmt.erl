@@ -74,7 +74,7 @@
 %% Internal conversion between the internal state table
 %% and the external representation of randlist
 %% (i.e., a list of N32 integer elements)
--export([randlist_to_intstate/1,   
+-export([randlist_to_intstate/1,
 	 intstate_to_randlist/1,
 	 intstate_to_randlist_float/1,
 	 intstate_to_list_max/2]).
@@ -82,7 +82,7 @@
 %% SFMT period parameters
 %% details on SFMT-1.3.3 source code
 %%
-%% Mersenne Exponent. The period of the sequence 
+%% Mersenne Exponent. The period of the sequence
 %%  is a multiple of 2^MEXP-1.
 -define(MEXP, 19937).
 %% SFMT generator has an internal state array of 128-bit integers,
@@ -112,12 +112,12 @@
 -define(POS1, 122).
 %% the parameter of shift left as four 32-bit registers.
 -define(SL1, 18).
-%% the parameter of shift left as one 128-bit register. 
+%% the parameter of shift left as one 128-bit register.
 %% The 128-bit integer is shifted by (SL2 * 8) bits.
 -define(SL2, 1).
 %% the parameter of shift right as four 32-bit registers.
 -define(SR1, 11).
-%% the parameter of shift right as one 128-bit register. 
+%% the parameter of shift right as one 128-bit register.
 %% The 128-bit integer is shifted by (SL2 * 8) bits.
 -define(SR2, 1).
 %% A bitmask, used in the recursion.  These parameters are introduced
@@ -144,13 +144,13 @@
 nif_stub_error(Line) ->
     erlang:nif_error({nif_not_loaded, module, ?MODULE, line, Line}).
 
-%% @type w128() = [integer()]. 
+%% @type w128() = [integer()].
 %% An 128-bit integer represented by four 32-bit unsigned integers.
 %% Note: the number of elements is four (4).
 
 %% -type w128() :: [integer()].
 
-%% @type randlist() = [integer()]. 
+%% @type randlist() = [integer()].
 %% A list of N 128-bit integers for the portable representation of
 %% the internal state table,
 %% represented as multiple concatenation of four 32-bit unsigned integers.
@@ -195,7 +195,7 @@ nif_stub_error(Line) ->
 %% (For gen_rand_list32, S &gt;= N)
 %% r(a, b, c, d): do_recursion/4 function (of 4 w128() arguments)
 %% (The indexes are in C notation ([0 ... J-1] for J elements))
-%% 
+%%
 %% a[0] = r(i[0], i[POS1],   i[N-2], i[N-1]);
 %% a[1] = r(i[1], i[POS1+1], i[N-1], a[0]);
 %% a[2] = r(i[2], i[POS1+2], a[0],   a[1]);
@@ -212,10 +212,10 @@ nif_stub_error(Line) ->
 %% a[X]   = r(a[X-N], a[X-(N-POS1)], a[X-1], a[X-2]);
 %% ...
 %% a[S-1] = r(a[(S-N)-1], a[S-(N-POS1)-1], a[S-2], a[S-3]);
-%% 
+%%
 %% Use the last N <code>w128()</code> elements of <code>a[]</code>
-%% for the new internal state <code>ni[]</code>, 
-%% i.e., 
+%% for the new internal state <code>ni[]</code>,
+%% i.e.,
 %% ni[0] = a[S-N], ni[1] = a[S-N+1], ... ni[N-1] = a[S-1].
 %% </code></pre>
 
@@ -435,7 +435,7 @@ seed(A1, A2, A3) ->
 
 -spec uniform() -> float().
 
-uniform() -> 
+uniform() ->
     % if random number list doesn't exist
     % the corresponding internal state must be initialized
     RS = case get(?PDIC_SEED) of
@@ -454,8 +454,28 @@ uniform() ->
 
 -spec uniform(integer()) -> integer().
 
-uniform(N) when N >= 1 ->
-    trunc(uniform() * N) + 1.
+uniform(N) when (N >= 1) and (N <= 4294967295) ->
+	Range = N + 1,
+	uniform32process(Range, rem(4294967296, Range)).
+
+uniform32process(Range, Limit) ->
+	case random32int() of
+		GoodN when (GoodN >= Limit) -> rem(GoodN, Range);
+		_ -> uniform32process(Range, Limit)
+	end.
+
+random32int() ->
+	% if random number list doesn't exist
+	% the corresponding internal state must be initialized
+	RS = case get(?PDIC_SEED) of
+			undefined ->
+				seed0();
+				Val -> Val
+		end,
+	{X, NRS} = gen_rand32(RS),
+	% divided by 2^32 - 1
+	put(?PDIC_SEED, NRS),
+	X.
 
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
@@ -476,7 +496,7 @@ uniform_s(RS) ->
 uniform_s(N, RS) ->
     {X, NRS} = gen_rand_float(RS),
     {trunc(X * N) + 1, NRS}.
-    
+
 %% On-load callback
 
 %% @doc Loading NIF shared library file, used at the on-load callback.
@@ -492,4 +512,4 @@ load_nif() ->
 	      end,
     erlang:load_nif(filename:join(PrivDir, "sfmt_nif"), ?NIF_LOAD_INFO).
 
-%% end of the module    
+%% end of the module
