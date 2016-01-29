@@ -366,6 +366,7 @@ gen_rand_float(I) when is_binary(I) ->
 %% compatible funtions to the random module in stdlib
 
 %% entry in the process dictionary
+-define(PDIC_SEED_INT32, sfmt_seed_int32).
 -define(PDIC_SEED, sfmt_seed).
 
 %% @doc Returns the default internal state.
@@ -382,6 +383,7 @@ seed0() ->
 
 seed() ->
     Seed = seed0(),
+	put(?PDIC_SEED_INT32, Seed),
     case put(?PDIC_SEED, Seed) of
 	undefined -> Seed;
 	Old ->       Old
@@ -399,6 +401,7 @@ seed() ->
 seed(N) when is_integer(N) ->
     I = init_by_list32([N]),
     RS = {?N32, I},
+    put(?PDIC_SEED_INT32, RS),
     put(?PDIC_SEED, RS);
 
 %% @doc Puts the seed computed from the given integer list by init_by_list32/1
@@ -409,6 +412,7 @@ seed(N) when is_integer(N) ->
 seed(L) when is_list(L), is_integer(hd(L)) ->
     I = init_by_list32(L),
     RS = {?N32, I},
+    put(?PDIC_SEED_INT32, RS),
     put(?PDIC_SEED, RS);
 
 %% @doc Puts the seed computed from given three integers as a tuple
@@ -467,14 +471,14 @@ uniform32process(Range, Limit) ->
 random32int() ->
 	% if random number list doesn't exist
 	% the corresponding internal state must be initialized
-	RS = case get(?PDIC_SEED) of
+	RS = case get(?PDIC_SEED_INT32) of
 			undefined ->
 				seed0();
 				Val -> Val
 		end,
 	{X, NRS} = gen_rand32(RS),
 	% divided by 2^32 - 1
-	put(?PDIC_SEED, NRS),
+	put(?PDIC_SEED_INT32, NRS),
 	X.
 
 %% @doc With a given state,
