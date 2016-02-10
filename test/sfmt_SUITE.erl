@@ -73,13 +73,7 @@ gen_rand_tests(_) ->
     true = is_float(F4),
     {Outarray0, _I5} = sfmt:gen_rand_list_float(10, I0),
     true = is_float(hd(Outarray0)),
-    true = 10 =:= length(Outarray0),
-    {N6, I6} = sfmt:gen_rand32_max(10000, I0),
-    true = is_integer(N6),
-    true = N6 < 10000,
-    {N7, _I7} = sfmt:gen_rand32_max(10000, I6),
-    true = is_integer(N7),
-    true = N7 < 10000.
+    true = 10 =:= length(Outarray0).
     
 test_rec1(0, Acc, RS) ->
      {lists:reverse(Acc), RS};
