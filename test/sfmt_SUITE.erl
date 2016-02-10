@@ -51,29 +51,24 @@
 -export([all/0]).
 -export([gen_rand_tests/1,
          value_tests_1/1,
-         value_tests_2/1
+         value_tests_2/1,
+         value_tests_3/1
         ]).
 
 all() ->
     [gen_rand_tests,
      value_tests_1,
-     value_tests_2].
+     value_tests_2,
+     value_tests_3].
 
-%% @doc gen_rand32 and gen_rand_float API tests
+%% @doc gen_rand32 API tests
 
 gen_rand_tests(_) ->
     I0 = sfmt:init_gen_rand(1234),
     {N1, I1} = sfmt:gen_rand32(I0),
     true = is_integer(N1),
     {N2, _I2} = sfmt:gen_rand32(I1),
-    true = is_integer(N2),
-    {F3, I3} = sfmt:gen_rand_float(I0),
-    true = is_float(F3),
-    {F4, _I4} = sfmt:gen_rand_float(I3),
-    true = is_float(F4),
-    {Outarray0, _I5} = sfmt:gen_rand_list_float(10, I0),
-    true = is_float(hd(Outarray0)),
-    true = 10 =:= length(Outarray0).
+    true = is_integer(N2).
     
 test_rec1(0, Acc, RS) ->
      {lists:reverse(Acc), RS};
@@ -113,6 +108,46 @@ value_tests_2(_) ->
     true = Outarray3 =:= Outarray1,
     {Outarray4, _RS5} = test_rec1(10000, [], RS4),
     true = Outarray4 =:= Outarray2.
+
+test_rec2_sfmt_uniform_s(0, Acc, RS) ->
+     {lists:reverse(Acc), RS};
+test_rec2_sfmt_uniform_s(I, Acc, RS) ->
+     {Val, RS2} = sfmt:uniform_s(RS),
+     test_rec2_sfmt_uniform_s(I - 1, [Val | Acc], RS2).
+
+test_rec2_sfmt_pure_uniform_s(0, Acc, RS) ->
+     {lists:reverse(Acc), RS};
+test_rec2_sfmt_pure_uniform_s(I, Acc, RS) ->
+     {Val, RS2} = sfmt_pure:uniform_s(RS),
+     test_rec2_sfmt_pure_uniform_s(I - 1, [Val | Acc], RS2).
+
+test_rec2_sfmt_uniform_s_2(0, _N, Acc, RS) ->
+     {lists:reverse(Acc), RS};
+test_rec2_sfmt_uniform_s_2(I, N, Acc, RS) ->
+     {Val, RS2} = sfmt:uniform_s(N, RS),
+     test_rec2_sfmt_uniform_s_2(I - 1, N, [Val | Acc], RS2).
+
+test_rec2_sfmt_pure_uniform_s_2(0, _N, Acc, RS) ->
+     {lists:reverse(Acc), RS};
+test_rec2_sfmt_pure_uniform_s_2(I, N, Acc, RS) ->
+     {Val, RS2} = sfmt_pure:uniform_s(N, RS),
+     test_rec2_sfmt_pure_uniform_s_2(I - 1, N, [Val | Acc], RS2).
+
+%% @doc  Value tests of the first 10000 random numbers 
+%%       between sfmt:uniform_s/1 and sfmt_pure:uniform_s/1,
+%% and between sfmt:uniform_s/2 and sfmt_pure:uniform_s/2.
+
+-define(N32, 624).
+
+value_tests_3(_) ->
+    RS1 = {?N32, sfmt:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0])},
+    RS2 = {[], sfmt_pure:init_by_list32([16#1234, 16#5678, 16#9abc, 16#def0])},
+    {Outarray1, RS3} = test_rec2_sfmt_uniform_s(10000, [], RS1),
+    {Outarray2, RS4} = test_rec2_sfmt_pure_uniform_s(10000, [], RS2),
+    true = Outarray1 =:= Outarray2,
+    {Outarray3, RS5} = test_rec2_sfmt_uniform_s_2(10000, 10000, [], RS3),
+    {Outarray4, RS6} = test_rec2_sfmt_pure_uniform_s_2(10000, 10000, [], RS4),
+    true = Outarray3 =:= Outarray4.
 
 %% @doc test value definitions (as in SFMT.19937.out.txt)
 
