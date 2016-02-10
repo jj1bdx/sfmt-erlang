@@ -1,6 +1,6 @@
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.12.8 13-JAN-2016
+* Version 0.13.0 10-FEB-2016
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
 
@@ -42,8 +42,8 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## Tested platforms
 
-* FreeBSD/amd64 10.2-STABLE with Erlang/OTP 18.2.1
-* OS X 10.11.2 El Capitanwith Erlang/OTP 18.2.
+* FreeBSD/amd64 10.3-PRERELEASE with Erlang/OTP 18.2.3
+* OS X 10.11.3 El Capitanwith Erlang/OTP 18.2.3
 
 ## Make options (of erlang.mk)
 
@@ -63,9 +63,14 @@ Note well: only (2^19937 - 1) period is supported.
 * See `mix.exs`
 * Note: all builds including C and Erlang source compilation are done with `make` with `erlang.mk`
 
-## API compatible with the random module
+## API compatible with the rand module
 
-    seed0, seed/0, seed/3, uniform/0, uniform/1, uniform_s/1, uniform_s/3 
+    seed/3, uniform/0, uniform/1, uniform_s/1, uniform_s/3 
+
+## On HiPE usage
+
+* sfmt module is NIFnized so does not coexist with HiPE
+* On the other hand, `sfmt_pure` module can be compiled with HiPE or `+native "+{hipe, [o3]}"` erlc compile option, which will result in 40% to 100% speedup on 64-bit machines
 
 ## TODO
 
