@@ -52,18 +52,17 @@
 -export([
 	 gen_rand_all/1,
 	 gen_rand_list32/2,
-	 gen_rand_list_float/2,
 	 get_idstring/0,
 	 get_min_array_size32/0,
 	 get_lib_refc/0,
 	 init_gen_rand/1,
 	 init_by_list32/1,
 	 gen_rand32/1,
-	 gen_rand_float/1,
 	 seed0/0,
 	 seed/0,
 	 seed/1,
 	 seed/3,
+     uint32_to_float/1,
 	 uniform/0,
 	 uniform/1,
 	 uniform_s/1,
@@ -73,9 +72,7 @@
 %% Internal conversion between the internal state table
 %% and the external representation of randlist
 %% (i.e., a list of N32 integer elements)
--export([randlist_to_intstate/1,
-	 intstate_to_randlist/1,
-     intstate_to_randlist_float/1]).
+-export([randlist_to_intstate/1, intstate_to_randlist/1]).
 
 %% SFMT period parameters
 %% details on SFMT-1.3.3 source code
@@ -229,14 +226,6 @@ gen_rand_all(_) -> ?nif_stub.
 
 gen_rand_list32(_, _) -> ?nif_stub.
 
-%% @doc generating a list of uniform floats of (0.0, 1.0)
-%%      where length of the list is Size
-%%      with the updated internal state.
-
--spec gen_rand_list_float(Size::integer(), Intstate::intstate()) -> {[float()], intstate()}.
-
-gen_rand_list_float(_, _) -> ?nif_stub.
-
 %% @doc returns SFMT identification string.
 %% (Note: NIFnized)
 
@@ -286,12 +275,18 @@ randlist_to_intstate(_) -> ?nif_stub.
 
 intstate_to_randlist(_) -> ?nif_stub.
 
-%% @doc converts an internal state table to a list of (0.0, 1.0) float.
-%% (Note: NIFnized)
+%% @doc Converts a 32-bit unsigned integer N to
+%%      a float number X
+%%      where 0.0 &lt; X &lt; 1.0;
+%%      X = (N + 0.5) * (1.0/4294967296).
 
--spec intstate_to_randlist_float(Intstate::intstate()) -> [float()].
+%% (1 / ((2 ^ 32)) (for (0, 1)-interval conversion)
+-define(FLOAT_CONST, (1.0/4294967296.0)).
 
-intstate_to_randlist_float(_) -> ?nif_stub.
+-spec uint32_to_float([0..4294967295]) -> float().
+
+uint32_to_float(N) when is_integer(N) ->
+        ((N + 0.5) * ?FLOAT_CONST).
 
 %% @type ran_sfmt() = {non_neg_integer(), intstate()}.
 %% This type represents an internal state for random number generator.
@@ -312,25 +307,9 @@ gen_rand32(I) when is_binary(I) ->
     [H|T] = intstate_to_randlist(I2),
     {H, {T, I2}}.
 
-%% @doc generates a float random number from the given ran_sfmt() or intstate()
-%% where the range is (0.0, 1.0).
-%% (Note: once nifnized, but the speed of list-based code is faster)
-
--spec gen_rand_float(RS::ran_sfmt()|intstate()) -> {float(), ran_sfmt()}.
-
-gen_rand_float({[H|T], I}) ->
-    {H, {T, I}};
-gen_rand_float({_, I}) ->
-    gen_rand_float(I);
-gen_rand_float(I) when is_binary(I) ->
-    I2 = gen_rand_all(I),
-    [H|T] = intstate_to_randlist_float(I2),
-    {H, {T, I2}}.
-
 %% compatible funtions to the random module in stdlib
 
 %% entry in the process dictionary
--define(PDIC_SEED_INT32, sfmt_seed_int32).
 -define(PDIC_SEED, sfmt_seed).
 
 %% @doc Returns the default internal state.
@@ -347,7 +326,6 @@ seed0() ->
 
 seed() ->
     Seed = seed0(),
-	put(?PDIC_SEED_INT32, Seed),
     case put(?PDIC_SEED, Seed) of
 	undefined -> Seed;
 	Old ->       Old
@@ -365,7 +343,6 @@ seed() ->
 seed(N) when is_integer(N) ->
     I = init_by_list32([N]),
     RS = {?N32, I},
-    put(?PDIC_SEED_INT32, RS),
     put(?PDIC_SEED, RS);
 
 %% @doc Puts the seed computed from the given integer list by init_by_list32/1
@@ -376,7 +353,6 @@ seed(N) when is_integer(N) ->
 seed(L) when is_list(L), is_integer(hd(L)) ->
     I = init_by_list32(L),
     RS = {?N32, I},
-    put(?PDIC_SEED_INT32, RS),
     put(?PDIC_SEED, RS);
 
 %% @doc Puts the seed computed from given three integers as a tuple
@@ -411,39 +387,34 @@ uniform() ->
 		       seed0();
 		   Val -> Val
 	       end,
-    {X, NRS} = gen_rand_float(RS),
-    % divided by 2^32 - 1
+    {X, NRS} = gen_rand32(RS),
+    % convert to (0.0, 1.0) interval
     put(?PDIC_SEED, NRS),
-    X.
+    uint32_to_float(X).
 
 %% @doc Returns a uniformly-distributed integer random number X
 %%      where X is in the range of 1 =&lt; X =&lt; N
 %%      and updates the internal state in the process dictionary.
+%% Note: the pigeonhole principle is applied to the output;
+%% this function will retry generating the base 32-bit unsigned integer
+%% number sequence if the result does not guarantee the
+%% equally-probabilistic results between the given range of integers.
+
+-define(TWOPOW32, 16#100000000).
 
 -spec uniform(integer()) -> integer().
 
-uniform(N) when (N >= 1) and (N =< 4294967295) ->
-	Range = N + 1,
-	uniform32process(Range, (4294967296 rem Range)).
-
-uniform32process(Range, Limit) ->
-	case random32int() of
-		GoodN when (GoodN >= Limit) -> (GoodN rem Range);
-		_ -> uniform32process(Range, Limit)
-	end.
-
-random32int() ->
-	% if random number list doesn't exist
-	% the corresponding internal state must be initialized
-	RS = case get(?PDIC_SEED_INT32) of
-			undefined ->
-				seed0();
-				Val -> Val
-		end,
-	{X, NRS} = gen_rand32(RS),
-	% divided by 2^32 - 1
-	put(?PDIC_SEED_INT32, NRS),
-	X.
+uniform(N) when is_integer(N), N >= 1, N < ?TWOPOW32 ->
+    % if random number list doesn't exist
+    % the corresponding internal state must be initialized
+    RS = case get(?PDIC_SEED) of
+           undefined ->
+               seed0();
+           Val -> Val
+           end,
+    {V, NRS} = uniform_s(N, RS),
+    put(?PDIC_SEED, NRS),
+    V.
 
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
@@ -453,17 +424,29 @@ random32int() ->
 -spec uniform_s(RS::ran_sfmt()) -> {float(), ran_sfmt()}.
 
 uniform_s(RS) ->
-    gen_rand_float(RS).
+    {X, NRS} = gen_rand32(RS),
+    {uint32_to_float(X), NRS}.
 
 %% @doc Returns a uniformly-distributed integer random number X
 %%      and a new state
 %%      where X is in the range of 1 =&lt; X =&lt; N.
+%% Note: the pigeonhole principle is applied to the output;
+%% this function will retry generating the base 32-bit unsigned integer
+%% number sequence if the result does not guarantee the
+%% equally-probabilistic results between the given range of integers.
 
 -spec uniform_s(integer(), ran_sfmt()) -> {integer(), ran_sfmt()}.
 
-uniform_s(N, RS) ->
-    {X, NRS} = gen_rand_float(RS),
-    {trunc(X * N) + 1, NRS}.
+uniform_s(Max, RS) when is_integer(Max), Max >= 1 ->
+    Limit = ?TWOPOW32 - (?TWOPOW32 rem Max),
+    uniform_s(Max, Limit, RS).
+
+uniform_s(M, L, RS) ->
+    {V, NRS} = gen_rand32(RS),
+    case V < L of
+        true -> {(V rem M) + 1, NRS};
+        false -> uniform_s(M, L, NRS)
+    end.
 
 %% On-load callback
 
