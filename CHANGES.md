@@ -1,5 +1,18 @@
 # List of changes on sfmt-erlang
 
+## Pigeonhole principle enforced
+
+* From 0.13.0
+* See Issue #23 at https://github.com/jj1bdx/sfmt-erlang/issues/23
+* On `uniform/1` and `uniform_s/2`
+* This will enforce the probability values for all possible numbers showing up in the random number sequence of X ranged in `1 <= X <= N` are equal with each other
+
+## Possible errors on mixing up floats and integers existed on 0.12.8 and older versions
+
+* 0.12.8 and older versions had a bug of possibly mixing up floats and integers when sfmt:uniform/0 and sfmt:uniform/1 are called in sequence
+* From 0.13.0, float values are no longer precomputed and generated from 32-bit integers of SFMT output each time. `uniform/0` and `uniform_s/1` are affected
+* _Float NIFs are no longer available_ from 0.13.0
+
 ## output interval changed to (0.0, 1.0)
 
 * `uniform/0` and `uniform_s/1` output `X` range: `0.0 < X < 1.0` (from 0.12.0)
