@@ -83,66 +83,87 @@ test_speed_sfmt_uniform(P, Q) ->
     {_, T} = statistics(runtime),
     T.
 
-test_speed_orig_uniform_rec1(Acc, 0, _, _, _) ->
+test_speed_sfmt_uniform_n_rec1(Acc, 0, _, _, _) ->
     _ = lists:reverse(Acc),
     ok;
-test_speed_orig_uniform_rec1(Acc, X, 0, R, I) ->
+test_speed_sfmt_uniform_n_rec1(Acc, X, 0, R, I) ->
     _ = lists:reverse(Acc),
-    test_speed_orig_uniform_rec1([], X - 1, R, R, I);
-test_speed_orig_uniform_rec1(Acc, X, Q, R, I) ->
-    {F, I2} = random:uniform_s(I),
-    test_speed_orig_uniform_rec1([F|Acc], X, Q - 1, R, I2).
+    test_speed_sfmt_uniform_n_rec1([], X - 1, R, R, I);
+test_speed_sfmt_uniform_n_rec1(Acc, X, Q, R, I) ->
+    {F, I2} = sfmt:uniform_s(10000, I),
+    test_speed_sfmt_uniform_n_rec1([F|Acc], X, Q - 1, R, I2).
 
-test_speed_orig_uniform(P, Q) ->
+test_speed_sfmt_uniform_n(P, Q) ->
     _ = statistics(runtime),
-    I = random:seed(),
-    ok = test_speed_orig_uniform_rec1([], P, Q, Q, I),
+    I = sfmt:seed(),
+    ok = test_speed_sfmt_uniform_n_rec1([], P, Q, Q, I),
     {_, T} = statistics(runtime),
     T.
 
-test_speed_orig_uniform_n_rec1(Acc, 0, _, _, _) ->
+test_speed_rand_uniform_rec1(Acc, 0, _, _, _) ->
     _ = lists:reverse(Acc),
     ok;
-test_speed_orig_uniform_n_rec1(Acc, X, 0, R, I) ->
+test_speed_rand_uniform_rec1(Acc, X, 0, R, I) ->
     _ = lists:reverse(Acc),
-    test_speed_orig_uniform_n_rec1([], X - 1, R, R, I);
-test_speed_orig_uniform_n_rec1(Acc, X, Q, R, I) ->
-    {F, I2} = random:uniform_s(10000, I),
-    test_speed_orig_uniform_n_rec1([F|Acc], X, Q - 1, R, I2).
+    test_speed_rand_uniform_rec1([], X - 1, R, R, I);
+test_speed_rand_uniform_rec1(Acc, X, Q, R, I) ->
+    {F, I2} = rand:uniform_s(I),
+    test_speed_rand_uniform_rec1([F|Acc], X, Q - 1, R, I2).
 
-test_speed_orig_uniform_n(P, Q) ->
+test_speed_rand_uniform(P, Q) ->
     _ = statistics(runtime),
-    I = random:seed(),
-    ok = test_speed_orig_uniform_n_rec1([], P, Q, Q, I),
+    I = rand:seed_s(exsplus),
+    ok = test_speed_rand_uniform_rec1([], P, Q, Q, I),
+    {_, T} = statistics(runtime),
+    T.
+
+test_speed_rand_uniform_n_rec1(Acc, 0, _, _, _) ->
+    _ = lists:reverse(Acc),
+    ok;
+test_speed_rand_uniform_n_rec1(Acc, X, 0, R, I) ->
+    _ = lists:reverse(Acc),
+    test_speed_rand_uniform_n_rec1([], X - 1, R, R, I);
+test_speed_rand_uniform_n_rec1(Acc, X, Q, R, I) ->
+    {F, I2} = rand:uniform_s(10000, I),
+    test_speed_rand_uniform_n_rec1([F|Acc], X, Q - 1, R, I2).
+
+test_speed_rand_uniform_n(P, Q) ->
+    _ = statistics(runtime),
+    I = rand:seed_s(exsplus),
+    ok = test_speed_rand_uniform_n_rec1([], P, Q, Q, I),
     {_, T} = statistics(runtime),
     T.
 
 %% @doc running speed test for 100 times of
 %% 100000 calls for sfmt:gen_rand32/1, sfmt:uniform_s/1,
-%% random:uniform_s/1, sfmt:gen_rand32_max/2, and random:uniform_s/2.
+%% rand:uniform_s/1 (with exsplus algorithm),
+%% sfmt:gen_rand32_max/2, and rand:uniform_s/2.
 
 -spec test_speed() -> ok.
 
 test_speed() ->
-    io:format("{rand, sfmt_uniform, orig_uniform, orig_uniform_n}~n~p~n",
+    io:format("{sfmt_gen_rand32, sfmt_uniform, rand_uniform, sfmt_uniform_n, rand_uniform_n}~n~p~n",
 	    [{test_speed_rand(100, 100000),
 		test_speed_sfmt_uniform(100, 100000),
-		test_speed_orig_uniform(100, 100000),
-        test_speed_orig_uniform_n(100, 100000)}
+		test_speed_rand_uniform(100, 100000),
+		test_speed_sfmt_uniform_n(100, 100000),
+        test_speed_rand_uniform_n(100, 100000)}
 	    ]).
 
 %% @doc running speed test for 10 times of
 %% 10000 calls for sfmt:gen_rand32/1, sfmt:uniform_s/1,
-%% random:uniform_s/1, sfmt:gen_rand32_max/2, and random:uniform_s/2.
+%% rand:uniform_s/1 (with exsplus algorithm),
+%% sfmt:gen_rand32_max/2, and rand:uniform_s/2.
 
 -spec test_short_speed() -> ok.
 
 test_short_speed() ->
-    io:format("{rand, sfmt_uniform, orig_uniform, orig_uniform_n}~n~p~n",
+    io:format("{sfmt_gen_rand32, sfmt_uniform, rand_uniform, sfmt_uniform_n, rand_uniform_n}~n~p~n",
 	    [{test_speed_rand(10, 10000),
 		test_speed_sfmt_uniform(10, 10000),
-		test_speed_orig_uniform(10, 10000),
-        test_speed_orig_uniform_n(10, 10000)}
+		test_speed_rand_uniform(10, 10000),
+        test_speed_sfmt_uniform_n(10, 10000),
+        test_speed_rand_uniform_n(10, 10000)}
 	    ]).
 
 %% @doc counting reduction of sfmt:gen_rand_all/1.
