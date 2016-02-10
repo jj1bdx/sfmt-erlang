@@ -100,23 +100,6 @@ test_speed_orig_uniform(P, Q) ->
     {_, T} = statistics(runtime),
     T.
 
-test_speed_rand_max_rec1(Acc, 0, _, _, _) ->
-    _ = lists:reverse(Acc),
-    ok;
-test_speed_rand_max_rec1(Acc, X, 0, R, I) ->
-    _ = lists:reverse(Acc),
-    test_speed_rand_max_rec1([], X - 1, R, R, I);
-test_speed_rand_max_rec1(Acc, X, Q, R, I) ->
-    {F, I2} = sfmt:gen_rand32_max(10000, I),
-    test_speed_rand_max_rec1([F|Acc], X, Q - 1, R, I2).
-
-test_speed_rand_max(P, Q) ->
-    _ = statistics(runtime),
-    I = sfmt:init_gen_rand(1234),
-    ok = test_speed_rand_max_rec1([], P, Q, Q, I),
-    {_, T} = statistics(runtime),
-    T.
-
 test_speed_orig_uniform_n_rec1(Acc, 0, _, _, _) ->
     _ = lists:reverse(Acc),
     ok;
@@ -141,11 +124,10 @@ test_speed_orig_uniform_n(P, Q) ->
 -spec test_speed() -> ok.
 
 test_speed() ->
-    io:format("{rand, sfmt_uniform, orig_uniform, rand_max, orig_uniform_n}~n~p~n",
+    io:format("{rand, sfmt_uniform, orig_uniform, orig_uniform_n}~n~p~n",
 	    [{test_speed_rand(100, 100000),
 		test_speed_sfmt_uniform(100, 100000),
 		test_speed_orig_uniform(100, 100000),
-	    test_speed_rand_max(100, 100000),
         test_speed_orig_uniform_n(100, 100000)}
 	    ]).
 
@@ -156,11 +138,10 @@ test_speed() ->
 -spec test_short_speed() -> ok.
 
 test_short_speed() ->
-    io:format("{rand, sfmt_uniform, orig_uniform, rand_max, orig_uniform_n}~n~p~n",
+    io:format("{rand, sfmt_uniform, orig_uniform, orig_uniform_n}~n~p~n",
 	    [{test_speed_rand(10, 10000),
 		test_speed_sfmt_uniform(10, 10000),
 		test_speed_orig_uniform(10, 10000),
-	    test_speed_rand_max(10, 10000),
         test_speed_orig_uniform_n(10, 10000)}
 	    ]).
 
