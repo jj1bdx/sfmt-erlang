@@ -92,6 +92,7 @@
 	 seed/0,
 	 seed/1,
 	 seed/3,
+     uint32_to_float/1,
 	 uniform/0,
 	 uniform/1,
 	 uniform_s/1,
@@ -498,8 +499,6 @@ gen_rand32({R, I}) ->
 
 %% entry in the process dictionary
 -define(PDIC_SEED, sfmt_pure_seed).
-%% (1 / ((2 ^ 32)) (for (0, 1)-interval conversion)
--define(FLOAT_CONST, (1.0/4294967296.0)).
 
 %% @doc Returns the default internal state.
 
@@ -564,6 +563,19 @@ seed({A1, A2, A3}) ->
 seed(A1, A2, A3) ->
     seed([A1, A2, A3]).
 
+%% @doc Converts a 32-bit unsigned integer N to 
+%%      a float number X
+%%      where 0.0 &lt; X &lt; 1.0;
+%%      X = (N + 0.5) * (1.0/4294967296).
+
+%% (1 / ((2 ^ 32)) (for (0, 1)-interval conversion)
+-define(FLOAT_CONST, (1.0/4294967296.0)).
+
+-spec uint32_to_float([0..4294967295]) -> float().
+
+uint32_to_float(N) when is_integer(N) ->
+    ((N + 0.5) * ?FLOAT_CONST).
+
 %% @doc Returns a uniformly-distributed float random number X
 %%      where 0.0 &lt; X &lt; 1.0
 %%      and updates the internal state in the process dictionary.
@@ -581,16 +593,31 @@ uniform() ->
     {X, NRS} = gen_rand32(RS),
     % convert to (0.0, 1.0) interval
     put(?PDIC_SEED, NRS),
-    ((X + 0.5) * ?FLOAT_CONST).
+    uint32_to_float(X).
 
 %% @doc Returns a uniformly-distributed integer random number X
 %%      where 1 =&lt; X &lt;= N
 %%      and updates the internal state in the process dictionary.
+%% Note: the pigeonhole principle is applied to the output;
+%% this function will retry generating the base 32-bit unsigned integer
+%% number sequence if the result does not guarantee the
+%% equally-probabilistic results between the given range of integers.
+
+-define(TWOPOW32, 16#100000000).
 
 -spec uniform(integer()) -> integer().
 
-uniform(N) when N >= 1 ->
-    trunc(uniform() * N) + 1.
+uniform(N) when is_integer(N), N >= 1, N < ?TWOPOW32 ->
+    % if random number list doesn't exist
+    % the corresponding internal state must be initialized
+    RS = case get(?PDIC_SEED) of
+		   undefined ->
+		       seed0();
+		   Val -> Val
+	       end,
+    {V, NRS} = uniform_s(N, RS),
+    put(?PDIC_SEED, NRS),
+    V.
 
 %% @doc With a given state,
 %%      Returns a uniformly-distributed float random number X
@@ -601,17 +628,28 @@ uniform(N) when N >= 1 ->
 
 uniform_s(RS) ->
     {X, NRS} = gen_rand32(RS),
-    {((X + 0.5) * ?FLOAT_CONST), NRS}.
+    {uint32_to_float(X), NRS}.
 
 %% @doc With a given state,
 %%      Returns a uniformly-distributed integer random number X
 %%      where 1 =&lt; X &lt;= N
 %%      and a new state.
+%% Note: the pigeonhole principle is applied to the output;
+%% this function will retry generating the base 32-bit unsigned integer
+%% number sequence if the result does not guarantee the
+%% equally-probabilistic results between the given range of integers.
 
 -spec uniform_s(integer(), ran_sfmt()) -> {integer(), ran_sfmt()}.
 
-uniform_s(N, RS) ->
-    {X, NRS} = gen_rand32(RS),
-    {trunc(((X + 0.5) * ?FLOAT_CONST) * N) + 1, NRS}.
+uniform_s(Max, RS) when is_integer(Max), Max >= 1 ->
+    Limit = ?TWOPOW32 - (?TWOPOW32 rem Max),
+    uniform_s(Max, Limit, RS).
+
+uniform_s(M, L, RS) ->
+    {V, NRS} = gen_rand32(RS),
+    case V < L of
+        true -> {(V rem M) + 1, NRS};
+        false -> uniform_s(M, L, NRS)
+    end.
     
 %% end of the module    
