@@ -571,7 +571,7 @@ seed(A1, A2, A3) ->
 %% (1 / ((2 ^ 32)) (for (0, 1)-interval conversion)
 -define(FLOAT_CONST, (1.0/4294967296.0)).
 
--spec uint32_to_float([0..4294967295]) -> float().
+-spec uint32_to_float(0..4294967295) -> float().
 
 uint32_to_float(N) when is_integer(N) ->
     ((N + 0.5) * ?FLOAT_CONST).
