@@ -10,7 +10,7 @@
 
 ## License
 
-Copyright (c) 2010-2016 Kenji Rikitake and Kyoto University. All rights
+Copyright (c) 2010-2017 Kenji Rikitake and Kyoto University. All rights
 reserved.
 
 Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -110,3 +110,6 @@ Computing and Media Studies (ACCMS), Kyoto University.
 Erlang Solutions kindly gave Kenji Rikitake
 an opportunity to give a presentation
 about this software at Erlang Factory SF Bay 2011.
+
+Pepabo R&D Institute of GMO Pepabo Inc.
+kindly give the financial support for this project.
