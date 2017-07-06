@@ -111,5 +111,5 @@ Erlang Solutions kindly gave Kenji Rikitake
 an opportunity to give a presentation
 about this software at Erlang Factory SF Bay 2011.
 
-Pepabo R&D Institute of GMO Pepabo Inc.
-kindly give the financial support for this project.
+Pepabo R&D Institute of GMO Pepabo, Inc.
+kindly gives the financial support for this project.
