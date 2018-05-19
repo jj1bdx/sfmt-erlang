@@ -83,6 +83,7 @@ defmodule Sfmt.Mixfile do
         "c_src",
         "doc/overview.edoc",
         "reference_texts",
+        "rebar.config",
         "src",
         "test",
         "test_scripts",

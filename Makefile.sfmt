@@ -25,3 +25,7 @@ clean-c_doc:
 speed:
 	erl -pa ./ebin -noshell -s sfmt_tests test_speed -s init stop
 	erl -pa ./ebin -noshell -s sfmt_pure_tests test_speed -s init stop
+
+rebar_config: rebar.config
+	echo '{pre_hooks,[{compile, "make"}]}.' >>$^
+	echo '{post_hooks,[{clean, "make clean"}]}.' >>$^

@@ -7,3 +7,4 @@ c_src/env.mk
 c_src/sfmt_nif.o
 priv/sfmt_nif.so
 sfmt.d
+/.erlang.mk/
