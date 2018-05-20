@@ -87,6 +87,7 @@ Note well: only (2^19937 - 1) period is supported.
 * Michael Truog
 * Michael Chmielewski
 * David Whitlock
+* Philip Fenoll
 
 ## THANKS to:
 
@@ -100,7 +101,6 @@ Note well: only (2^19937 - 1) period is supported.
 * Shunichi Shinohara
 * Loïc Hoguin
 * @timCF of GitHub
-* Philip Fenoll
 
 ## ACKNOWLEDGMENTS
 
