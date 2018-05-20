@@ -87,7 +87,7 @@ Note well: only (2^19937 - 1) period is supported.
 * Michael Truog
 * Michael Chmielewski
 * David Whitlock
-* Philip Fenoll
+* Pierre Fenoll
 
 ## THANKS to:
 
