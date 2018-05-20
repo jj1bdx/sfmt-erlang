@@ -100,6 +100,7 @@ Note well: only (2^19937 - 1) period is supported.
 * Shunichi Shinohara
 * Loïc Hoguin
 * @timCF of GitHub
+* Philip Fenoll
 
 ## ACKNOWLEDGMENTS
 
