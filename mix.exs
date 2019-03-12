@@ -1,12 +1,15 @@
 defmodule Mix.Tasks.Compile.Sfmt do
+  use Mix.Task
   @shortdoc "Compiles Sfmt"
-  
+
+  @impl Mix.Task
   def run(_) do
     File.mkdir("priv")
     {exec, args} = {"make", ["all"]}
+
     if System.find_executable(exec) do
       build(exec, args)
-      Mix.Project.build_structure
+      Mix.Project.build_structure()
       :ok
     else
       nocompiler_error(exec)
@@ -15,7 +18,7 @@ defmodule Mix.Tasks.Compile.Sfmt do
 
   def build(exec, args) do
     {result, error_code} = System.cmd(exec, args, stderr_to_stdout: true)
-    IO.binwrite result
+    IO.binwrite(result)
     if error_code != 0, do: build_error(exec)
   end
 
@@ -41,27 +44,30 @@ defmodule Mix.Tasks.Compile.Sfmt do
 end
 
 defmodule Mix.Tasks.Edoc do
+  use Mix.Task
   @shortdoc "Make docs using edoc on erlang.mk"
 
+  @impl Mix.Task
   def run(_) do
-  {result, _error_code} = System.cmd("make", ["docs"], stderr_to_stdout: true)
-  Mix.shell.info result
-  :ok
+    {result, _error_code} = System.cmd("make", ["docs"], stderr_to_stdout: true)
+    Mix.shell().info(result)
+    :ok
   end
 end
-
 
 defmodule Sfmt.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :sfmt,
-     version: "0.13.0",
-     description: description,
-     package: package,
-     compilers: [:sfmt] ++ Mix.compilers,
-     aliases: [docs: ["edoc"]],
-     deps: deps]
+    [
+      app: :sfmt,
+      version: "0.13.0",
+      description: description(),
+      package: package(),
+      compilers: [:sfmt] ++ Mix.compilers(),
+      aliases: [docs: ["edoc"]],
+      deps: deps()
+    ]
   end
 
   def application do
@@ -79,7 +85,8 @@ defmodule Sfmt.Mixfile do
   end
 
   defp package do
-    [files: [
+    [
+      files: [
         "c_src",
         "doc/overview.edoc",
         "reference_texts",
@@ -98,14 +105,16 @@ defmodule Sfmt.Mixfile do
         "README.md",
         "erlang.mk",
         "mix.exs"
-        ],
-     maintainers: [
+      ],
+      maintainers: [
         "Kenji Rikitake"
-        ],
-     licenses: ["simplified BSD"],
-     build_tools: ["make"],
-     links: %{"GitHub" => "https://github.com/jj1bdx/sfmt-erlang/",
-     "Docs" => "http://hexdocs.pm/sfmt"}
-     ]
+      ],
+      licenses: ["simplified BSD"],
+      build_tools: ["make"],
+      links: %{
+        "GitHub" => "https://github.com/jj1bdx/sfmt-erlang/",
+        "Docs" => "http://hexdocs.pm/sfmt"
+      }
+    ]
   end
 end
