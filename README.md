@@ -1,8 +1,20 @@
+[//]: # (-*- coding: utf-8 -*-)
+
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.13.0 10-FEB-2016
+* Version 0.13.1 8-JAN-2020
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
+
+## Security notice regarding the PHP mt_seed() vulnerability
+
+Ambionics Security published [an internal state retrieval algorithm of PHP `mt_rand()`](https://www.ambionics.io/blog/php-mt-rand-prediction) on 6-JAN-2020. sfmt-erlang uses the same seed-to-internal-state initialization algorithm at the function `init_gen_rand/1`.
+
+For reducting the possibility of the internal state revelation, use `init_by_list32/1` instead, better combined with `rand:uniform/1`. [Raimo Niskanen published a piece of code for this purpose](http://erlang.org/pipermail/erlang-questions/2018-July/095875.html).
+
+*Note well that sfmt-erlang has no cryptographic security guarantee and MUST NOT be used for security purposes such as password generation.*
+
+Also: Version 0.13.0 and 0.13.1 Erlang and C code files are identical. Users have no need to upgrade.
 
 ## Travis CI build status for the master branch
 

@@ -1,5 +1,9 @@
 # List of changes on sfmt-erlang
 
+## Security notice added
+
+See `Security notice regarding the PHP mt_seed() vulnerability` in the README.md.
+
 ## Pigeonhole principle enforced
 
 * From 0.13.0
