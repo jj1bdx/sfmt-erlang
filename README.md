@@ -16,6 +16,8 @@ For reducting the possibility of the internal state revelation, use `init_by_lis
 
 Also: Version 0.13.0 and 0.13.1 Erlang and C code files are identical. Users have no need to upgrade.
 
+Thanks to Shiro Kawai for the notification of the seed initialization algorithm issue. 
+
 ## Travis CI build status for the master branch
 
 [![Build Status](https://travis-ci.org/jj1bdx/sfmt-erlang.svg?branch=master)](https://travis-ci.org/jj1bdx/sfmt-erlang)
@@ -113,6 +115,7 @@ Note well: only (2^19937 - 1) period is supported.
 * Shunichi Shinohara
 * Loïc Hoguin
 * @timCF of GitHub
+* Shiro Kawai
 
 ## ACKNOWLEDGMENTS
 
