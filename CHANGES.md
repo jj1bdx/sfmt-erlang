@@ -1,5 +1,9 @@
 # List of changes on sfmt-erlang
 
+## Use 0.13.2 and later for OTP 23
+
+* erlang.mk is updated to stop using `-lerl_interface`. This is required for successfully build in OTP 23.
+
 ## Security notice added
 
 See `Security notice regarding the PHP mt_seed() vulnerability` in the README.md.
