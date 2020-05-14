@@ -60,8 +60,9 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## Tested platforms
 
-* FreeBSD/amd64 11.1-PRERELEASE with Erlang/OTP 20.0
-* macOS 10.12.5 with Erlang/OTP 20.0
+* macOS 10.14.6 with Erlang/OTP 23.0
+* Ubuntu 20.04 LTS with Erlang/OTP 23.0
+* Note: FreeBSD is *no longer tested* anymore
 
 ## Make options (of erlang.mk)
 
