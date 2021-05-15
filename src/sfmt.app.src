@@ -6,9 +6,8 @@
     {modules, [sfmt, sfmt_pure]},
     {applications, [kernel, stdlib]},
     {licenses, ["Simplified BSD"]},
-    {links, [{"GitHub", "https://github.com/jj1bdx/sfmt-erlang/"},
-             {"Docs", "https://hexdocs.pm/sfmt"}]},
-    {build_tools: ["rebar3"]},
+    {links, [{"GitHub", "https://github.com/jj1bdx/sfmt-erlang/"}]},
+    {build_tools, ["rebar3"]},
     {files, [
         "c_src",
         "doc/overview.edoc",
