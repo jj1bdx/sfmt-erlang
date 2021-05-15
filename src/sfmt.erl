@@ -8,11 +8,11 @@
 %% The module defines a PRNG of period ((2^19937) - 1).
 %% @reference <a href="http://github.com/jj1bdx/sfmt-erlang">GitHub page
 %% for sfmt-erlang</a>
-%% @copyright 2010-2016 Kenji Rikitake and Kyoto University.
+%% @copyright 2010-2021 Kenji Rikitake and Kyoto University.
 %% Copyright (c) 2006, 2007 Mutsuo Saito, Makoto Matsumoto and
 %% Hiroshima University.
 
-%% Copyright (c) 2010-2020 Kenji Rikitake and Kyoto University. All rights
+%% Copyright (c) 2010-2021 Kenji Rikitake and Kyoto University. All rights
 %% reserved.
 %%
 %% Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -139,13 +139,13 @@
 nif_stub_error(Line) ->
     erlang:nif_error({nif_not_loaded, module, ?MODULE, line, Line}).
 
-%% @type w128() = [integer()].
+%% -type w128() = [integer()].
 %% An 128-bit integer represented by four 32-bit unsigned integers.
 %% Note: the number of elements is four (4).
 
 %% -type w128() :: [integer()].
 
-%% @type randlist() = [integer()].
+%% -type randlist() = [integer()].
 %% A list of N 128-bit integers for the portable representation of
 %% the internal state table,
 %% represented as multiple concatenation of four 32-bit unsigned integers.
@@ -153,7 +153,7 @@ nif_stub_error(Line) ->
 
 -type randlist() :: [integer()].
 
-%% @type intstate() = binary().
+%% -type intstate() = binary().
 %% A binary representation of N 128-bit integers for the internal state table,
 %% represented as multiple concatenation of four 32-bit unsigned integers.
 %% Note: the number of the binary bytes is the same as N32*4 (2496).
@@ -288,7 +288,7 @@ intstate_to_randlist(_) -> ?nif_stub.
 uint32_to_float(N) when is_integer(N) ->
         ((N + 0.5) * ?FLOAT_CONST).
 
-%% @type ran_sfmt() = {non_neg_integer(), intstate()}.
+%% -type ran_sfmt() = {non_neg_integer(), intstate()}.
 %% This type represents an internal state for random number generator.
 
 -type ran_sfmt() :: {non_neg_integer(), intstate()}.

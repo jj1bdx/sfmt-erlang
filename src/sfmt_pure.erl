@@ -1,7 +1,7 @@
 %% @author Kenji Rikitake <kenji.rikitake@acm.org>
 %% @author Mutsuo Saito
 %% @author Makoto Matsumoto
-%% @copyright 2010-2016 Kenji Rikitake, Mutsuo Saito, Makoto Matsumoto, Kyoto University,
+%% @copyright 2010-2021 Kenji Rikitake, Mutsuo Saito, Makoto Matsumoto, Kyoto University,
 %% Hiroshima University, The University of Tokyo
 %% @doc SIMD-oriented Fast Mersenne Twister (SFMT) in pure Erlang.
 %% The recursion algorithm for `gen_rand_all' and `gen_rand_list32' are
@@ -45,7 +45,7 @@
 %% This makes the algorithm simpler and faster.
 %% @end
 %%
-%% Copyright (c) 2010-2020 Kenji Rikitake and Kyoto University.
+%% Copyright (c) 2010-2021 Kenji Rikitake and Kyoto University.
 %% All rights reserved.
 %%
 %% Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -158,12 +158,12 @@
 -define(BITMASK32, 16#ffffffff).
 -define(BITMASK64, 16#ffffffffffffffff).
 
-%% @type w128(). Four-element list of 32-bit unsigned integers
+%% -type w128(). Four-element list of 32-bit unsigned integers
 %% to represent a 128-bit integer.
 
 -type w128() :: [integer()].
 
-%% @type intstate(). N-element list of 128-bit unsigned integers,
+%% -type intstate(). N-element list of 128-bit unsigned integers,
 %% represented as a four-element list of 32-bit integers.
 %% The number of N is 156.
 %% Each 128-bit number is represented in little endian,
@@ -180,7 +180,7 @@
 
 -type intstate() :: [integer()].
 
-%% @type ran_sfmt(). N-element list of 128-bit unsigned integers,
+%% -type ran_sfmt(). N-element list of 128-bit unsigned integers,
 %% represented as a list of 32-bit integers. The number of N is 156.
 
 -type ran_sfmt() :: {[integer()], intstate()}.
