@@ -4,5 +4,25 @@
     {env, []},
     {registered, []},
     {modules, [sfmt, sfmt_pure]},
-    {applications, [kernel, stdlib]}
+    {applications, [kernel, stdlib]},
+    {licenses, ["Simplified BSD"]},
+    {links, [{"GitHub", "https://github.com/jj1bdx/sfmt-erlang/"},
+             {"Docs", "https://hexdocs.pm/sfmt"}]},
+    {build_tools: ["rebar3"]},
+    {files, [
+        "c_src",
+        "doc/overview.edoc",
+        "reference_texts",
+        "rebar.config",
+        "src",
+        "test",
+        "test_scripts",
+        ".gitignore",
+        ".travis.yml",
+        "CHANGES.md",
+        "CONTRIBUTING.md",
+        "Doxyfile",
+        "LICENSE",
+        "README.md"
+        ]}
 ]}.
