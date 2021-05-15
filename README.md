@@ -2,9 +2,23 @@
 
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
-* Version 0.13.3 14-MAY-2020
+* Version 0.14.0 15-MAY-2021
+* 0.13.2 and 0.14.0 have the identical Erlang and C code files.
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
+
+## Build and test commands
+
+* Building: `rebar3 compile`
+* C NIF Documentation: `doxygen` (requires Doxygen 1.9.1 or later)
+* Erlang Documentation: `rebar3 edoc`
+* Testing: `rebar3 ct`
+* Execution speed benchmark: execute `rebar3 shell` and run `sfmt_tests:test_speed()` and `sfmt_pure_tests:test_speed()`
+* Cleaning up: `rebar3 clean`
+
+## Use rebar3 to build since 0.14.0
+
+* Since 14.0, erlang.mk and mix.exs are removed. Use rebar3 to build.
 
 ## Use 0.13.2 and later for OTP 23
 
@@ -28,7 +42,7 @@ Thanks to Shiro Kawai for the notification of the seed initialization algorithm 
 
 ## License
 
-Copyright (c) 2010-2020 Kenji Rikitake and Kyoto University. All rights
+Copyright (c) 2010-2021 Kenji Rikitake and Kyoto University. All rights
 reserved.
 
 Copyright (c) 2006,2007 Mutsuo Saito, Makoto Matsumoto and Hiroshima
@@ -60,27 +74,16 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## Tested platforms
 
-* macOS 10.14.6 with Erlang/OTP 23.0
-* Ubuntu 20.04 LTS with Erlang/OTP 23.0
-* Note: FreeBSD is *no longer tested* anymore
-
-## Make options (of erlang.mk)
-
-* `Makefile` works on both BSD/GNU make
-* `Makefile.sfmt` is the real GNU make file; edit this file for modification
-* Building: `make`
-* C NIF Documentation: `make c_doc` (requires Doxygen 1.8.3.1 or later)
-* Erlang Documentation: `make docs`
-* Testing: `make tests`
-* Execution speed benchmark: `make speed`
-* See also [erlang.mk](https://github.com/extend/erlang.mk) for the details
+* macOS 10.15.7 with Erlang/OTP 24.0
+* Ubuntu 20.10 with Erlang/OTP 24.0
+* sfmt-erlang will work with older OTP versions
 
 ## hex.pm support
 
+* hex is supported through rebar3\_hex plugin
 * NIF building errors fixed (0.12.7 and later)
 * Package name: `sfmt`
-* See `mix.exs`
-* Note: all builds including C and Erlang source compilation are done with `make` with `erlang.mk`
+* Note: all builds including C and Erlang source compilation are done with rebar3
 
 ## API compatible with the rand module
 
@@ -88,6 +91,7 @@ Note well: only (2^19937 - 1) period is supported.
 
 ## On HiPE usage
 
+* HiPE is removed from OTP 24, no longer configured
 * sfmt module is NIFnized so does not coexist with HiPE
 * On the other hand, `sfmt_pure` module can be compiled with HiPE or `+native "+{hipe, [o3]}"` erlc compile option, which will result in 40% to 100% speedup on 64-bit machines
 

@@ -1,6 +1,6 @@
 {application, sfmt, [
     {description, "SFMT PRNG for Erlang"},
-    {vsn, "0.13.3"},
+    {vsn, "0.14.0"},
     {env, []},
     {registered, []},
     {modules, [sfmt, sfmt_pure]},
@@ -17,7 +17,6 @@
         "test",
         "test_scripts",
         ".gitignore",
-        ".travis.yml",
         "CHANGES.md",
         "CONTRIBUTING.md",
         "Doxyfile",
