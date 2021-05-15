@@ -3,7 +3,7 @@ submit an issue on the GitHub repository at
 <https://github.com/jj1bdx/sfmt-erlang/issues>.
 
 When you propose a pull request, send the diff with the
-[next](https://github.com/jj1bdx/sfmt-erlang/tree/next) branch.
+[dev](https://github.com/jj1bdx/sfmt-erlang/tree/dev) branch.
 The PR will be reviewed and the authors will decide whether
 it will be merged into the master branch.
 
