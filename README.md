@@ -35,10 +35,6 @@ Also: Version 0.13.0 and 0.13.1 Erlang and C code files are identical. Users hav
 
 Thanks to Shiro Kawai for the notification of the seed initialization algorithm issue. 
 
-## Travis CI build status for the master branch
-
-[![Build Status](https://travis-ci.org/jj1bdx/sfmt-erlang.svg?branch=master)](https://travis-ci.org/jj1bdx/sfmt-erlang)
-
 ## License
 
 Copyright (c) 2010-2021 Kenji Rikitake and Kyoto University. All rights
