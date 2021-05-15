@@ -1,5 +1,18 @@
 # List of changes on sfmt-erlang
 
+## Build and test commands since 0.14.0
+
+* Building: `rebar3 compile`
+* C NIF Documentation: `doxygen` (requires Doxygen 1.9.1 or later)
+* Erlang Documentation: `rebar3 edoc`
+* Testing: `rebar3 ct`
+* Execution speed benchmark: execute `rebar3 shell` and run `sfmt_tests:test_speed()` and `sfmt_pure_tests:test_speed()`
+* Cleaning up: `rebar3 clean`
+
+## Use rebar3 to build since 0.14.0
+
+* Since 14.0, erlang.mk and mix.exs are removed. Use rebar3 to build.
+
 ## Use 0.13.2 and later for OTP 23
 
 * erlang.mk is updated to stop using `-lerl_interface`. This is required for successfully build in OTP 23.
