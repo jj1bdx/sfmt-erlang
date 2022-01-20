@@ -2,6 +2,12 @@
 
 # sfmt-erlang: SIMD-oriented Fast Mersenne Twister (SFMT) for Erlang
 
+## This software is no longer maintained
+
+*CAUTION*: this software is no longer maintained. *Migrate to the default rand module for OTP 18 and later because they are well-supported and use faster and better algorithms.*
+
+## Version and credit information
+
 * Version 0.14.0 15-MAY-2021
 * Edited and written by Kenji Rikitake (Kenji Rikitake Professional Engineer's Office)
 * Email contact: <kenji.rikitake@acm.org>
